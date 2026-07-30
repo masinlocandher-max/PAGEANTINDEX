@@ -11,7 +11,7 @@
   "icons": [
     {
       "src": "/public/images/pageant-icon.png",
-      "sizes": "190x170",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
