@@ -645,7 +645,7 @@ function render() {
   if (page === "signin" || page === "signup") {
     document.getElementById("app").innerHTML =
       announcementBar() + content + modalHtml() + toastHtml();
-    init();
+    initSignIn();
     return;
   }
   document.getElementById("app").innerHTML =
@@ -935,6 +935,8 @@ function initSignIn() {
     signupMessage.id = "signup-message";
     signupMessage.setAttribute("aria-live", "polite");
   }
+  const signupForm = document.getElementById("signup-form");
+  if (signupForm) signupForm.noValidate = true;
   const setTab = (name) => {
     document.querySelectorAll("[data-auth-tab]").forEach((button) =>
       button.classList.toggle("active", button.dataset.authTab === name));
@@ -964,14 +966,26 @@ function initSignIn() {
   });
   document.getElementById("signup-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget));
+    const form = event.currentTarget;
+    const firstInvalid = [...form.elements].find((field) =>
+      typeof field.checkValidity === "function" && !field.checkValidity());
+    if (firstInvalid) {
+      const label = firstInvalid.closest(".field")?.querySelector("label")?.textContent || "required field";
+      const message = `Please complete the ${label.toLowerCase()}.`;
+      const status = document.getElementById("signup-message");
+      if (status) status.textContent = message;
+      firstInvalid.focus();
+      showToast(message, "error");
+      return;
+    }
+    const data = Object.fromEntries(new FormData(form));
     if (data.password !== data.confirm) {
       const status = document.getElementById("signup-message");
       if (status) status.textContent = "Passwords do not match.";
       showToast("Passwords do not match.", "error");
       return;
     }
-    const button = event.currentTarget.querySelector('button[type="submit"]');
+    const button = form.querySelector('button[type="submit"]');
     button.disabled = true;
     const status = document.getElementById("signup-message");
     if (status) status.textContent = "Creating your secure account…";
