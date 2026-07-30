@@ -1,8 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap");
 
 :root {
-  --pink: #ff1478;
-  --pink-dark: #d80e62;
+  --pink: #e91e63;
+  --pink-dark: #c2185b;
   --burgundy: #2b0d14;
   --black: #111111;
   --gold: #d4af37;
@@ -36,6 +36,50 @@ body {
   background: var(--white);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+.announcement-bar {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  height: 34px;
+  overflow: hidden;
+  background: rgba(43, 13, 20, 0.96);
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  backdrop-filter: saturate(140%) blur(18px);
+  -webkit-backdrop-filter: saturate(140%) blur(18px);
+}
+.announcement-track {
+  width: max-content;
+  min-width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  animation: announcement-scroll 34s linear infinite;
+  will-change: transform;
+}
+.announcement-track > div {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 28px;
+  white-space: nowrap;
+  font-size: .66rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+}
+.announcement-track i {
+  width: 4px;
+  height: 4px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #e4b85d;
+}
+.announcement-track a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.announcement-bar:hover .announcement-track { animation-play-state: paused; }
+@keyframes announcement-scroll {
+  from { transform: translate3d(0,0,0); }
+  to { transform: translate3d(-33.333%,0,0); }
 }
 img {
   max-width: 100%;
@@ -134,7 +178,7 @@ button {
   background: rgba(255, 255, 255, 0.96);
   border-bottom: 1px solid var(--line);
   position: sticky;
-  top: 0;
+  top: 34px;
   z-index: 50;
   backdrop-filter: blur(14px);
 }
@@ -864,7 +908,7 @@ button {
   width: 24px;
   height: 24px;
   display: block;
-  filter: brightness(0) saturate(100%) invert(18%) sepia(100%) saturate(6808%) hue-rotate(327deg) brightness(105%) contrast(107%);
+  filter: none;
 }
 .supplier-placeholder-grid {
   display: grid;
@@ -1917,7 +1961,9 @@ button {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(17, 17, 17, 0.68);
+  background: rgba(30, 13, 20, 0.38);
+  backdrop-filter: blur(14px) saturate(125%);
+  -webkit-backdrop-filter: blur(14px) saturate(125%);
   z-index: 100;
   display: none;
   align-items: center;
@@ -1928,19 +1974,33 @@ button {
   display: flex;
 }
 .modal {
-  background: #fff;
-  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: 20px;
   width: min(760px, 100%);
   max-height: 92vh;
   overflow: auto;
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 28px 80px rgba(43, 13, 20, 0.22);
+  backdrop-filter: blur(32px) saturate(150%);
+  -webkit-backdrop-filter: blur(32px) saturate(150%);
+  animation: modal-enter .34s cubic-bezier(.2,.8,.2,1);
 }
 .modal-head {
   padding: 22px 24px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid rgba(111,105,112,.16);
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+.modal input,
+.modal select,
+.modal textarea {
+  background: rgba(255,255,255,.7);
+  border-color: rgba(111,105,112,.22);
+}
+@keyframes modal-enter {
+  from { opacity:0; transform:translateY(14px) scale(.985); }
+  to { opacity:1; transform:translateY(0) scale(1); }
 }
 .modal-head h2 {
   font-family: "Playfair Display", Georgia, serif;
@@ -2394,7 +2454,7 @@ button {
 }
 
 /* Professional authentication */
-.official-auth { min-height: 100vh; }
+.official-auth { min-height: calc(100vh - 34px); }
 .official-auth .auth-visual {
   background:
     linear-gradient(90deg, rgba(43,13,20,.88), rgba(43,13,20,.42)),
@@ -2429,8 +2489,8 @@ button {
 .auth-apply a { color:var(--pink); font-weight:700; }
 
 /* Shared professional and administration shells */
-.product-shell { min-height:100vh; display:grid; grid-template-columns:250px minmax(0,1fr); background:#fff; }
-.product-sidebar { position:sticky; top:0; height:100vh; background:var(--burgundy); color:#fff; padding:24px 14px; display:flex; flex-direction:column; overflow:auto; }
+.product-shell { min-height:calc(100vh - 34px); display:grid; grid-template-columns:250px minmax(0,1fr); background:#fff; }
+.product-sidebar { position:sticky; top:34px; height:calc(100vh - 34px); background:var(--burgundy); color:#fff; padding:24px 14px; display:flex; flex-direction:column; overflow:auto; }
 .product-sidebar > .brand-lockup { padding:0 14px 24px; }
 .product-sidebar nav { display:grid; gap:4px; margin-top:16px; }
 .product-sidebar nav button { display:flex; align-items:center; gap:12px; width:100%; border:0; border-radius:8px; padding:12px 14px; background:transparent; color:#f3e9ec; font-size:.78rem; text-align:left; }
@@ -2557,4 +2617,59 @@ button {
   .auth-mobile-brand { display:block; }
   .official-auth .auth-panel { min-height:100vh;padding:28px 20px; }
   .admin-zero-stats { grid-template-columns:1fr; }
+}
+
+/* Restrained motion and tactile controls */
+.btn,
+.category-card,
+.supplier-placeholder,
+.article-card,
+.location-card,
+.price-card,
+.product-sidebar nav button,
+.icon-button,
+.modal-close {
+  transition:
+    transform .28s cubic-bezier(.2,.8,.2,1),
+    box-shadow .28s ease,
+    background-color .28s ease,
+    border-color .28s ease,
+    color .28s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active,
+.category-card:active,
+.supplier-placeholder:active,
+.product-sidebar nav button:active { transform: scale(.975); }
+.article-card:hover,
+.location-card:hover,
+.price-card:hover { transform: translateY(-3px); }
+.motion-enabled .motion-ready {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity .58s cubic-bezier(.2,.8,.2,1),
+    transform .58s cubic-bezier(.2,.8,.2,1);
+}
+.motion-enabled .motion-ready.motion-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior:auto; }
+  .announcement-track { animation:none; }
+  .motion-enabled .motion-ready,
+  .motion-enabled .motion-ready.motion-in {
+    opacity:1;
+    transform:none;
+    transition:none;
+  }
+  .btn,
+  .category-card,
+  .supplier-placeholder,
+  .article-card,
+  .location-card,
+  .price-card,
+  .product-sidebar nav button,
+  .modal { animation:none; transition:none; }
 }

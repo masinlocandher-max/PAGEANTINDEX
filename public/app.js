@@ -147,6 +147,10 @@ function assetIcon(name, className = "") {
 function brandLockup(inverse = false) {
   return `<span class="brand-lockup${inverse ? " inverse" : ""}"><img src="/public/images/pageant-icon.png" alt=""><span class="brand-type"><strong>PAGEANT INDEX</strong><small>PHILIPPINES</small></span></span>`;
 }
+function announcementBar() {
+  const message = `<span>Pageant Index Philippines</span><i aria-hidden="true"></i><span>Founding directory applications are open</span><i aria-hidden="true"></i><a href="/list-your-business/">Apply to be listed</a>`;
+  return `<aside class="announcement-bar" aria-label="Pageant Index announcement"><div class="announcement-track"><div>${message}</div><div aria-hidden="true">${message}</div><div aria-hidden="true">${message}</div></div></aside>`;
+}
 function escapeHtml(value) {
   return String(value ?? "").replace(
     /[&<>"']/g,
@@ -531,6 +535,7 @@ function render() {
       break;
     case "dashboard":
       document.getElementById("app").innerHTML =
+        announcementBar() +
         dashboardPage() +
         modalHtml() +
         toastHtml();
@@ -538,7 +543,7 @@ function render() {
       return;
     case "admin":
       document.getElementById("app").innerHTML =
-        adminPage() + modalHtml() + toastHtml();
+        announcementBar() + adminPage() + modalHtml() + toastHtml();
       init();
       return;
     default:
@@ -546,12 +551,12 @@ function render() {
   }
   if (page === "signin" || page === "signup") {
     document.getElementById("app").innerHTML =
-      content + modalHtml() + toastHtml();
+      announcementBar() + content + modalHtml() + toastHtml();
     init();
     return;
   }
   document.getElementById("app").innerHTML =
-    header() + content + footer() + modalHtml() + toastHtml();
+    announcementBar() + header() + content + footer() + modalHtml() + toastHtml();
   init();
 }
 
@@ -592,6 +597,25 @@ function inquiryForm(p) {
   return `<p class="muted">Your inquiry will be saved in the professional dashboard and sent to <strong>${p.name}</strong>.</p><form id="inquiry-form" class="form-grid"><input type="hidden" name="profile" value="${p.name}"><div class="field"><label>Full name</label><input name="name" required autocomplete="name"></div><div class="field"><label>Email</label><input name="email" type="email" required autocomplete="email"></div><div class="field"><label>Mobile number</label><input name="mobile" required inputmode="tel"></div><div class="field"><label>Type of event</label><select name="eventType" required><option value="">Select event type</option><option>Municipal Pageant</option><option>Provincial Pageant</option><option>National Pageant</option><option>School Pageant</option><option>Festival Pageant</option><option>Corporate Event</option><option>Campaign or Photoshoot</option></select></div><div class="field"><label>Event date</label><input name="date" type="date" required></div><div class="field"><label>Location</label><input name="location" required></div><div class="field"><label>Required service</label><select name="service" required>${p.services.map((s) => `<option>${s}</option>`).join("")}</select></div><div class="field"><label>Estimated budget</label><select name="budget" required><option>Below ₱10,000</option><option>₱10,000–₱30,000</option><option>₱30,001–₱75,000</option><option>₱75,001–₱150,000</option><option>₱150,000+</option><option>Requesting a proposal</option></select></div><div class="field full"><label>Project details</label><textarea name="details" required placeholder="Tell the professional what you need, expected deliverables, and important dates."></textarea></div><div class="field full"><label>Preferred contact method</label><select name="contact"><option>Email</option><option>Mobile call</option><option>SMS</option><option>Messaging app</option></select></div><label class="checkbox-consent field full"><input name="consent" type="checkbox" required> I consent to Pageant Index sharing this inquiry with the selected professional and storing it for account and anti-spam purposes.</label><div class="field full"><button class="btn btn-primary btn-block">Send Inquiry</button></div></form>`;
 }
 function init() {
+  document.documentElement.classList.add("motion-enabled");
+  const revealTargets = document.querySelectorAll(
+    ".section-head, .supplier-placeholder, .article-card, .location-card, .directory-launch, .price-card, .info-panel",
+  );
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("motion-in");
+          observer.unobserve(entry.target);
+        }
+      }),
+      { threshold: 0.08, rootMargin: "0px 0px -24px" },
+    );
+    revealTargets.forEach((element) => {
+      element.classList.add("motion-ready");
+      observer.observe(element);
+    });
+  }
   document.querySelector(".menu-toggle")?.addEventListener("click", (e) => {
     const m = document.querySelector(".mobile-nav");
     const open = m.classList.toggle("open");
