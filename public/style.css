@@ -1455,6 +1455,80 @@ button {
   background: linear-gradient(160deg, #fffdf5, #fff8df);
   border-color: var(--gold);
 }
+.membership-section { background:#fff; }
+.public-access-band {
+  display:grid;
+  grid-template-columns:64px minmax(0,1fr);
+  gap:22px;
+  align-items:center;
+  margin-bottom:34px;
+  padding:24px 28px;
+  border:1px solid #f4bfd6;
+  border-radius:14px;
+  background:#fff7fb;
+}
+.public-access-band > .asset-icon {
+  width:32px;
+  height:32px;
+  padding:16px;
+  border-radius:14px;
+  background:var(--pink);
+  filter:brightness(0) invert(1);
+  box-sizing:content-box;
+}
+.public-access-band h2,
+.commercial-separation h2 {
+  margin:0 0 6px;
+  font-family:"Playfair Display", Georgia, serif;
+}
+.public-access-band p,
+.commercial-separation p {
+  margin:0;
+  color:var(--muted);
+  font-size:.78rem;
+}
+.membership-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.plan-price {
+  display:flex;
+  align-items:baseline;
+  gap:7px;
+  margin:20px 0 2px;
+}
+.plan-price strong {
+  font-family:"Playfair Display", Georgia, serif;
+  font-size:2.2rem;
+  line-height:1;
+  color:var(--burgundy);
+}
+.plan-price span,
+.annual-price {
+  color:var(--muted);
+  font-size:.68rem;
+}
+.annual-price {
+  min-height:18px;
+  margin-bottom:14px;
+}
+.authority-plan {
+  border-color:#d9b553;
+  box-shadow:0 12px 34px rgba(76,46,9,.08);
+}
+.commercial-separation {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:28px;
+  margin-top:40px;
+  padding:34px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+}
+.commercial-separation > div:first-child {
+  padding-right:28px;
+  border-right:1px solid var(--line);
+}
+.commercial-separation .btn { margin-top:22px; }
+.trust-rules .feature-list { margin:16px 0 0; }
 .plan-title {
   font-family: "Playfair Display", Georgia, serif;
   font-size: 1.75rem;
@@ -2472,10 +2546,19 @@ button {
 
 @media (max-width: 900px) {
   .supplier-placeholder-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .membership-grid { grid-template-columns: 1fr; }
+  .commercial-separation { grid-template-columns: 1fr; }
+  .commercial-separation > div:first-child {
+    padding: 0 0 26px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
 }
 @media (max-width: 600px) {
   .supplier-placeholder-grid { grid-template-columns: 1fr; }
   .directory-launch { grid-template-columns: 1fr; padding: 22px; }
+  .public-access-band { grid-template-columns: 1fr; padding: 22px; }
+  .commercial-separation { padding: 24px; }
 }
 
 /* Professional authentication */
