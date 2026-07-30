@@ -643,7 +643,7 @@ create policy data_request_insert on public.data_requests for insert with check 
 -- private bucket: verification-documents
 -- Enforce MIME allowlists, file-size limits, generated paths, malware scanning, and signed URLs for private files.
 
--- Seed pricing display used by the prototype
+-- Seed private pricing-plan configuration
 insert into public.subscription_plans(code,name,amount,billing_interval,features) values
 ('free','Free Listing',0,'year','["Basic directory visibility","One contact link"]'),
 ('verified','Verified Listing',4900,'year','["Verified badge","Full profile","Portfolio","Review eligibility"]'),

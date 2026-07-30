@@ -30,181 +30,16 @@ const locations = [
   "Laguna",
   "Bulacan",
 ];
-const profiles = [
-  {
-    id: "alon-mendoza-designs",
-    name: "Alon Mendoza Designs",
-    category: "Designers",
-    location: "Metro Manila",
-    city: "Quezon City",
-    rating: 4.9,
-    reviews: 128,
-    verified: true,
-    featured: true,
-    nationwide: true,
-    travel: true,
-    years: 12,
-    views: 2341,
-    updated: "2 days ago",
-    image: "profile-designer.jpg",
-    desc: "Custom couture gowns, national costumes, and competition-ready wardrobe development for pageant candidates and organizations.",
-    services: [
-      "Pageant Gown Design",
-      "National Costume",
-      "Wardrobe Consultation",
-    ],
-    response: "Usually replies within 3 hours",
-  },
-  {
-    id: "captured-grace-studios",
-    name: "Captured Grace Studios",
-    category: "Photography",
-    location: "Cebu",
-    city: "Cebu City",
-    rating: 4.8,
-    reviews: 96,
-    verified: true,
-    featured: true,
-    nationwide: true,
-    travel: true,
-    years: 9,
-    views: 1970,
-    updated: "5 days ago",
-    image: "profile-photographer.jpg",
-    desc: "Pageant headshots, campaign portraits, editorial photography, and coronation-night coverage with nationwide availability.",
-    services: ["Pageant Headshots", "Editorial Portraits", "Event Coverage"],
-    response: "Usually replies within 1 day",
-  },
-  {
-    id: "glamourpro-makeup-ph",
-    name: "GlamourPro Makeup PH",
-    category: "Hair and Makeup",
-    location: "Pampanga",
-    city: "Angeles City",
-    rating: 4.9,
-    reviews: 210,
-    verified: true,
-    featured: true,
-    nationwide: false,
-    travel: true,
-    years: 10,
-    views: 2840,
-    updated: "Today",
-    image: "profile-makeup.jpg",
-    desc: "Professional hair and makeup artistry for pageants, campaigns, fittings, media appearances, and special events.",
-    services: ["Pageant Makeup", "Hair Styling", "Team Glam Package"],
-    response: "Usually replies within 2 hours",
-  },
-  {
-    id: "stagevision-productions",
-    name: "StageVision Productions",
-    category: "Events and Production",
-    location: "Davao",
-    city: "Davao City",
-    rating: 4.7,
-    reviews: 87,
-    verified: true,
-    featured: true,
-    nationwide: true,
-    travel: true,
-    years: 14,
-    views: 1744,
-    updated: "1 week ago",
-    image: "profile-production.jpg",
-    desc: "End-to-end pageant production, staging, lights and sound, LED systems, livestreaming, and technical direction.",
-    services: ["Full Production", "Stage and Lights", "Livestreaming"],
-    response: "Usually replies within 1 day",
-  },
-  {
-    id: "elevate-pageant-camp",
-    name: "Elevate Pageant Camp",
-    category: "Pageant Camps",
-    location: "Metro Manila",
-    city: "Makati City",
-    rating: 4.8,
-    reviews: 64,
-    verified: true,
-    featured: false,
-    nationwide: true,
-    travel: true,
-    years: 7,
-    views: 1510,
-    updated: "3 days ago",
-    image: "gallery-4.jpg",
-    desc: "Purpose-driven training in communication, stage presence, interview preparation, and competition strategy.",
-    services: ["Full Camp Program", "Q&A Coaching", "Runway Training"],
-    response: "Usually replies within 5 hours",
-  },
-  {
-    id: "crown-republic-ph",
-    name: "Crown Republic PH",
-    category: "Crown and Sash Suppliers",
-    location: "Bulacan",
-    city: "Meycauayan City",
-    rating: 4.7,
-    reviews: 51,
-    verified: true,
-    featured: false,
-    nationwide: true,
-    travel: false,
-    years: 8,
-    views: 1212,
-    updated: "6 days ago",
-    image: "gallery-2.jpg",
-    desc: "Custom crowns, sashes, medals, and pageant recognition pieces delivered nationwide.",
-    services: ["Custom Crowns", "Sashes", "Awards"],
-    response: "Usually replies within 1 day",
-  },
-  {
-    id: "senz-pageant-digital",
-    name: "SENZ Pageant Digital",
-    category: "PR and Digital Services",
-    location: "Metro Manila",
-    city: "Taguig City",
-    rating: 4.9,
-    reviews: 32,
-    verified: true,
-    featured: false,
-    nationwide: true,
-    travel: true,
-    years: 6,
-    views: 1108,
-    updated: "Today",
-    image: "article-2.jpg",
-    desc: "Pageant websites, voting systems, tabulation, branding, PR strategy, content production, and digital campaigns.",
-    services: ["Website and Voting", "PR Strategy", "Social Media"],
-    response: "Usually replies within 3 hours",
-  },
-  {
-    id: "horizon-pageant-hosts",
-    name: "Horizon Pageant Hosts",
-    category: "Hosts and Choreographers",
-    location: "Iloilo",
-    city: "Iloilo City",
-    rating: 4.6,
-    reviews: 29,
-    verified: false,
-    featured: false,
-    nationwide: false,
-    travel: true,
-    years: 5,
-    views: 620,
-    updated: "2 weeks ago",
-    image: "article-1.jpg",
-    desc: "Professional hosting and choreography for school, festival, municipal, and corporate pageants.",
-    services: ["Event Hosting", "Choreography", "Program Direction"],
-    response: "Response time not available",
-  },
-];
+const profiles = [];
 const articles = [
   {
     slug: "choose-pageant-photographer",
     tag: "Industry Guide",
     title: "How to Choose a Pageant Photographer",
-    author: "Editorial Team",
+    author: "Pageant Index Editorial",
     date: "July 25, 2026",
     time: "8 min read",
-    image: "article-1.jpg",
+    image: "guide-photographer.webp",
     summary:
       "A practical guide to portfolios, usage rights, delivery timelines, direction style, and event coverage.",
   },
@@ -212,10 +47,10 @@ const articles = [
     slug: "coronation-production-checklist",
     tag: "Production",
     title: "Complete Coronation Production Checklist",
-    author: "JP Dela Cruz",
+    author: "Pageant Index Editorial",
     date: "July 22, 2026",
     time: "12 min read",
-    image: "article-2.jpg",
+    image: "guide-production.webp",
     summary:
       "A production-ready checklist covering stage, lights, audio, livestream, rehearsals, safety, and contingencies.",
   },
@@ -223,10 +58,10 @@ const articles = [
     slug: "hiring-pageant-coach",
     tag: "Pageant Business",
     title: "Questions to Ask Before Hiring a Pageant Coach",
-    author: "Ana Reyes",
+    author: "Pageant Index Editorial",
     date: "July 18, 2026",
     time: "7 min read",
-    image: "article-3.jpg",
+    image: "guide-coach.webp",
     summary:
       "What to clarify about coaching scope, ethics, preparation methods, boundaries, and expected outcomes.",
   },
@@ -234,56 +69,15 @@ const articles = [
     slug: "choose-gown-designer",
     tag: "Design and Beauty",
     title: "How to Choose a Pageant Gown Designer",
-    author: "Carla Mendoza",
+    author: "Pageant Index Editorial",
     date: "July 15, 2026",
     time: "9 min read",
-    image: "article-4.jpg",
+    image: "guide-designer.webp",
     summary:
       "How to evaluate design fit, timelines, budget, construction quality, fittings, and ownership terms.",
   },
 ];
-const events = [
-  {
-    day: "18",
-    month: "SEP",
-    name: "Lakambini ng Turismo 2026",
-    org: "Tourism Council of Central Luzon",
-    location: "Clark, Pampanga",
-    deadline: "August 28, 2026",
-    type: "Tourism Pageant",
-    status: "Open",
-  },
-  {
-    day: "03",
-    month: "OCT",
-    name: "Mutya ng Zambales 2026",
-    org: "Provincial Cultural Affairs Office",
-    location: "Iba, Zambales",
-    deadline: "September 10, 2026",
-    type: "Provincial Pageant",
-    status: "Open",
-  },
-  {
-    day: "21",
-    month: "NOV",
-    name: "Hiyas ng Kabisayaan",
-    org: "Visayas Events Collective",
-    location: "Cebu City",
-    deadline: "October 15, 2026",
-    type: "Regional Pageant",
-    status: "Upcoming",
-  },
-  {
-    day: "12",
-    month: "DEC",
-    name: "Reyna ng Festival Philippines",
-    org: "Philippine Festival Alliance",
-    location: "Pasay City",
-    deadline: "Closed",
-    type: "National Pageant",
-    status: "Upcoming",
-  },
-];
+const events = [];
 
 const page = document.body.dataset.page || "home";
 const path = window.__APP_PATH || window.location.pathname;
@@ -329,13 +123,18 @@ function svgIcon(name, className = "") {
   return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${pathData}</svg>`;
 }
 function iconLabel(name) {
-  return `<span class="category-icon" aria-hidden="true">${svgIcon(name)}</span>`;
+  const assets = {
+    training: "graduation-cap", message: "message-circle", clipboard: "clipboard-list",
+    microphone: "mic-vocal", production: "clapperboard", chart: "chart-no-axes-combined",
+    building: "building-2", heart: "heart-pulse"
+  };
+  return `<span class="category-icon" aria-hidden="true"><img src="/public/icons/${assets[name] || name}.svg" alt=""></span>`;
+}
+function assetIcon(name, className = "") {
+  return `<img class="asset-icon ${className}" src="/public/icons/${name}.svg" alt="" aria-hidden="true">`;
 }
 function brandLockup(inverse = false) {
   return `<span class="brand-lockup${inverse ? " inverse" : ""}"><img src="/public/images/pageant-icon.png" alt=""><span class="brand-type"><strong>PAGEANT INDEX</strong><small>PHILIPPINES</small></span></span>`;
-}
-function previewBanner() {
-  return `<aside class="preview-banner" role="note"><div class="container"><strong>Platform preview</strong><span>Sample profiles and activity are shown to demonstrate the PageantIndex experience.</span></div></aside>`;
 }
 function escapeHtml(value) {
   return String(value ?? "").replace(
@@ -409,13 +208,13 @@ function header() {
   return `<header class="site-header"><div class="container nav-wrap"><a class="brand" href="/" aria-label="Pageant Index Philippines home">${brandLockup()}</a><nav class="desktop-nav" aria-label="Primary navigation">${nav.map(([l, u]) => `<a class="${path === u ? "active" : ""}" href="${u}">${l}</a>`).join("")}</nav><div class="nav-actions"><a class="signin" href="/sign-in/">Sign In</a><a class="btn btn-primary" href="/list-your-business/">List Your Business</a><button class="menu-toggle" aria-label="Open menu" aria-expanded="false">${svgIcon("menu")}</button></div></div><nav class="mobile-nav" aria-label="Mobile navigation">${nav.map(([l, u]) => `<a href="${u}">${l}</a>`).join("")}<a href="/sign-in/">Sign In</a><a class="mobile-nav-cta" href="/list-your-business/">List Your Business</a></nav></header>`;
 }
 function footer() {
-  return `<footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-brand">${brandLockup(true)}<p>Trusted discovery, verification, and visibility infrastructure for the professionals, suppliers, and organizations behind Philippine pageantry.</p><form class="newsletter" data-newsletter><input type="email" required aria-label="Email address" placeholder="Email for industry updates"><button class="btn btn-primary btn-small">Subscribe</button></form></div><div class="footer-col"><h4>Directory</h4><a href="/directory/">Browse All</a><a href="/directory/?verified=true">Verified Professionals</a><a href="/directory/?featured=true">Featured Professionals</a><a href="/locations/">Locations</a></div><div class="footer-col"><h4>Professional Resources</h4><a href="/list-your-business/">List Your Business</a><a href="/claim-profile/">Claim Your Profile</a><a href="/verification/">Verification Policy</a><a href="/dashboard/">Professional Dashboard</a></div><div class="footer-col"><h4>Trust and Transparency</h4><a href="/ranking-methodology/">Ranking Methodology</a><a href="/about/#advertising">Advertising Disclosure</a><a href="/about/#reviews">Review Guidelines</a><a href="/about/#complaints">Complaints Process</a></div><div class="footer-col"><h4>Company</h4><a href="/about/">About</a><a href="/articles/">Articles</a><a href="/pageant-calendar/">Calendar</a><a href="/list-your-business/">Work With Us</a><a href="/about/#privacy">Privacy</a></div></div><div class="footer-bottom"><span>© 2026 Pageant Index Philippines. Preview build.</span><span>Official website: www.pageantindex.com</span></div></div></footer>`;
+  return `<footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-brand">${brandLockup(true)}<p>The trusted discovery and verification directory for the people and businesses behind Philippine pageantry.</p><a class="footer-domain" href="https://www.pageantindex.com/">www.pageantindex.com</a></div><div class="footer-col"><h4>Explore</h4><a href="/directory/">Directory</a><a href="/categories/">Categories</a><a href="/locations/">Locations</a><a href="/articles/">Reading Materials</a><a href="/pageant-calendar/">Calendar</a></div><div class="footer-col"><h4>For Professionals</h4><a href="/list-your-business/">List Your Business</a><a href="/claim-profile/">Claim Your Profile</a><a href="/verification/">Verification</a><a href="/list-your-business/#founding">Founding Program</a></div><div class="footer-col"><h4>Standards</h4><a href="/ranking-methodology/">Ranking Methodology</a><a href="/about/#advertising">Advertising Disclosure</a><a href="/about/#reviews">Review Guidelines</a><a href="/about/#complaints">Complaints Process</a><a href="/about/#privacy">Privacy</a></div></div><div class="footer-bottom"><span>© 2026 Pageant Index Philippines. All rights reserved.</span><span>Independent directory for Philippine pageantry.</span></div></div></footer>`;
 }
 
 function homePage() {
   return `<main class="page-shell"><section class="hero"><div class="hero-media" role="img" aria-label="Filipino pageant professionals preparing a crown backstage"></div><div class="container hero-inner"><div class="hero-content"><h1>Find the people behind every <em>winning</em> moment.</h1><p>Discover pageant professionals, suppliers, creatives, organizations, and production partners across the Philippines.</p><form class="hero-search" data-main-search><label class="sr-only" for="home-search">Search the directory</label><input id="home-search" name="q" placeholder="Search by service, business, professional, specialty, province, or city"><button class="btn btn-primary">Search the Directory</button></form><div class="popular"><span>Popular searches:</span>${["Pageant photographer", "Gown designer", "Makeup artist", "Pageant coach", "Pageant camp", "Tabulation provider", "Crown supplier", "Livestreaming team"].map((x) => `<a class="chip" href="/directory/?q=${encodeURIComponent(x)}">${x}</a>`).join("")}</div><div class="hero-proof"><span><b>${svgIcon("check")}</b>Identity and business verification</span><span><b>${svgIcon("info")}</b>Paid placements are clearly labeled</span></div></div></div></section>
 <section class="category-strip"><div class="container"><div class="strip-title">BROWSE BY CATEGORY</div><div class="category-grid">${categories.map(([name, code]) => `<a class="category-card" href="/directory/?category=${encodeURIComponent(name)}">${iconLabel(code)}<span>${name}</span></a>`).join("")}</div></div></section>
-<section class="section-tight"><div class="container"><div class="section-head"><div><div class="eyebrow">Professional discovery</div><h2 class="section-title small">Featured Professionals</h2><p class="section-copy">Paid visibility from professionals and businesses serving the pageant industry. Featured placement does not alter organic ranking.</p></div><a class="text-link" href="/directory/?featured=true">View all featured ${svgIcon("arrow", "inline-icon")}</a></div><div class="feature-layout"><div class="listing-grid">${profiles.slice(0, 4).map(listingCard).join("")}</div><aside class="feature-aside"><div class="info-panel"><div class="badge-seal">${svgIcon("check")}</div><h3>Verified Professionals</h3><p>Verified profiles have completed identity, business, or professional credential checks based on the requirements of their category.</p><a class="btn btn-secondary btn-block" href="/verification/">Learn About Verification</a></div><div class="info-panel gold"><div class="badge-seal">F</div><h3>Founding Member Program</h3><p>Limited early-member distinction, priority onboarding, and private introductory terms. It never guarantees top ranking.</p><a class="btn btn-gold btn-block" href="/list-your-business/#founding">Learn More</a></div></aside></div></div></section>
+<section class="section-tight"><div class="container"><div class="section-head"><div><div class="eyebrow">Founding directory</div><h2 class="section-title small">Approved supplier profiles are coming online</h2><p class="section-copy">Every public listing must be submitted or claimed by its owner and reviewed before publication. No placeholder business names are shown.</p></div><a class="btn btn-primary" href="/list-your-business/">Apply to be listed</a></div><div class="supplier-placeholder-grid">${categories.slice(0,6).map(([name, code]) => `<a class="supplier-placeholder" href="/list-your-business/">${iconLabel(code)}<span><strong>${name}</strong><small>Verified listings opening soon</small></span>${svgIcon("arrow","inline-icon")}</a>`).join("")}</div></div></section>
 <section class="location-strip"><div class="container"><div class="section-head" style="margin-bottom:16px"><div><div class="eyebrow">Search by location</div><h2 class="section-title small">Find professionals in your area</h2></div><a class="text-link" href="/locations/">View all locations →</a></div><div class="location-grid">${locations
     .slice(0, 11)
     .map(
@@ -424,25 +223,25 @@ function homePage() {
     )
     .join("")}</div></div></section>
 <section class="section-tight"><div class="container how-grid"><div class="how-panel"><h3>How it works for clients</h3><div class="steps three">${[
-    ["1", "Search", "Find the right professional or supplier."],
-    ["2", "Compare", "Review profiles, portfolios, reviews, and services."],
-    ["3", "Connect", "Send an inquiry and discuss your project."],
+    ["search", "Search", "Find the right professional or supplier."],
+    ["badge-check", "Compare", "Review verified profile evidence and services."],
+    ["messages-square", "Connect", "Send a private project inquiry."],
   ]
     .map(
       (x) =>
-        `<div class="step"><span class="step-num">${x[0]}</span><strong>${x[1]}</strong><span>${x[2]}</span></div>`,
+        `<div class="step"><span class="step-icon">${assetIcon(x[0])}</span><strong>${x[1]}</strong><span>${x[2]}</span></div>`,
     )
     .join(
       "",
     )}</div></div><div class="how-panel"><h3>How it works for professionals</h3><div class="steps">${[
-    ["1", "Claim Your Profile", "Create or claim your listing."],
-    ["2", "Complete Verification", "Submit category-specific evidence."],
-    ["3", "Receive Inquiries", "Connect with potential clients."],
-    ["4", "Grow Visibility", "Upgrade or apply for features."],
+    ["file-user", "Claim Your Profile", "Create or claim your listing."],
+    ["shield-check", "Complete Verification", "Submit category-specific evidence."],
+    ["inbox", "Receive Inquiries", "Connect with potential clients."],
+    ["chart-no-axes-combined", "Grow Visibility", "Use clearly labeled visibility tools."],
   ]
     .map(
       (x) =>
-        `<div class="step"><span class="step-num">${x[0]}</span><strong>${x[1]}</strong><span>${x[2]}</span></div>`,
+        `<div class="step"><span class="step-icon">${assetIcon(x[0])}</span><strong>${x[1]}</strong><span>${x[2]}</span></div>`,
     )
     .join("")}</div></div></div></section>
 <section class="section" style="background:var(--off)"><div class="container"><div class="section-head"><div><div class="eyebrow">Industry editorial</div><h2 class="section-title">Guides for better pageant decisions</h2></div><a class="text-link" href="/articles/">View all articles →</a></div><div class="article-grid">${articles.map(articleCard).join("")}</div></div></section>
@@ -453,7 +252,7 @@ function pageHero(title, copy, crumb = "Home") {
   return `<section class="page-hero"><div class="container"><div class="breadcrumbs"><a href="/">Home</a> / ${crumb}</div><h1>${title}</h1><p>${copy}</p></div></section>`;
 }
 function directoryPage() {
-  return `<main class="page-shell">${pageHero("Find pageant professionals across the Philippines.", "Search verified professionals, suppliers, creatives, production partners, venues, and industry services. Featured and sponsored profiles are clearly labeled.", "Directory")}<div class="container"><div class="directory-shell"><aside class="filter-panel" id="filter-panel"><div class="filter-head"><h2>Filters</h2><button class="text-link" id="clear-filters">Clear all</button></div><div class="filter-group"><label for="filter-keyword">Keyword</label><input id="filter-keyword" type="text" placeholder="Name, service, specialty"></div><div class="filter-group"><label for="filter-category">Category</label><select id="filter-category"><option value="">All Categories</option>${categories.map((c) => `<option>${c[0]}</option>`).join("")}</select></div><div class="filter-group"><label for="filter-location">Location</label><select id="filter-location"><option value="">All Locations</option>${locations.map((l) => `<option>${l}</option>`).join("")}</select></div><div class="filter-group"><label>Profile options</label><label class="check-row"><input id="filter-verified" type="checkbox"> Verified only</label><label class="check-row"><input id="filter-nationwide" type="checkbox"> Accepts nationwide projects</label><label class="check-row"><input id="filter-travel" type="checkbox"> Available for travel</label><label class="check-row"><input id="filter-featured" type="checkbox"> Featured listings</label></div><div class="filter-group"><label>Years of experience</label><select><option>Any</option><option>1–3 years</option><option>4–7 years</option><option>8–12 years</option><option>13+ years</option></select></div><div class="private-rate-note">${svgIcon("info")}<span>Professional rates are shared privately through direct inquiries.</span></div><button class="btn btn-primary btn-block" id="apply-mobile-filters">Apply Filters</button></aside><section><div class="directory-top"><div><button class="btn btn-secondary filter-toggle" id="filter-toggle">Filters</button><h2><span id="result-count">${profiles.length}</span> professionals found</h2></div><select class="sort-select" id="sort-select" aria-label="Sort directory"><option value="recommended">Recommended</option><option value="rating">Highest Reviewed</option><option value="views">Most Viewed</option><option value="updated">Recently Updated</option><option value="alphabetical">Alphabetical</option></select></div><div class="results-list" id="results-list">${profiles.map(resultCard).join("")}</div><div class="empty-state" id="empty-results" hidden><h3>No matching profiles</h3><p>Try removing one or more filters, expanding your location, or searching a broader service term.</p><button class="btn btn-primary" id="empty-reset">Reset Filters</button></div></section></div></div></main>`;
+  return `<main class="page-shell">${pageHero("Find pageant professionals across the Philippines.", "Approved professionals, suppliers, creatives, production partners, venues, and industry services will appear here after owner submission and review.", "Directory")}<section class="section"><div class="container"><div class="directory-launch"><div class="directory-empty-icon">${assetIcon("shield-check")}</div><div><div class="eyebrow">Founding directory</div><h2 class="section-title small">No approved profiles have been published yet.</h2><p class="section-copy">Pageant Index does not publish invented supplier listings. Professionals and businesses can apply now for ownership review, category verification, and founding-directory consideration.</p><div class="empty-actions"><a class="btn btn-primary" href="/list-your-business/">Apply to be listed</a><a class="btn btn-secondary" href="/claim-profile/">Claim an existing profile</a></div></div></div><div class="supplier-placeholder-grid directory-placeholders">${categories.map(([name, code]) => `<a class="supplier-placeholder" href="/list-your-business/">${iconLabel(code)}<span><strong>${name}</strong><small>Accepting listing applications</small></span>${svgIcon("arrow","inline-icon")}</a>`).join("")}</div></div></section></main>`;
 }
 
 function categoriesPage() {
@@ -498,7 +297,7 @@ function rankingsPage() {
     )}</div><div style="margin-top:50px"><div class="section-head"><div><h2 class="section-title small">Organic, featured, sponsored, and editorial are different.</h2><p class="section-copy">Every visibility type is disclosed so users can understand why a profile appears where it does.</p></div><a class="btn btn-primary" href="/ranking-methodology/">Read Ranking Methodology</a></div><table class="methodology-table"><thead><tr><th>Label</th><th>How it works</th><th>Can it be purchased?</th></tr></thead><tbody><tr><td>Organic ranking</td><td>Calculated from disclosed trust, relevance, completeness, activity, and user-feedback signals.</td><td>No</td></tr><tr><td>Featured placement</td><td>Paid priority visibility in clearly labeled areas, separate from organic scores.</td><td>Yes</td></tr><tr><td>Sponsored content</td><td>Commercial content or campaigns visibly marked as sponsored.</td><td>Yes</td></tr><tr><td>Editorial selection</td><td>Chosen by the editorial team for relevance, story value, or industry contribution.</td><td>No</td></tr></tbody></table></div></div></section></main>`;
 }
 function calendarPage() {
-  return `<main>${pageHero("Philippine pageant calendar.", "Track applications, deadlines, coronation dates, organizer details, and official links. Sponsored events are clearly labeled.", "Pageant Calendar")}<section class="section"><div class="container"><div class="section-head"><div><h2 class="section-title small">Upcoming pageant events</h2><p class="section-copy">Dates shown are realistic demonstration data for the platform prototype.</p></div><button class="btn btn-primary" id="submit-event-btn">Submit an Event</button></div><div class="calendar-grid">${events.map((e, i) => `<article class="event-card">${i === 0 ? '<span class="ribbon">Featured Event</span>' : ""}<div class="event-date"><strong>${e.day}</strong><span>${e.month}</span></div><div class="event-info"><h3>${e.name}</h3><p>${e.org} · ${e.location}</p><p>${e.type} · Application deadline: ${e.deadline}</p><span class="status ${e.status.toLowerCase()}">${e.status}</span></div><a class="btn btn-secondary" href="#event-${i}">View Details</a></article>`).join("")}</div></div></section></main>`;
+  return `<main>${pageHero("Philippine pageant calendar.", "Confirmed application deadlines, coronation dates, organizer details, and official links will be published after review.", "Pageant Calendar")}<section class="section"><div class="container"><div class="directory-launch"><div class="directory-empty-icon">${assetIcon("clipboard-list")}</div><div><div class="eyebrow">Events desk</div><h2 class="section-title small">No confirmed events are published yet.</h2><p class="section-copy">Organizers may submit an event for editorial review. Dates and official organizer links must be verifiable before they appear publicly.</p><button class="btn btn-primary" id="submit-event-btn">Submit an Event</button></div></div></div></section></main>`;
 }
 function articlesPage() {
   const editorialCategories = [
@@ -513,7 +312,7 @@ function articlesPage() {
     ["Regional Pageantry", "building"],
     ["Industry Updates", "megaphone"],
   ];
-  return `<main>${pageHero("Pageant industry guides and editorial.", "Useful, searchable content for clients, professionals, pageant organizations, LGUs, schools, tourism offices, and production teams.", "Articles")}<section class="section"><div class="container"><div class="category-grid" style="margin-bottom:34px">${editorialCategories.map(([name, icon]) => `<a class="category-card" href="#${name.toLowerCase().replaceAll(" ", "-")}">${iconLabel(icon)}<span>${name}</span></a>`).join("")}</div><div class="article-grid">${articles.map(articleCard).join("")}${articles.map(articleCard).join("")}</div></div></section></main>`;
+  return `<main>${pageHero("Pageant industry guides and editorial.", "Complete, practical reading materials for candidates, families, professionals, organizers, schools, tourism offices, and production teams.", "Articles")}<section class="section"><div class="container"><div class="category-grid" style="margin-bottom:34px">${editorialCategories.map(([name, icon]) => `<a class="category-card" href="#${name.toLowerCase().replaceAll(" ", "-")}">${iconLabel(icon)}<span>${name}</span></a>`).join("")}</div><div class="article-grid">${articles.map(articleCard).join("")}</div></div></section></main>`;
 }
 function pricingPage() {
   return `<main>${pageHero("Present your work. Receive inquiries. Grow your visibility.", "Apply for the profile and visibility level that matches your business. Commercial terms are shared privately after review.", "List Your Business")}<section class="section"><div class="container"><div class="confidential-note">${svgIcon("info")}<div><strong>Rates are confidential.</strong><p>PageantIndex reviews each business, category, and visibility request before sharing a private proposal. No public rate card is displayed.</p></div></div><div class="pricing-grid"><article class="price-card"><div class="plan-label">Directory access</div><h2 class="plan-title">Basic Profile</h2><p class="plan-desc">Essential presence for professionals and organizations entering the Philippine pageant directory.</p><ul class="feature-list"><li>Business or professional name</li><li>Primary category and location</li><li>One verified contact link</li><li>Basic directory discovery</li><li>Claim and ownership review</li></ul><a class="btn btn-ghost btn-block" href="/claim-profile/">Claim a Profile</a></article><article class="price-card popular"><div class="plan-label">Trust and credibility</div><h2 class="plan-title">Verified Profile</h2><p class="plan-desc">For professionals ready to present a complete, evidence-backed public profile.</p><ul class="feature-list"><li>Identity and business review</li><li>Full profile and portfolio</li><li>Contact and inquiry tools</li><li>Service areas and availability</li><li>Review eligibility</li><li>Profile management</li></ul><button class="btn btn-primary btn-block plan-select" data-plan="Verified Profile">Request Private Terms</button></article><article class="price-card"><div class="plan-label">Business growth</div><h2 class="plan-title">Professional Profile</h2><p class="plan-desc">Expanded visibility and lead tools for established professionals, teams, and suppliers.</p><ul class="feature-list"><li>Everything in Verified</li><li>Expanded portfolio and video</li><li>Service presentation</li><li>Lead notifications</li><li>Profile analytics</li><li>Priority support</li><li>Editorial consideration</li></ul><button class="btn btn-primary btn-block plan-select" data-plan="Professional Profile">Request Private Terms</button></article><article class="price-card gold-plan"><div class="plan-label">Campaign visibility</div><h2 class="plan-title">Featured Placement</h2><p class="plan-desc">Clearly labeled paid visibility for launches, seasonal campaigns, and priority discovery.</p><ul class="feature-list"><li>Labeled priority visibility</li><li>Featured category placement</li><li>Homepage consideration</li><li>Highlighted profile treatment</li><li>Campaign reporting</li><li>No direct effect on organic score</li></ul><button class="btn btn-gold btn-block plan-select" data-plan="Featured Placement">Discuss a Campaign</button></article></div><div id="founding" class="cta-band founding-band"><div class="cta-inner"><div><h2>Founding Member Program</h2><p>Selected early members may receive a permanent founding distinction, priority onboarding, private introductory terms, early access, and editorial consideration. The badge never guarantees ranking.</p></div><button class="btn btn-gold plan-select" data-plan="Founding Member Program">Apply as Founding Member</button></div></div></div></section></main>`;
@@ -581,11 +380,12 @@ function aboutPage() {
   return `<main>${pageHero("Trusted infrastructure for Philippine pageantry.", "Pageant Index Philippines is built to make professional discovery clearer, safer, more credible, and commercially sustainable without selling fake authority.", "About")}<section class="section"><div class="container"><div class="how-grid"><div><div class="eyebrow">Our purpose</div><h2 class="section-title">Make the industry easier to navigate.</h2><p class="section-copy">Candidates, parents, directors, LGUs, schools, tourism offices, festivals, producers, and event organizers need a reliable way to compare professionals and suppliers. Professionals need a credible place to present work, build trust, receive inquiries, and grow visibility.</p></div><div class="info-panel"><h3>What we will not become</h3><ul class="feature-list"><li>A fan page or beauty-pageant organization</li><li>An award-selling website</li><li>A pay-to-win ranking scheme</li><li>A platform that hides sponsored visibility</li><li>A public archive of private verification documents</li></ul></div></div><div id="advertising" class="profile-section" style="margin-top:52px"><h2>Advertising disclosure</h2><p>Featured placements, sponsored events, sponsored articles, and commercial campaigns are visibly labeled. Payment does not directly change organic ranking scores.</p></div><div id="reviews" class="profile-section"><h2>Review policy</h2><p>Reviews should come from verified accounts or transactions when possible. Negative reviews are not automatically removed because a business complains. Administrators may request evidence, temporarily hide a review during an investigation, restore legitimate reviews, and document moderation decisions.</p></div><div id="complaints" class="profile-section"><h2>Reports and complaints</h2><p>Users may report inaccurate information, misconduct, impersonation, suspicious reviews, or unsafe content. Businesses have a fair opportunity to respond, and serious actions are recorded in audit logs.</p></div><div id="privacy" class="profile-section"><h2>Privacy and document handling</h2><p>Private identity and verification documents are stored separately from public profile data. The platform supports consent records, privacy controls, account deletion requests, secure uploads, and role-based access.</p></div></div></section></main>`;
 }
 function signInPage() {
-  return `<main class="auth-shell"><section class="auth-visual"><h1>Manage your visibility in the Philippine pageant industry.</h1></section><section class="auth-panel"><div class="auth-card">${brandLockup()}<h2>Sign in</h2><p class="muted">Access your profile, inquiries, subscription, verification requests, and analytics.</p><form id="signin-form"><div class="field"><label for="signin-email">Email</label><input id="signin-email" type="email" required autocomplete="email"></div><div class="field"><label for="signin-password">Password</label><input id="signin-password" type="password" required autocomplete="current-password"></div><label class="check-row"><input type="checkbox"> Keep me signed in</label><button class="btn btn-primary btn-block">Sign In</button><a class="btn btn-ghost btn-block" href="/claim-profile/">Create an Account</a><p class="muted" style="font-size:.68rem;text-align:center">Preview login: any valid email and password.</p></form></div></section></main>`;
+  return `<main class="auth-shell"><section class="auth-visual"><h1>Manage your visibility in the Philippine pageant industry.</h1></section><section class="auth-panel"><div class="auth-card">${brandLockup()}<h2>Professional portal</h2><p class="muted">Portal access is issued to approved profile owners during onboarding.</p><div class="info-panel"><strong>Need access?</strong><p>Apply for a listing or submit a profile claim. The Pageant Index team will review ownership before activating an account.</p></div><a class="btn btn-primary btn-block" href="/list-your-business/">Apply to be listed</a><a class="btn btn-ghost btn-block" href="/claim-profile/">Claim a profile</a></div></section></main>`;
 }
 function profilePage() {
   const slug = path.split("/").filter(Boolean).pop();
   const p = profiles.find((x) => x.id === slug) || profiles[0];
+  if (!p) return `<main>${pageHero("Profile unavailable.", "This supplier profile is not published in the approved Pageant Index directory.", "Directory")}<section class="section"><div class="container"><div class="directory-launch"><div class="directory-empty-icon">${assetIcon("shield-check")}</div><div><h2 class="section-title small">This listing is not available.</h2><p class="section-copy">Browse the official directory or apply to create an owner-verified profile.</p><div class="empty-actions"><a class="btn btn-primary" href="/directory/">Open directory</a><a class="btn btn-secondary" href="/list-your-business/">Apply to be listed</a></div></div></div></div></section></main>`;
   return `<main><section class="profile-hero"><div class="container"><div class="breadcrumbs"><a href="/">Home</a> / <a href="/directory/">Directory</a> / ${p.name}</div><div class="profile-summary"><img class="profile-avatar" src="/public/images/${p.image}" alt="${p.name}"><div><h1 class="profile-name">${p.name}</h1><div class="profile-badges">${badgeHtml(p)}<span class="badge gold-badge">Founding Member</span></div><div class="card-meta">${p.category} · ${p.city}, ${p.location}</div><div class="card-meta"><span class="rating">★ ${p.rating}</span> ${p.reviews} verified reviews · ${p.years} years experience</div><div class="card-meta">${p.nationwide ? "Accepts nationwide projects" : "Regional service"} · ${p.travel ? "Available for travel" : "Local projects only"}</div></div><div class="profile-actions"><button class="btn btn-primary inquiry-trigger" data-profile="${p.id}">Send Inquiry</button><button class="btn btn-ghost save-profile" data-profile="${p.id}">Save Profile</button><button class="btn btn-ghost share-profile">Share Profile</button></div></div></div></section><div class="profile-nav"><div class="container" style="display:flex;gap:30px"><button class="active" data-tab="overview">Overview</button><button data-tab="portfolio">Portfolio</button><button data-tab="services">Services</button><button data-tab="reviews">Reviews</button><button data-tab="faqs">FAQs</button><button data-tab="info">Info</button></div></div><div class="container profile-layout"><section class="profile-main"><div class="profile-section" data-section="overview"><h2>About</h2><p>${p.desc} The team works with candidates, pageant organizations, tourism offices, schools, LGUs, and producers. Every project begins with a written scope, timeline, deliverables, and project-specific terms.</p><div class="details-grid"><div class="detail"><strong>Specialties</strong><span>${p.services.slice(0, 2).join(", ")}</span></div><div class="detail"><strong>Years of experience</strong><span>${p.years} years</span></div><div class="detail"><strong>Languages</strong><span>English, Filipino</span></div><div class="detail"><strong>Service areas</strong><span>${p.nationwide ? "Nationwide" : "Region-based"}</span></div><div class="detail"><strong>Travel availability</strong><span>${p.travel ? "Available" : "Not available"}</span></div><div class="detail"><strong>Last updated</strong><span>${p.updated}</span></div></div></div><div class="profile-section" data-section="portfolio"><h2>Professional Portfolio</h2><div class="gallery-grid">${[1, 2, 3, 4].map((i) => `<img src="/public/images/gallery-${i}.jpg" alt="${p.name} portfolio ${i}">`).join("")}</div></div><div class="profile-section" data-section="services"><h2>Services and packages</h2><p class="section-copy private-services-copy">Project rates are confidential and shared privately after the professional reviews the scope.</p><div class="service-grid">${p.services.map((s, i) => `<article class="service-card"><h3>${s}</h3><p>${["Project planning, creative direction, and professional execution based on an approved scope.", "Includes a discovery consultation, written deliverables, and timeline.", "Custom package for pageant candidates, organizations, or production teams."][i]}</p><div class="price">Private quotation</div></article>`).join("")}</div></div><div class="profile-section" data-section="reviews"><h2>Verified client reviews</h2>${[
     ["Professionalism", "5.0"],
     ["Communication", "4.9"],
@@ -602,9 +402,10 @@ function profilePage() {
     )}<article class="info-panel" style="margin-top:18px"><strong>Mariel Santos · Verified project</strong><p style="margin-top:8px">The scope, timeline, and deliverables were explained clearly. Communication remained professional throughout the project.</p><small class="muted">Service received: ${p.services[0]} · Project date: June 2026</small></article><form class="form-card" style="margin-top:18px" data-generic-form data-success="Your review was submitted for verification and moderation."><h3 class="display" style="font-size:1.5rem;margin-top:0">Write a review</h3><div class="form-grid"><div class="field"><label>Overall experience</label><select><option>5 - Excellent</option><option>4 - Good</option><option>3 - Average</option><option>2 - Poor</option><option>1 - Very poor</option></select></div><div class="field"><label>Project date</label><input type="date" required></div><div class="field full"><label>Written review</label><textarea required></textarea></div><div class="field full"><button class="btn btn-primary">Submit Review</button></div></div></form></div><div class="profile-section" data-section="faqs"><h2>Frequently asked questions</h2>${["How early should clients inquire?", "Do you accept nationwide projects?", "What is required to reserve a date?", "Are travel costs included?"].map((q, i) => `<details class="info-panel" style="margin-bottom:10px"><summary style="font-weight:700;cursor:pointer">${q}</summary><p>${["Booking 6–12 weeks ahead is recommended for major pageant projects.", "Nationwide availability depends on the service scope, schedule, and travel requirements.", "A signed agreement and reservation fee may be required after the scope is approved.", "Travel and accommodation are quoted separately unless explicitly included."][i]}</p></details>`).join("")}</div><div class="profile-section" data-section="info"><h2>Credentials and verification</h2><div class="details-grid"><div class="detail"><strong>Identity</strong><span>Verified</span></div><div class="detail"><strong>Business evidence</strong><span>Reviewed</span></div><div class="detail"><strong>Portfolio evidence</strong><span>Reviewed</span></div></div><div class="disclosure" style="margin-top:18px">Verification confirms submitted information based on category requirements. It is not a guarantee of service quality, conduct, or outcomes.</div></div></section><aside class="profile-aside"><div class="contact-card"><h3>Contact information</h3><div class="contact-row">● ${p.city}, ${p.location}</div><div class="contact-row">● ${p.nationwide ? "Nationwide service" : "Regional service"}</div><div class="contact-row">Direct contact details are shared privately after an inquiry is accepted.</div><button class="btn btn-primary btn-block inquiry-trigger" data-profile="${p.id}" style="margin-top:14px">Send Private Inquiry</button></div><div class="contact-card"><h3>Verification details</h3><div class="contact-row">✓ Identity verified</div><div class="contact-row">✓ Business evidence reviewed</div><div class="contact-row">✓ Portfolio evidence reviewed</div><div class="contact-row">Verified July 2026</div></div><div class="disclosure">${p.featured ? "This profile has paid featured visibility. Featured placement does not change its organic ranking score." : "This profile is not currently using paid featured placement."}</div><button class="btn btn-ghost btn-block" data-report-profile>Report Profile</button></aside></div><button class="btn btn-primary sticky-inquiry inquiry-trigger" data-profile="${p.id}">Send Inquiry to ${p.name}</button></main>`;
 }
 function claimPage() {
-  return `<main>${pageHero("Claim an existing profile.", "Take ownership of an unclaimed listing, submit evidence privately, and manage your public profile after review.", "Claim Profile")}<section class="section"><div class="container" style="max-width:900px"><div class="claim-steps">${["Find profile", "Create account", "Submit evidence", "Confirm contact", "Review"].map((x, i) => `<div class="claim-step ${i === 0 ? "active" : ""}" data-step-indicator="${i}"><b>${i + 1}</b><span>${x}</span></div>`).join("")}</div><div class="form-card"><section class="claim-panel active" data-claim-step="0"><h2 class="display">Find your profile</h2><div class="field"><label>Business or professional name</label><input id="claim-search" placeholder="Search existing unclaimed profiles"></div><div class="info-panel" id="claim-result" style="margin-top:18px"><strong>Sample unclaimed listing</strong><p>Horizon Pageant Hosts · Hosts and Choreographers · Iloilo City</p><button class="btn btn-primary claim-next">Claim This Profile</button></div></section><section class="claim-panel" data-claim-step="1"><h2 class="display">Create your account</h2><div class="form-grid"><div class="field"><label>Full name</label><input required></div><div class="field"><label>Email</label><input type="email" required></div><div class="field"><label>Mobile number</label><input required></div><div class="field"><label>Password</label><input type="password" required></div></div><div class="form-actions"><button class="btn btn-ghost claim-back">Back</button><button class="btn btn-primary claim-next">Continue</button></div></section><section class="claim-panel" data-claim-step="2"><h2 class="display">Submit supporting information</h2><div class="form-grid"><div class="field"><label>Relationship to business</label><select><option>Owner</option><option>Authorized representative</option><option>Team member</option></select></div><div class="field"><label>Evidence type</label><select><option>Business registration</option><option>Government ID</option><option>Official social account</option><option>Proof of completed work</option></select></div><div class="field full"><label>Evidence summary</label><textarea placeholder="Describe the documents you will submit securely."></textarea></div></div><div class="disclosure" style="margin-top:18px">Private documents will not be displayed publicly.</div><div class="form-actions"><button class="btn btn-ghost claim-back">Back</button><button class="btn btn-primary claim-next">Continue</button></div></section><section class="claim-panel" data-claim-step="3"><h2 class="display">Confirm contact information</h2><div class="form-grid"><div class="field"><label>Public business email</label><input type="email"></div><div class="field"><label>Public mobile number</label><input></div><div class="field full"><label>Website or official social profile</label><input type="url"></div></div><label class="checkbox-consent"><input type="checkbox" required> I confirm that I am authorized to manage this profile.</label><div class="form-actions"><button class="btn btn-ghost claim-back">Back</button><button class="btn btn-primary claim-next">Submit Claim</button></div></section><section class="claim-panel" data-claim-step="4"><div class="empty-state"><h3>Claim submitted</h3><p>Your claim is now pending review. The admin team may approve it, request revisions, or ask for additional evidence.</p><a class="btn btn-primary" href="/dashboard/">Open Demo Dashboard</a></div></section></div></div></section></main>`;
+  return `<main>${pageHero("Claim an existing profile.", "Ownership claims are reviewed privately before a listing or account is activated.", "Claim Profile")}<section class="section"><div class="container" style="max-width:820px"><div class="form-card"><h2 class="display">Submit a profile claim</h2><p class="section-copy">If Pageant Index has contacted you about an unpublished listing, provide the details below. New businesses should use the listing application.</p><form class="form-grid" data-generic-form data-success="Your profile claim has been submitted for ownership review."><div class="field"><label>Business or professional name</label><input required></div><div class="field"><label>Full name</label><input required autocomplete="name"></div><div class="field"><label>Email</label><input type="email" required autocomplete="email"></div><div class="field"><label>Mobile number</label><input required></div><div class="field full"><label>Official website or social profile</label><input type="url" required></div><div class="field full"><label>Ownership evidence summary</label><textarea required placeholder="Explain your relationship to the business and the evidence available for private review."></textarea></div><label class="checkbox-consent field full"><input type="checkbox" required> I confirm that I am authorized to represent this business or professional profile.</label><div class="field full"><button class="btn btn-primary">Submit Claim</button></div></form></div></div></section></main>`;
 }
 function dashboardPage() {
+  return `<main>${pageHero("Professional portal access.", "Approved profile owners receive secure portal access during onboarding.", "Professional Portal")}<section class="section"><div class="container"><div class="directory-launch"><div class="directory-empty-icon">${assetIcon("shield-check")}</div><div><h2 class="section-title small">This area requires an approved account.</h2><p class="section-copy">Apply for a listing or claim an existing profile to begin ownership and verification review.</p><div class="empty-actions"><a class="btn btn-primary" href="/list-your-business/">Apply to be listed</a><a class="btn btn-secondary" href="/claim-profile/">Claim a profile</a></div></div></div></div></section></main>`;
   return `<main class="dashboard-shell"><aside class="dashboard-sidebar">${brandLockup(true)}<nav class="dash-nav">${["Dashboard", "Profile", "Inquiries", "Portfolio", "Services", "Reviews", "Analytics", "Subscription", "Verification", "Team", "Support"].map((x, i) => `<button class="${i === 0 ? "active" : ""}" data-dash-tab="${x.toLowerCase()}">${x}</button>`).join("")}<a href="/">View Public Site</a></nav></aside><section class="dashboard-main"><div class="dash-head"><div><div class="eyebrow">Professional dashboard</div><h1>Welcome back, Alon.</h1><p class="muted">Here is what is happening with your profile.</p></div><a class="btn btn-primary" href="/professional/alon-mendoza-designs/">View Profile</a></div><div class="stat-grid"><div class="stat-card"><span>Profile views</span><strong>1,248</strong><small>↑ 12% this month</small></div><div class="stat-card"><span>Inquiries</span><strong id="dash-inquiry-count">12</strong><small>↑ 8% this month</small></div><div class="stat-card"><span>Profile saves</span><strong>89</strong><small>↑ 5% this month</small></div><div class="stat-card"><span>Review score</span><strong>4.9</strong><small>128 verified reviews</small></div></div><div class="dash-grid"><div class="panel"><h2>Recent inquiries</h2><div class="inquiry-list" id="dashboard-inquiries">${[
     ["Maria Santos", "Municipal pageant gown", "New"],
     ["Cebu Queen Org", "Coronation wardrobe", "Replied"],
@@ -619,12 +420,48 @@ function dashboardPage() {
     )}</div><button class="text-link" style="margin-top:14px">View all inquiries →</button></div><div class="panel"><h2>Profile completion</h2><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:8px"><span>Complete profile</span><strong>92%</strong></div><div class="progress"><span style="width:92%"></span></div><ul class="feature-list"><li>Basic information</li><li>Portfolio</li><li>Services</li><li>Verification</li><li>Reviews</li></ul><button class="btn btn-secondary btn-block">Complete Profile</button></div></div><div class="dash-grid"><div class="panel"><h2>Analytics overview</h2><div class="mini-chart">${[35, 60, 48, 82, 72, 95, 74, 90, 54, 76, 43, 68].map((h) => `<i style="height:${h}%"></i>`).join("")}</div></div><div class="panel"><h2>Subscription</h2><span class="badge pink-badge">Professional Plan</span><p class="muted" style="font-size:.76rem">Renews August 20, 2026</p><button class="btn btn-primary btn-block plan-select" data-plan="Manage Professional Subscription">Manage Subscription</button></div></div></section></main>`;
 }
 function adminPage() {
+  return `<main>${pageHero("Restricted administration.", "This area is available only to authorized Pageant Index administrators.", "Administration")}<section class="section"><div class="container"><div class="directory-launch"><div class="directory-empty-icon">${assetIcon("shield-check")}</div><div><h2 class="section-title small">Authorization required.</h2><p class="section-copy">Return to the public site to browse official Pageant Index content.</p><a class="btn btn-primary" href="/">Return home</a></div></div></div></section></main>`;
   return `<main class="dashboard-shell"><aside class="dashboard-sidebar">${brandLockup(true)}<div class="eyebrow" style="color:var(--light-gold);margin-bottom:12px">Secure admin</div><nav class="dash-nav">${["Overview", "Profiles", "Claims", "Verification", "Subscriptions", "Featured", "Inquiries", "Reviews", "Reports", "Articles", "Events", "Badges", "Audit Logs", "Analytics", "Exports"].map((x, i) => `<button class="${i === 1 ? "active" : ""}">${x}</button>`).join("")}<a href="/">View Public Site</a></nav></aside><section class="dashboard-main"><div class="dash-head"><div><div class="eyebrow">Administration</div><h1>Profile management</h1><p class="muted">Manage listing status, verification, badges, claims, and visibility.</p></div><button class="btn btn-primary" id="admin-create">Create Profile</button></div><div class="stat-grid"><div class="stat-card"><span>Total profiles</span><strong>1,248</strong><small>432 verified</small></div><div class="stat-card"><span>Pending claims</span><strong>27</strong><small>8 require action</small></div><div class="stat-card"><span>Verification queue</span><strong>19</strong><small>Oldest: 3 days</small></div><div class="stat-card"><span>Reports</span><strong>6</strong><small>2 high priority</small></div></div><div class="panel" style="margin-top:18px"><div class="admin-toolbar"><input id="admin-search" placeholder="Search profiles, owners, locations, or categories"><button class="btn btn-secondary">Export CSV</button><button class="btn btn-ghost">Filters</button></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Profile</th><th>Category</th><th>Location</th><th>Status</th><th>Verified</th><th>Featured</th><th>Updated</th><th>Actions</th></tr></thead><tbody id="admin-tbody">${profiles.map((p, i) => `<tr data-admin-name="${p.name.toLowerCase()}"><td><strong>${p.name}</strong><br><small>${p.id}</small></td><td>${p.category}</td><td>${p.location}</td><td><select class="status-select" data-profile="${p.id}">${["Unclaimed", "Claim Pending", "Basic", "Verified", "Professional", "Featured", "Founding Member", "Suspended", "Archived"].map((s) => `<option ${s === (p.featured ? "Featured" : p.verified ? "Verified" : "Basic") ? "selected" : ""}>${s}</option>`).join("")}</select></td><td>${p.verified ? "Yes" : "No"}</td><td>${p.featured ? "Yes" : "No"}</td><td>${p.updated}</td><td><button class="btn btn-small btn-ghost admin-edit" data-profile="${p.id}">Edit</button></td></tr>`).join("")}</tbody></table></div></div></section></main>`;
 }
+const articleBodies = {
+  "choose-pageant-photographer": `
+    <p class="article-lead">A strong pageant photographer does more than make attractive images. The right professional understands campaign goals, directs confidently, protects the schedule, and delivers files that work across print, social media, press, and competition requirements.</p>
+    <h2>Define the assignment first</h2><p>Write down the images you need before requesting quotations: official headshots, full-length portraits, advocacy content, sponsor deliverables, wardrobe looks, behind-the-scenes coverage, or coronation-night photographs. Confirm the intended platforms, required dimensions, deadline, location, and number of final images.</p>
+    <h2>Review complete galleries, not highlights</h2><p>A social feed shows only selected work. Ask to see one or two complete sessions similar to yours. Look for consistent focus, skin tone, fabric detail, posing, retouching, and image quality across different lighting conditions—not only one exceptional frame.</p>
+    <h2>Questions to ask</h2><ul class="article-checklist"><li>Who will photograph the session or event?</li><li>How many edited images are included, and when are they delivered?</li><li>Are hair, makeup, studio, assistants, permits, travel, and overtime included?</li><li>How are image selections and revision requests handled?</li><li>What usage rights are granted to the candidate, organizer, sponsors, and photographer?</li><li>How are files backed up, delivered, and archived?</li></ul>
+    <h2>Direction and working style</h2><p>Discuss how the photographer directs posing and expression, especially if the candidate is new to professional shoots. For events, ask how the team coordinates with production, handles changing light, and covers key moments without obstructing judges or the audience.</p>
+    <h2>Put the agreement in writing</h2><p>The agreement should identify deliverables, payment schedule, cancellation and rescheduling terms, turnaround time, retouching limits, usage rights, credit requirements, travel costs, and what happens if equipment or weather affects the assignment.</p>
+    <div class="article-callout"><strong>Final check:</strong> Choose the photographer whose full body of work, communication, process, and written terms match the assignment—not simply the lowest quotation or largest follower count.</div>`,
+  "coronation-production-checklist": `
+    <p class="article-lead">A coronation night succeeds when creative, technical, safety, and guest-experience decisions are coordinated early. Use this checklist as a planning framework, then adapt it to the venue, audience size, program, and local requirements.</p>
+    <h2>Production foundation</h2><ul class="article-checklist"><li>Confirm venue access, capacity, loading route, curfew, power, rigging limits, and house rules.</li><li>Name one production lead and establish a clear approval chain.</li><li>Lock the running order, candidate count, segments, awards, speakers, and estimated duration.</li><li>Create a contact sheet for organizers, venue staff, suppliers, medical support, security, and emergency contacts.</li></ul>
+    <h2>Stage, lighting, audio, and video</h2><p>Approve a scaled stage plan showing entrances, exits, stairs, judges, hosts, screens, cameras, and backstage holding areas. Test lighting for every wardrobe color and performance position. Prepare dedicated microphones for hosts, performers, judges, and announcements, with labeled backups. Confirm playback formats, screen resolution, camera positions, recording, and livestream connectivity.</p>
+    <h2>Program and content control</h2><ul class="article-checklist"><li>Use one master script with version number and owner.</li><li>Verify names, titles, pronunciation, award order, music cues, and sponsor obligations.</li><li>Place every audio, video, and graphic asset in an organized show folder with backups.</li><li>Prepare holding slides and neutral music for unexpected pauses.</li></ul>
+    <h2>Candidate and backstage operations</h2><p>Publish call times, rehearsal schedules, dressing-room assignments, wardrobe sequence, prop responsibilities, and stage routes. Assign backstage coordinators who can communicate with the stage manager. Keep walkways dry and unobstructed, mark level changes clearly, and check gowns, footwear, and props during rehearsal.</p>
+    <h2>Rehearsals and contingencies</h2><p>Run a technical cue-to-cue before the full dress rehearsal. Then rehearse entrances, exits, host links, tabulation handoff, special awards, final question, crowning, and winner photography. Prepare written responses for power loss, delayed results, microphone failure, missing media, medical incidents, severe weather, and schedule overrun.</p>
+    <div class="article-callout"><strong>Show-day rule:</strong> Freeze nonessential changes before doors open. Any necessary change should pass through the production lead and be communicated to every affected department.</div>`,
+  "hiring-pageant-coach": `
+    <p class="article-lead">Coaching should help a candidate think, communicate, move, and prepare with greater clarity—not imitate another contestant or promise a crown. A good fit depends on goals, methods, boundaries, and trust.</p>
+    <h2>Clarify what you need</h2><p>Identify the competition stage and the candidate’s priorities: interview, question and answer, advocacy, stage presence, runway, wardrobe planning, media preparation, fitness coordination, or an overall program. Ask which needs the coach handles directly and which require qualified specialists.</p>
+    <h2>Ask about the coaching method</h2><ul class="article-checklist"><li>How is the first assessment conducted?</li><li>How are sessions structured and progress documented?</li><li>Is feedback adapted to the candidate’s voice, background, age, and goals?</li><li>How are practice questions selected and reviewed?</li><li>What preparation is expected between sessions?</li><li>How does the coach respond when a method is not working?</li></ul>
+    <h2>Discuss ethics and boundaries</h2><p>Ask how the coach protects confidentiality, handles conflicts of interest, works with minors and parents, communicates outside sessions, and refers health, nutrition, mental-health, legal, or medical matters to qualified professionals. Avoid anyone who humiliates candidates, guarantees results, encourages dishonesty, or pressures you into unrelated services.</p>
+    <h2>Understand the package</h2><p>Confirm session length, number of sessions, format, location, rescheduling policy, travel, access between sessions, included materials, payment schedule, and refund terms. If a team is involved, identify who provides each service and who remains accountable for the overall plan.</p>
+    <h2>Evaluate the relationship</h2><p>A consultation should leave the candidate informed and respected. The coach should listen carefully, explain their approach, give specific observations, and be comfortable stating what they cannot provide. References can help, but testimonials and titles should never replace a direct assessment of fit.</p>
+    <div class="article-callout"><strong>Healthy outcome:</strong> The candidate becomes more prepared and self-directed while retaining an authentic voice, reasonable boundaries, and responsibility for their own decisions.</div>`,
+  "choose-gown-designer": `
+    <p class="article-lead">A pageant gown must support the candidate, the segment, and the movement required on stage. Choosing a designer is therefore a decision about design judgment, construction, communication, fittings, schedule, and written ownership terms.</p>
+    <h2>Prepare a useful brief</h2><p>Share the event date, segment rules, venue, stage conditions, candidate measurements, footwear, movement needs, preferred silhouette, colors to consider or avoid, and a realistic spending range. Inspiration images can communicate direction, but ask for an original solution suited to the wearer.</p>
+    <h2>Examine construction closely</h2><p>Review finished garments in person when possible. Inspect seams, lining, closures, boning, cups, hems, embellishment security, weight distribution, and comfort. Ask to see how the garment moves from the front, side, and back under strong light.</p>
+    <h2>Questions for the designer</h2><ul class="article-checklist"><li>Who creates the design and who constructs the garment?</li><li>How many fittings are required, and when will they happen?</li><li>Which fabrics, embellishments, understructure, and accessories are included?</li><li>What changes are included after design approval?</li><li>How are rush work, travel, shipping, repairs, and late measurement changes handled?</li><li>Is the gown purchased, rented, borrowed, sponsored, or returned after use?</li></ul>
+    <h2>Plan the fitting timeline</h2><p>Agree on dates for design approval, measurements, sourcing, mock-up or first fitting, refinement, final fitting, and collection. Build in time for walking, sitting, stairs, quick changes, photographs, and emergency adjustments. Bring the intended shoes and foundation garments to fittings.</p>
+    <h2>Document ownership and publicity</h2><p>The written agreement should clarify total cost, payment milestones, cancellation, design changes, garment ownership, exclusivity if any, alteration responsibility, image use, credits, sponsor disclosure, and what happens if the event or candidate measurements change.</p>
+    <div class="article-callout"><strong>Final fitting:</strong> Check comfort, balance, hem length, closures, skin safety, movement, and a simple repair kit. The candidate should be able to enter, walk, turn, sit, and exit with confidence.</div>`
+};
 function articleDetailPage() {
   const slug = path.split("/").filter(Boolean).pop();
   const a = articles.find((x) => x.slug === slug) || articles[0];
-  return `<main>${pageHero(a.title, a.summary, "Articles")}<article class="section"><div class="container" style="max-width:900px"><img src="/public/images/${a.image}" alt="${a.title}" style="width:100%;height:min(480px,55vw);object-fit:cover;border-radius:14px"><div class="article-meta" style="margin:18px 0">By ${a.author} · Published ${a.date} · Updated July 29, 2026 · ${a.time}</div><div class="display" style="font-size:1.8rem;line-height:1.4"><p>Choosing the right professional is not only about liking a portfolio. It is about understanding the process, responsibilities, deliverables, communication style, timelines, usage rights, and how the professional works under pressure.</p></div><p>Start by defining what you need. A pageant campaign, headshot session, gown commission, coaching program, or coronation production can involve very different expectations. Ask for a written scope and make sure the quoted price clearly states what is included, what is optional, and what may create additional cost.</p><h2 class="display" style="font-size:2rem">Questions worth asking</h2><ul class="feature-list"><li>What experience is directly relevant to this type of project?</li><li>What deliverables, timelines, and revision limits are included?</li><li>Who owns the final files and how may they be used?</li><li>What happens if the event date, location, or scope changes?</li><li>How are deposits, cancellations, travel, and overtime handled?</li><li>Can references or documented completed projects be reviewed?</li></ul><div class="disclosure">Related professionals shown on Pageant Index may include organic, featured, sponsored, or editorial selections. Each label should be interpreted separately.</div><section class="section-tight"><h2 class="section-title small">Related professionals</h2><div class="listing-grid" style="grid-template-columns:repeat(2,1fr)">${profiles.slice(0, 2).map(listingCard).join("")}</div></section></div></article></main>`;
+  const related = articles.filter((x) => x.slug !== a.slug).slice(0, 3);
+  return `<main>${pageHero(a.title, a.summary, "Reading Materials")}<article class="section"><div class="container article-body"><img class="article-hero-image" src="/public/images/${a.image}" alt="${a.title}"><div class="article-meta">By ${a.author} · Published ${a.date} · Updated July 30, 2026 · ${a.time}</div>${articleBodies[a.slug]}<section class="related-reading"><div class="section-head"><div><div class="eyebrow">Continue reading</div><h2 class="section-title small">Related guides</h2></div><a class="text-link" href="/articles/">All reading materials →</a></div><div class="article-grid">${related.map(articleCard).join("")}</div></section></div></article></main>`;
 }
 
 function render() {
@@ -678,22 +515,22 @@ function render() {
     case "dashboard":
       document.getElementById("app").innerHTML =
         header() +
-        previewBanner() +
         dashboardPage() +
+        footer() +
         modalHtml() +
         toastHtml();
       init();
       return;
     case "admin":
       document.getElementById("app").innerHTML =
-        header() + previewBanner() + adminPage() + modalHtml() + toastHtml();
+        header() + adminPage() + footer() + modalHtml() + toastHtml();
       init();
       return;
     default:
       content = homePage();
   }
   document.getElementById("app").innerHTML =
-    header() + previewBanner() + content + footer() + modalHtml() + toastHtml();
+    header() + content + footer() + modalHtml() + toastHtml();
   init();
 }
 
@@ -863,6 +700,7 @@ function initDirectory() {
     trav = document.getElementById("filter-travel"),
     feat = document.getElementById("filter-featured"),
     sort = document.getElementById("sort-select");
+  if (!kw) return;
   kw.value = q.get("q") || "";
   cat.value = q.get("category") || "";
   loc.value = q.get("location") || "";
@@ -967,11 +805,7 @@ function initClaim() {
   );
 }
 function initSignIn() {
-  document.getElementById("signin-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    showToast("Signed in to the demo account.");
-    setTimeout(() => (location.href = "/dashboard/"), 600);
-  });
+  document.getElementById("signin-form")?.addEventListener("submit", (e) => e.preventDefault());
 }
 function initCalendar() {
   document
