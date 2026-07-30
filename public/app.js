@@ -1,0 +1,1040 @@
+"use strict";
+
+const categories = [
+  ["Designers", "scissors"],
+  ["Hair and Makeup", "sparkles"],
+  ["Photography", "camera"],
+  ["Videography", "video"],
+  ["Pageant Camps", "training"],
+  ["Coaches", "message"],
+  ["Pageant Directors", "clipboard"],
+  ["Hosts and Choreographers", "microphone"],
+  ["Crown and Sash Suppliers", "crown"],
+  ["Events and Production", "production"],
+  ["Voting and Tabulation", "chart"],
+  ["Venues and Hotels", "building"],
+  ["Beauty and Wellness", "heart"],
+  ["PR and Digital Services", "megaphone"],
+];
+const locations = [
+  "Metro Manila",
+  "Zambales",
+  "Pampanga",
+  "Bataan",
+  "Tarlac",
+  "Cebu",
+  "Davao",
+  "Iloilo",
+  "Bacolod",
+  "Cavite",
+  "Laguna",
+  "Bulacan",
+];
+const profiles = [
+  {
+    id: "alon-mendoza-designs",
+    name: "Alon Mendoza Designs",
+    category: "Designers",
+    location: "Metro Manila",
+    city: "Quezon City",
+    rating: 4.9,
+    reviews: 128,
+    verified: true,
+    featured: true,
+    nationwide: true,
+    travel: true,
+    years: 12,
+    views: 2341,
+    updated: "2 days ago",
+    image: "profile-designer.jpg",
+    desc: "Custom couture gowns, national costumes, and competition-ready wardrobe development for pageant candidates and organizations.",
+    services: [
+      "Pageant Gown Design",
+      "National Costume",
+      "Wardrobe Consultation",
+    ],
+    response: "Usually replies within 3 hours",
+  },
+  {
+    id: "captured-grace-studios",
+    name: "Captured Grace Studios",
+    category: "Photography",
+    location: "Cebu",
+    city: "Cebu City",
+    rating: 4.8,
+    reviews: 96,
+    verified: true,
+    featured: true,
+    nationwide: true,
+    travel: true,
+    years: 9,
+    views: 1970,
+    updated: "5 days ago",
+    image: "profile-photographer.jpg",
+    desc: "Pageant headshots, campaign portraits, editorial photography, and coronation-night coverage with nationwide availability.",
+    services: ["Pageant Headshots", "Editorial Portraits", "Event Coverage"],
+    response: "Usually replies within 1 day",
+  },
+  {
+    id: "glamourpro-makeup-ph",
+    name: "GlamourPro Makeup PH",
+    category: "Hair and Makeup",
+    location: "Pampanga",
+    city: "Angeles City",
+    rating: 4.9,
+    reviews: 210,
+    verified: true,
+    featured: true,
+    nationwide: false,
+    travel: true,
+    years: 10,
+    views: 2840,
+    updated: "Today",
+    image: "profile-makeup.jpg",
+    desc: "Professional hair and makeup artistry for pageants, campaigns, fittings, media appearances, and special events.",
+    services: ["Pageant Makeup", "Hair Styling", "Team Glam Package"],
+    response: "Usually replies within 2 hours",
+  },
+  {
+    id: "stagevision-productions",
+    name: "StageVision Productions",
+    category: "Events and Production",
+    location: "Davao",
+    city: "Davao City",
+    rating: 4.7,
+    reviews: 87,
+    verified: true,
+    featured: true,
+    nationwide: true,
+    travel: true,
+    years: 14,
+    views: 1744,
+    updated: "1 week ago",
+    image: "profile-production.jpg",
+    desc: "End-to-end pageant production, staging, lights and sound, LED systems, livestreaming, and technical direction.",
+    services: ["Full Production", "Stage and Lights", "Livestreaming"],
+    response: "Usually replies within 1 day",
+  },
+  {
+    id: "elevate-pageant-camp",
+    name: "Elevate Pageant Camp",
+    category: "Pageant Camps",
+    location: "Metro Manila",
+    city: "Makati City",
+    rating: 4.8,
+    reviews: 64,
+    verified: true,
+    featured: false,
+    nationwide: true,
+    travel: true,
+    years: 7,
+    views: 1510,
+    updated: "3 days ago",
+    image: "gallery-4.jpg",
+    desc: "Purpose-driven training in communication, stage presence, interview preparation, and competition strategy.",
+    services: ["Full Camp Program", "Q&A Coaching", "Runway Training"],
+    response: "Usually replies within 5 hours",
+  },
+  {
+    id: "crown-republic-ph",
+    name: "Crown Republic PH",
+    category: "Crown and Sash Suppliers",
+    location: "Bulacan",
+    city: "Meycauayan City",
+    rating: 4.7,
+    reviews: 51,
+    verified: true,
+    featured: false,
+    nationwide: true,
+    travel: false,
+    years: 8,
+    views: 1212,
+    updated: "6 days ago",
+    image: "gallery-2.jpg",
+    desc: "Custom crowns, sashes, medals, and pageant recognition pieces delivered nationwide.",
+    services: ["Custom Crowns", "Sashes", "Awards"],
+    response: "Usually replies within 1 day",
+  },
+  {
+    id: "senz-pageant-digital",
+    name: "SENZ Pageant Digital",
+    category: "PR and Digital Services",
+    location: "Metro Manila",
+    city: "Taguig City",
+    rating: 4.9,
+    reviews: 32,
+    verified: true,
+    featured: false,
+    nationwide: true,
+    travel: true,
+    years: 6,
+    views: 1108,
+    updated: "Today",
+    image: "article-2.jpg",
+    desc: "Pageant websites, voting systems, tabulation, branding, PR strategy, content production, and digital campaigns.",
+    services: ["Website and Voting", "PR Strategy", "Social Media"],
+    response: "Usually replies within 3 hours",
+  },
+  {
+    id: "horizon-pageant-hosts",
+    name: "Horizon Pageant Hosts",
+    category: "Hosts and Choreographers",
+    location: "Iloilo",
+    city: "Iloilo City",
+    rating: 4.6,
+    reviews: 29,
+    verified: false,
+    featured: false,
+    nationwide: false,
+    travel: true,
+    years: 5,
+    views: 620,
+    updated: "2 weeks ago",
+    image: "article-1.jpg",
+    desc: "Professional hosting and choreography for school, festival, municipal, and corporate pageants.",
+    services: ["Event Hosting", "Choreography", "Program Direction"],
+    response: "Response time not available",
+  },
+];
+const articles = [
+  {
+    slug: "choose-pageant-photographer",
+    tag: "Industry Guide",
+    title: "How to Choose a Pageant Photographer",
+    author: "Editorial Team",
+    date: "July 25, 2026",
+    time: "8 min read",
+    image: "article-1.jpg",
+    summary:
+      "A practical guide to portfolios, usage rights, delivery timelines, direction style, and event coverage.",
+  },
+  {
+    slug: "coronation-production-checklist",
+    tag: "Production",
+    title: "Complete Coronation Production Checklist",
+    author: "JP Dela Cruz",
+    date: "July 22, 2026",
+    time: "12 min read",
+    image: "article-2.jpg",
+    summary:
+      "A production-ready checklist covering stage, lights, audio, livestream, rehearsals, safety, and contingencies.",
+  },
+  {
+    slug: "hiring-pageant-coach",
+    tag: "Pageant Business",
+    title: "Questions to Ask Before Hiring a Pageant Coach",
+    author: "Ana Reyes",
+    date: "July 18, 2026",
+    time: "7 min read",
+    image: "article-3.jpg",
+    summary:
+      "What to clarify about coaching scope, ethics, preparation methods, boundaries, and expected outcomes.",
+  },
+  {
+    slug: "choose-gown-designer",
+    tag: "Design and Beauty",
+    title: "How to Choose a Pageant Gown Designer",
+    author: "Carla Mendoza",
+    date: "July 15, 2026",
+    time: "9 min read",
+    image: "article-4.jpg",
+    summary:
+      "How to evaluate design fit, timelines, budget, construction quality, fittings, and ownership terms.",
+  },
+];
+const events = [
+  {
+    day: "18",
+    month: "SEP",
+    name: "Lakambini ng Turismo 2026",
+    org: "Tourism Council of Central Luzon",
+    location: "Clark, Pampanga",
+    deadline: "August 28, 2026",
+    type: "Tourism Pageant",
+    status: "Open",
+  },
+  {
+    day: "03",
+    month: "OCT",
+    name: "Mutya ng Zambales 2026",
+    org: "Provincial Cultural Affairs Office",
+    location: "Iba, Zambales",
+    deadline: "September 10, 2026",
+    type: "Provincial Pageant",
+    status: "Open",
+  },
+  {
+    day: "21",
+    month: "NOV",
+    name: "Hiyas ng Kabisayaan",
+    org: "Visayas Events Collective",
+    location: "Cebu City",
+    deadline: "October 15, 2026",
+    type: "Regional Pageant",
+    status: "Upcoming",
+  },
+  {
+    day: "12",
+    month: "DEC",
+    name: "Reyna ng Festival Philippines",
+    org: "Philippine Festival Alliance",
+    location: "Pasay City",
+    deadline: "Closed",
+    type: "National Pageant",
+    status: "Upcoming",
+  },
+];
+
+const page = document.body.dataset.page || "home";
+const path = window.__APP_PATH || window.location.pathname;
+
+const categoryIconPaths = {
+  scissors:
+    '<circle cx="6" cy="7" r="3"/><circle cx="6" cy="17" r="3"/><path d="m8.7 8.7 10.6 10.6M8.7 15.3 19 5"/>',
+  sparkles:
+    '<path d="m12 3-1.7 4.3L6 9l4.3 1.7L12 15l1.7-4.3L18 9l-4.3-1.7L12 3Z"/><path d="m5 15-.8 2.2L2 18l2.2.8L5 21l.8-2.2L8 18l-2.2-.8L5 15Z"/>',
+  camera:
+    '<path d="M14.5 5 16 8h3a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h3l1.5-3h5Z"/><circle cx="12" cy="14" r="3.5"/>',
+  video:
+    '<rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3v-4Z"/>',
+  training:
+    '<path d="m2 9 10-5 10 5-10 5L2 9Z"/><path d="M6 11.5V17c3.2 2.3 8.8 2.3 12 0v-5.5M22 9v6"/>',
+  message:
+    '<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"/><path d="M8 9h8M8 13h5"/>',
+  clipboard:
+    '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M9 10h6M9 14h6M9 18h4"/>',
+  microphone:
+    '<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8"/>',
+  crown: '<path d="m3 18 2-10 4 4 3-7 3 7 4-4 2 10H3Z"/><path d="M5 21h14"/>',
+  production:
+    '<rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 10h18M7 5l3 5M13 5l3 5"/>',
+  chart:
+    '<path d="M4 20V10M10 20V6M16 20v-8M3 20h18"/><path d="m14 7 2 2 4-5"/>',
+  building:
+    '<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2M10 21v-3h4v3"/>',
+  heart:
+    '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/><path d="m18 2 .5 1.5L20 4l-1.5.5L18 6l-.5-1.5L16 4l1.5-.5L18 2Z"/>',
+  megaphone:
+    '<path d="m3 11 14-6v14L3 13v-2Z"/><path d="M11 16v4a2 2 0 0 1-2 2H7l-2-8M17 9a4 4 0 0 1 0 6"/>',
+  menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  close: '<path d="m6 6 12 12M18 6 6 18"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  check: '<path d="m5 12 4 4L19 6"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+};
+
+function svgIcon(name, className = "") {
+  const pathData =
+    categoryIconPaths[name] || '<path d="M5 12h14M13 6l6 6-6 6"/>';
+  return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${pathData}</svg>`;
+}
+function iconLabel(name) {
+  return `<span class="category-icon" aria-hidden="true">${svgIcon(name)}</span>`;
+}
+function brandLockup(inverse = false) {
+  return `<span class="brand-lockup${inverse ? " inverse" : ""}"><img src="/public/images/pageant-icon.png" alt=""><span class="brand-type"><strong>PAGEANT INDEX</strong><small>PHILIPPINES</small></span></span>`;
+}
+function previewBanner() {
+  return `<aside class="preview-banner" role="note"><div class="container"><strong>Platform preview</strong><span>Sample profiles and activity are shown to demonstrate the PageantIndex experience.</span></div></aside>`;
+}
+function escapeHtml(value) {
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      })[character],
+  );
+}
+function badgeHtml(p) {
+  return `${p.verified ? '<span class="badge verified-badge">Verified</span>' : ""}${p.featured ? '<span class="badge gold-badge">Featured</span>' : ""}`;
+}
+function listingCard(p) {
+  return `<article class="listing-card">
+    ${p.featured ? '<span class="ribbon">Featured</span>' : ""}
+    <div class="card-media"><img src="/public/images/${p.image}" alt="Portfolio preview for ${p.name}" decoding="async"></div>
+    <div class="card-body">
+      <h3 class="card-title">${p.name}</h3><div class="card-category">${p.category}</div>
+      <div class="card-meta">● ${p.city}, ${p.location}</div>
+      <div class="card-meta"><span class="rating">★ ${p.rating}</span> <span>(${p.reviews} verified reviews)</span></div>
+      <div class="verified">${p.verified ? "Verified profile" : "Basic profile"}</div>
+      <div class="portfolio-strip">${[1, 2, 3, 4].map((i) => `<img loading="lazy" src="/public/images/gallery-${i}.jpg" alt="${p.name} portfolio item ${i}">`).join("")}</div>
+      <div class="card-actions"><a class="btn btn-secondary btn-small" href="/professional/${p.id}/">View Profile</a><button class="btn btn-primary btn-small inquiry-trigger" data-profile="${p.id}">Send Inquiry</button></div>
+    </div></article>`;
+}
+function resultCard(p) {
+  const aliases =
+    {
+      Photography: "photographer pageant photographer photo studio",
+      "Hair and Makeup": "makeup artist hair stylist hmu",
+      Designers: "gown designer national costume designer fashion designer",
+      "Pageant Camps": "pageant camp training",
+      Coaches: "pageant coach q and a coach",
+      "Voting and Tabulation": "voting provider tabulation provider",
+      "Events and Production":
+        "production team lights sound led wall livestreaming team",
+      "Crown and Sash Suppliers": "crown supplier sash supplier",
+      "PR and Digital Services":
+        "pr agency branding social media website digital services",
+    }[p.category] || "";
+  const searchText =
+    `${p.name} ${p.category} ${p.location} ${p.city} ${p.desc} ${p.services.join(" ")} ${aliases}`
+      .toLowerCase()
+      .replaceAll('"', "");
+  return `<article class="result-card ${p.featured ? "featured-result" : ""}" data-profile-card data-name="${p.name.toLowerCase()}" data-search="${searchText}" data-category="${p.category}" data-location="${p.location}" data-verified="${p.verified}" data-featured="${p.featured}" data-nationwide="${p.nationwide}" data-travel="${p.travel}" data-rating="${p.rating}" data-views="${p.views}" data-updated="${p.updated}">
+    ${p.featured ? '<span class="ribbon">Featured</span>' : ""}<div class="card-media"><img loading="lazy" src="/public/images/${p.image}" alt="${p.name} portfolio"></div>
+    <div class="result-content"><div class="profile-badges">${badgeHtml(p)}</div><h3>${p.name}</h3><div class="card-category">${p.category} · ${p.city}, ${p.location}</div><p class="result-desc">${p.desc}</p><div class="card-meta"><span class="rating">★ ${p.rating}</span> ${p.reviews} verified reviews · ${p.years} years experience</div><div class="card-meta">${p.nationwide ? "Accepts nationwide projects" : "Regional service"} · ${p.travel ? "Available for travel" : "Local projects"}</div></div>
+    <div class="result-actions"><a class="btn btn-secondary btn-small" href="/professional/${p.id}/">View Profile</a><button class="btn btn-primary btn-small inquiry-trigger" data-profile="${p.id}">Send Inquiry</button></div>
+  </article>`;
+}
+function articleCard(a) {
+  return `<article class="article-card"><a href="/articles/${a.slug}/"><img src="/public/images/${a.image}" alt="${a.title}" decoding="async"><span class="article-tag">${a.tag}</span><h3>${a.title}</h3><p class="muted" style="font-size:.76rem">${a.summary}</p><div class="article-meta">By ${a.author} · ${a.date} · ${a.time}</div></a></article>`;
+}
+
+function header() {
+  const nav = [
+    ["Home", "/"],
+    ["Directory", "/directory/"],
+    ["Categories", "/categories/"],
+    ["Locations", "/locations/"],
+    ["Rankings", "/rankings/"],
+    ["Pageant Calendar", "/pageant-calendar/"],
+    ["Articles", "/articles/"],
+    ["About", "/about/"],
+  ];
+  return `<header class="site-header"><div class="container nav-wrap"><a class="brand" href="/" aria-label="Pageant Index Philippines home">${brandLockup()}</a><nav class="desktop-nav" aria-label="Primary navigation">${nav.map(([l, u]) => `<a class="${path === u ? "active" : ""}" href="${u}">${l}</a>`).join("")}</nav><div class="nav-actions"><a class="signin" href="/sign-in/">Sign In</a><a class="btn btn-primary" href="/list-your-business/">List Your Business</a><button class="menu-toggle" aria-label="Open menu" aria-expanded="false">${svgIcon("menu")}</button></div></div><nav class="mobile-nav" aria-label="Mobile navigation">${nav.map(([l, u]) => `<a href="${u}">${l}</a>`).join("")}<a href="/sign-in/">Sign In</a><a class="mobile-nav-cta" href="/list-your-business/">List Your Business</a></nav></header>`;
+}
+function footer() {
+  return `<footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-brand">${brandLockup(true)}<p>Trusted discovery, verification, and visibility infrastructure for the professionals, suppliers, and organizations behind Philippine pageantry.</p><form class="newsletter" data-newsletter><input type="email" required aria-label="Email address" placeholder="Email for industry updates"><button class="btn btn-primary btn-small">Subscribe</button></form></div><div class="footer-col"><h4>Directory</h4><a href="/directory/">Browse All</a><a href="/directory/?verified=true">Verified Professionals</a><a href="/directory/?featured=true">Featured Professionals</a><a href="/locations/">Locations</a></div><div class="footer-col"><h4>Professional Resources</h4><a href="/list-your-business/">List Your Business</a><a href="/claim-profile/">Claim Your Profile</a><a href="/verification/">Verification Policy</a><a href="/dashboard/">Professional Dashboard</a></div><div class="footer-col"><h4>Trust and Transparency</h4><a href="/ranking-methodology/">Ranking Methodology</a><a href="/about/#advertising">Advertising Disclosure</a><a href="/about/#reviews">Review Guidelines</a><a href="/about/#complaints">Complaints Process</a></div><div class="footer-col"><h4>Company</h4><a href="/about/">About</a><a href="/articles/">Articles</a><a href="/pageant-calendar/">Calendar</a><a href="/list-your-business/">Work With Us</a><a href="/about/#privacy">Privacy</a></div></div><div class="footer-bottom"><span>© 2026 Pageant Index Philippines. Preview build.</span><span>Official website: www.pageantindex.com</span></div></div></footer>`;
+}
+
+function homePage() {
+  return `<main class="page-shell"><section class="hero"><div class="hero-media" role="img" aria-label="Filipino pageant professionals preparing a crown backstage"></div><div class="container hero-inner"><div class="hero-content"><h1>Find the people behind every <em>winning</em> moment.</h1><p>Discover pageant professionals, suppliers, creatives, organizations, and production partners across the Philippines.</p><form class="hero-search" data-main-search><label class="sr-only" for="home-search">Search the directory</label><input id="home-search" name="q" placeholder="Search by service, business, professional, specialty, province, or city"><button class="btn btn-primary">Search the Directory</button></form><div class="popular"><span>Popular searches:</span>${["Pageant photographer", "Gown designer", "Makeup artist", "Pageant coach", "Pageant camp", "Tabulation provider", "Crown supplier", "Livestreaming team"].map((x) => `<a class="chip" href="/directory/?q=${encodeURIComponent(x)}">${x}</a>`).join("")}</div><div class="hero-proof"><span><b>${svgIcon("check")}</b>Identity and business verification</span><span><b>${svgIcon("info")}</b>Paid placements are clearly labeled</span></div></div></div></section>
+<section class="category-strip"><div class="container"><div class="strip-title">BROWSE BY CATEGORY</div><div class="category-grid">${categories.map(([name, code]) => `<a class="category-card" href="/directory/?category=${encodeURIComponent(name)}">${iconLabel(code)}<span>${name}</span></a>`).join("")}</div></div></section>
+<section class="section-tight"><div class="container"><div class="section-head"><div><div class="eyebrow">Professional discovery</div><h2 class="section-title small">Featured Professionals</h2><p class="section-copy">Paid visibility from professionals and businesses serving the pageant industry. Featured placement does not alter organic ranking.</p></div><a class="text-link" href="/directory/?featured=true">View all featured ${svgIcon("arrow", "inline-icon")}</a></div><div class="feature-layout"><div class="listing-grid">${profiles.slice(0, 4).map(listingCard).join("")}</div><aside class="feature-aside"><div class="info-panel"><div class="badge-seal">${svgIcon("check")}</div><h3>Verified Professionals</h3><p>Verified profiles have completed identity, business, or professional credential checks based on the requirements of their category.</p><a class="btn btn-secondary btn-block" href="/verification/">Learn About Verification</a></div><div class="info-panel gold"><div class="badge-seal">F</div><h3>Founding Member Program</h3><p>Limited early-member distinction, priority onboarding, and private introductory terms. It never guarantees top ranking.</p><a class="btn btn-gold btn-block" href="/list-your-business/#founding">Learn More</a></div></aside></div></div></section>
+<section class="location-strip"><div class="container"><div class="section-head" style="margin-bottom:16px"><div><div class="eyebrow">Search by location</div><h2 class="section-title small">Find professionals in your area</h2></div><a class="text-link" href="/locations/">View all locations →</a></div><div class="location-grid">${locations
+    .slice(0, 11)
+    .map(
+      (l, i) =>
+        `<a class="location-card" href="/directory/?location=${encodeURIComponent(l)}"><img src="/public/images/location-${i + 1}.jpg" alt="${l}" decoding="async"><span class="location-label">${l}<small>Explore listings</small></span></a>`,
+    )
+    .join("")}</div></div></section>
+<section class="section-tight"><div class="container how-grid"><div class="how-panel"><h3>How it works for clients</h3><div class="steps three">${[
+    ["1", "Search", "Find the right professional or supplier."],
+    ["2", "Compare", "Review profiles, portfolios, reviews, and services."],
+    ["3", "Connect", "Send an inquiry and discuss your project."],
+  ]
+    .map(
+      (x) =>
+        `<div class="step"><span class="step-num">${x[0]}</span><strong>${x[1]}</strong><span>${x[2]}</span></div>`,
+    )
+    .join(
+      "",
+    )}</div></div><div class="how-panel"><h3>How it works for professionals</h3><div class="steps">${[
+    ["1", "Claim Your Profile", "Create or claim your listing."],
+    ["2", "Complete Verification", "Submit category-specific evidence."],
+    ["3", "Receive Inquiries", "Connect with potential clients."],
+    ["4", "Grow Visibility", "Upgrade or apply for features."],
+  ]
+    .map(
+      (x) =>
+        `<div class="step"><span class="step-num">${x[0]}</span><strong>${x[1]}</strong><span>${x[2]}</span></div>`,
+    )
+    .join("")}</div></div></div></section>
+<section class="section" style="background:var(--off)"><div class="container"><div class="section-head"><div><div class="eyebrow">Industry editorial</div><h2 class="section-title">Guides for better pageant decisions</h2></div><a class="text-link" href="/articles/">View all articles →</a></div><div class="article-grid">${articles.map(articleCard).join("")}</div></div></section>
+<section class="cta-band"><div class="container cta-inner"><div><h2>Your work deserves to be discovered.</h2><p>Create or claim your Pageant Index profile, present your portfolio, receive inquiries, and become part of the Philippine pageant professionals directory.</p></div><a class="btn btn-gold" href="/list-your-business/">List Your Business</a></div></section></main>`;
+}
+
+function pageHero(title, copy, crumb = "Home") {
+  return `<section class="page-hero"><div class="container"><div class="breadcrumbs"><a href="/">Home</a> / ${crumb}</div><h1>${title}</h1><p>${copy}</p></div></section>`;
+}
+function directoryPage() {
+  return `<main class="page-shell">${pageHero("Find pageant professionals across the Philippines.", "Search verified professionals, suppliers, creatives, production partners, venues, and industry services. Featured and sponsored profiles are clearly labeled.", "Directory")}<div class="container"><div class="directory-shell"><aside class="filter-panel" id="filter-panel"><div class="filter-head"><h2>Filters</h2><button class="text-link" id="clear-filters">Clear all</button></div><div class="filter-group"><label for="filter-keyword">Keyword</label><input id="filter-keyword" type="text" placeholder="Name, service, specialty"></div><div class="filter-group"><label for="filter-category">Category</label><select id="filter-category"><option value="">All Categories</option>${categories.map((c) => `<option>${c[0]}</option>`).join("")}</select></div><div class="filter-group"><label for="filter-location">Location</label><select id="filter-location"><option value="">All Locations</option>${locations.map((l) => `<option>${l}</option>`).join("")}</select></div><div class="filter-group"><label>Profile options</label><label class="check-row"><input id="filter-verified" type="checkbox"> Verified only</label><label class="check-row"><input id="filter-nationwide" type="checkbox"> Accepts nationwide projects</label><label class="check-row"><input id="filter-travel" type="checkbox"> Available for travel</label><label class="check-row"><input id="filter-featured" type="checkbox"> Featured listings</label></div><div class="filter-group"><label>Years of experience</label><select><option>Any</option><option>1–3 years</option><option>4–7 years</option><option>8–12 years</option><option>13+ years</option></select></div><div class="private-rate-note">${svgIcon("info")}<span>Professional rates are shared privately through direct inquiries.</span></div><button class="btn btn-primary btn-block" id="apply-mobile-filters">Apply Filters</button></aside><section><div class="directory-top"><div><button class="btn btn-secondary filter-toggle" id="filter-toggle">Filters</button><h2><span id="result-count">${profiles.length}</span> professionals found</h2></div><select class="sort-select" id="sort-select" aria-label="Sort directory"><option value="recommended">Recommended</option><option value="rating">Highest Reviewed</option><option value="views">Most Viewed</option><option value="updated">Recently Updated</option><option value="alphabetical">Alphabetical</option></select></div><div class="results-list" id="results-list">${profiles.map(resultCard).join("")}</div><div class="empty-state" id="empty-results" hidden><h3>No matching profiles</h3><p>Try removing one or more filters, expanding your location, or searching a broader service term.</p><button class="btn btn-primary" id="empty-reset">Reset Filters</button></div></section></div></div></main>`;
+}
+
+function categoriesPage() {
+  return `<main>${pageHero("Explore pageant services by category.", "Browse SEO-ready category pages designed around how clients actually search for pageant professionals and suppliers.", "Categories")}<section class="section"><div class="container"><div class="listing-grid">${categories.map(([name, code]) => `<a class="price-card" href="/directory/?category=${encodeURIComponent(name)}">${iconLabel(code)}<h2 class="display" style="font-size:1.55rem;margin:18px 0 8px">${name}</h2><p class="muted" style="font-size:.76rem">Find ${name.toLowerCase()} serving candidates, pageant organizations, LGUs, schools, festivals, and production teams.</p><span class="text-link">Browse profiles ${svgIcon("arrow", "inline-icon")}</span></a>`).join("")}</div></div></section></main>`;
+}
+function locationsPage() {
+  return `<main>${pageHero("Pageant professionals by location.", "Discover regional talent and suppliers by region, province, city, and municipality, with nationwide service filters for larger productions.", "Locations")}<section class="section"><div class="container"><div class="listing-grid">${locations.map((l, i) => `<a class="listing-card" href="/directory/?location=${encodeURIComponent(l)}"><div class="card-media" style="height:180px"><img src="/public/images/location-${(i % 11) + 1}.jpg" alt="${l}"></div><div class="card-body"><h2 class="card-title">${l}</h2><p class="muted" style="font-size:.74rem">Browse professionals and suppliers serving this area.</p><span class="text-link">Explore ${l} ${svgIcon("arrow", "inline-icon")}</span></div></a>`).join("")}</div></div></section></main>`;
+}
+function rankingsPage() {
+  return `<main>${pageHero("Rankings built on evidence, not payment.", "Formal rankings will be introduced only after the platform has enough verified profiles, client feedback, activity, and performance data.", "Rankings")}<section class="section"><div class="container"><div class="disclosure" style="margin-bottom:28px"><strong>Current phase:</strong> Discovery labels are informational, not definitive industry rankings. Paid packages do not directly change organic ranking scores.</div><div class="rank-grid">${[
+    [
+      "Most Viewed",
+      "Profiles receiving the most genuine profile visits in the selected period.",
+    ],
+    [
+      "Highly Reviewed",
+      "Profiles with a sufficient number of verified reviews and strong recent feedback.",
+    ],
+    [
+      "Trending Profiles",
+      "Profiles showing meaningful, recent increases in discovery and engagement.",
+    ],
+    [
+      "Editor's Selection",
+      "Editorially selected work based on relevance, portfolio quality, and industry contribution.",
+    ],
+    [
+      "Most Active",
+      "Profiles consistently maintaining complete information and recent project activity.",
+    ],
+    [
+      "Recently Verified",
+      "Profiles that completed category-specific verification checks most recently.",
+    ],
+  ]
+    .map(
+      (x) =>
+        `<article class="rank-card"><span class="eyebrow">Discovery label</span><h3>${x[0]}</h3><p class="muted">${x[1]}</p></article>`,
+    )
+    .join(
+      "",
+    )}</div><div style="margin-top:50px"><div class="section-head"><div><h2 class="section-title small">Organic, featured, sponsored, and editorial are different.</h2><p class="section-copy">Every visibility type is disclosed so users can understand why a profile appears where it does.</p></div><a class="btn btn-primary" href="/ranking-methodology/">Read Ranking Methodology</a></div><table class="methodology-table"><thead><tr><th>Label</th><th>How it works</th><th>Can it be purchased?</th></tr></thead><tbody><tr><td>Organic ranking</td><td>Calculated from disclosed trust, relevance, completeness, activity, and user-feedback signals.</td><td>No</td></tr><tr><td>Featured placement</td><td>Paid priority visibility in clearly labeled areas, separate from organic scores.</td><td>Yes</td></tr><tr><td>Sponsored content</td><td>Commercial content or campaigns visibly marked as sponsored.</td><td>Yes</td></tr><tr><td>Editorial selection</td><td>Chosen by the editorial team for relevance, story value, or industry contribution.</td><td>No</td></tr></tbody></table></div></div></section></main>`;
+}
+function calendarPage() {
+  return `<main>${pageHero("Philippine pageant calendar.", "Track applications, deadlines, coronation dates, organizer details, and official links. Sponsored events are clearly labeled.", "Pageant Calendar")}<section class="section"><div class="container"><div class="section-head"><div><h2 class="section-title small">Upcoming pageant events</h2><p class="section-copy">Dates shown are realistic demonstration data for the platform prototype.</p></div><button class="btn btn-primary" id="submit-event-btn">Submit an Event</button></div><div class="calendar-grid">${events.map((e, i) => `<article class="event-card">${i === 0 ? '<span class="ribbon">Featured Event</span>' : ""}<div class="event-date"><strong>${e.day}</strong><span>${e.month}</span></div><div class="event-info"><h3>${e.name}</h3><p>${e.org} · ${e.location}</p><p>${e.type} · Application deadline: ${e.deadline}</p><span class="status ${e.status.toLowerCase()}">${e.status}</span></div><a class="btn btn-secondary" href="#event-${i}">View Details</a></article>`).join("")}</div></div></section></main>`;
+}
+function articlesPage() {
+  const editorialCategories = [
+    ["Industry Guides", "clipboard"],
+    ["Professional Spotlights", "camera"],
+    ["Pageant Business", "chart"],
+    ["Production", "production"],
+    ["Design and Beauty", "sparkles"],
+    ["Technology", "video"],
+    ["Voting and Tabulation", "chart"],
+    ["Tourism Pageants", "crown"],
+    ["Regional Pageantry", "building"],
+    ["Industry Updates", "megaphone"],
+  ];
+  return `<main>${pageHero("Pageant industry guides and editorial.", "Useful, searchable content for clients, professionals, pageant organizations, LGUs, schools, tourism offices, and production teams.", "Articles")}<section class="section"><div class="container"><div class="category-grid" style="margin-bottom:34px">${editorialCategories.map(([name, icon]) => `<a class="category-card" href="#${name.toLowerCase().replaceAll(" ", "-")}">${iconLabel(icon)}<span>${name}</span></a>`).join("")}</div><div class="article-grid">${articles.map(articleCard).join("")}${articles.map(articleCard).join("")}</div></div></section></main>`;
+}
+function pricingPage() {
+  return `<main>${pageHero("Present your work. Receive inquiries. Grow your visibility.", "Apply for the profile and visibility level that matches your business. Commercial terms are shared privately after review.", "List Your Business")}<section class="section"><div class="container"><div class="confidential-note">${svgIcon("info")}<div><strong>Rates are confidential.</strong><p>PageantIndex reviews each business, category, and visibility request before sharing a private proposal. No public rate card is displayed.</p></div></div><div class="pricing-grid"><article class="price-card"><div class="plan-label">Directory access</div><h2 class="plan-title">Basic Profile</h2><p class="plan-desc">Essential presence for professionals and organizations entering the Philippine pageant directory.</p><ul class="feature-list"><li>Business or professional name</li><li>Primary category and location</li><li>One verified contact link</li><li>Basic directory discovery</li><li>Claim and ownership review</li></ul><a class="btn btn-ghost btn-block" href="/claim-profile/">Claim a Profile</a></article><article class="price-card popular"><div class="plan-label">Trust and credibility</div><h2 class="plan-title">Verified Profile</h2><p class="plan-desc">For professionals ready to present a complete, evidence-backed public profile.</p><ul class="feature-list"><li>Identity and business review</li><li>Full profile and portfolio</li><li>Contact and inquiry tools</li><li>Service areas and availability</li><li>Review eligibility</li><li>Profile management</li></ul><button class="btn btn-primary btn-block plan-select" data-plan="Verified Profile">Request Private Terms</button></article><article class="price-card"><div class="plan-label">Business growth</div><h2 class="plan-title">Professional Profile</h2><p class="plan-desc">Expanded visibility and lead tools for established professionals, teams, and suppliers.</p><ul class="feature-list"><li>Everything in Verified</li><li>Expanded portfolio and video</li><li>Service presentation</li><li>Lead notifications</li><li>Profile analytics</li><li>Priority support</li><li>Editorial consideration</li></ul><button class="btn btn-primary btn-block plan-select" data-plan="Professional Profile">Request Private Terms</button></article><article class="price-card gold-plan"><div class="plan-label">Campaign visibility</div><h2 class="plan-title">Featured Placement</h2><p class="plan-desc">Clearly labeled paid visibility for launches, seasonal campaigns, and priority discovery.</p><ul class="feature-list"><li>Labeled priority visibility</li><li>Featured category placement</li><li>Homepage consideration</li><li>Highlighted profile treatment</li><li>Campaign reporting</li><li>No direct effect on organic score</li></ul><button class="btn btn-gold btn-block plan-select" data-plan="Featured Placement">Discuss a Campaign</button></article></div><div id="founding" class="cta-band founding-band"><div class="cta-inner"><div><h2>Founding Member Program</h2><p>Selected early members may receive a permanent founding distinction, priority onboarding, private introductory terms, early access, and editorial consideration. The badge never guarantees ranking.</p></div><button class="btn btn-gold plan-select" data-plan="Founding Member Program">Apply as Founding Member</button></div></div></div></section></main>`;
+}
+function verificationPage() {
+  return `<main>${pageHero("Verification confirms submitted information.", "Verification checks identity, business, professional, or category-specific evidence. It is not a guarantee of service quality, outcomes, conduct, or client satisfaction.", "Verification")}<section class="section"><div class="container"><div class="how-grid"><article class="info-panel"><h3>What may be reviewed</h3><ul class="feature-list"><li>Government-issued identification</li><li>Business registration</li><li>Professional portfolio</li><li>Official website or social account</li><li>Client references</li><li>Proof of completed work</li><li>Organization appointment</li><li>Accreditation or certification</li></ul></article><article class="info-panel"><h3>What verification does not mean</h3><ul class="feature-list"><li>It does not guarantee service quality</li><li>It does not guarantee availability</li><li>It does not guarantee project results</li><li>It does not replace contracts or due diligence</li><li>It does not prevent future complaints</li><li>It does not create a permanent ranking advantage</li></ul></article></div><div class="form-card" style="margin-top:30px"><h2 class="section-title small">Request verification</h2><form class="form-grid" data-generic-form data-success="Verification request submitted for review."><div class="field"><label>Profile or business name</label><input required></div><div class="field"><label>Primary category</label><select required>${categories.map((c) => `<option>${c[0]}</option>`).join("")}</select></div><div class="field full"><label>Evidence summary</label><textarea required placeholder="Describe the identity, business, professional, or portfolio evidence you are ready to submit."></textarea></div><label class="checkbox-consent field full"><input required type="checkbox"> I understand that private verification documents will remain private and will not appear publicly.</label><div class="field full"><button class="btn btn-primary">Start Verification Request</button></div></form></div></div></section></main>`;
+}
+function methodologyPage() {
+  return `<main>${pageHero("Public ranking methodology.", "A transparent framework for future organic ranking, discovery labels, featured visibility, sponsored content, and editorial selection.", "Ranking Methodology")}<section class="section"><div class="container"><div class="disclosure" style="margin-bottom:30px"><strong>No fabricated rankings:</strong> Formal comparative rankings will remain inactive until enough verified profiles, reviews, activity, complaint outcomes, and performance data exist.</div><table class="methodology-table"><thead><tr><th>Possible factor</th><th>What it may measure</th><th>Safeguard</th></tr></thead><tbody>${[
+    [
+      "Verification completion",
+      "Completion of category-appropriate identity, business, and professional checks.",
+      "Verification is not a quality guarantee.",
+    ],
+    [
+      "Profile completeness",
+      "Useful, current information, services, portfolios, and contact details.",
+      "Completeness cannot be purchased as a score.",
+    ],
+    [
+      "Verified client feedback",
+      "Authenticated feedback with sufficient sample size and recency.",
+      "Suspicious reviews may be investigated, not automatically deleted.",
+    ],
+    [
+      "Professional activity",
+      "Recent updates, projects, and responsible platform use.",
+      "Activity must be meaningful, not spam.",
+    ],
+    [
+      "Documented experience",
+      "Evidence-backed completed work and relevant professional history.",
+      "Years alone do not determine quality.",
+    ],
+    [
+      "Response rate",
+      "Timely, respectful responses to legitimate inquiries.",
+      "No penalty for spam or abusive inquiries.",
+    ],
+    [
+      "Portfolio quality",
+      "Relevance, clarity, recency, and presentation of documented work.",
+      "Editorial review criteria will be published.",
+    ],
+    [
+      "Industry contribution",
+      "Education, mentoring, innovation, community work, or standards-building.",
+      "Requires documented evidence.",
+    ],
+    [
+      "Complaints",
+      "Resolved and unresolved complaints with due process.",
+      "Businesses may respond and appeal moderation decisions.",
+    ],
+  ]
+    .map(
+      (x) =>
+        `<tr><td><strong>${x[0]}</strong></td><td>${x[1]}</td><td>${x[2]}</td></tr>`,
+    )
+    .join(
+      "",
+    )}</tbody></table><div class="section" style="padding-bottom:0"><h2 class="section-title small">Commercial separation</h2><p class="section-copy">Subscriptions pay for profile tools, verification processing, analytics, expanded media, support, and clearly labeled visibility. They do not directly buy organic ranking points.</p></div></div></section></main>`;
+}
+function aboutPage() {
+  return `<main>${pageHero("Trusted infrastructure for Philippine pageantry.", "Pageant Index Philippines is built to make professional discovery clearer, safer, more credible, and commercially sustainable without selling fake authority.", "About")}<section class="section"><div class="container"><div class="how-grid"><div><div class="eyebrow">Our purpose</div><h2 class="section-title">Make the industry easier to navigate.</h2><p class="section-copy">Candidates, parents, directors, LGUs, schools, tourism offices, festivals, producers, and event organizers need a reliable way to compare professionals and suppliers. Professionals need a credible place to present work, build trust, receive inquiries, and grow visibility.</p></div><div class="info-panel"><h3>What we will not become</h3><ul class="feature-list"><li>A fan page or beauty-pageant organization</li><li>An award-selling website</li><li>A pay-to-win ranking scheme</li><li>A platform that hides sponsored visibility</li><li>A public archive of private verification documents</li></ul></div></div><div id="advertising" class="profile-section" style="margin-top:52px"><h2>Advertising disclosure</h2><p>Featured placements, sponsored events, sponsored articles, and commercial campaigns are visibly labeled. Payment does not directly change organic ranking scores.</p></div><div id="reviews" class="profile-section"><h2>Review policy</h2><p>Reviews should come from verified accounts or transactions when possible. Negative reviews are not automatically removed because a business complains. Administrators may request evidence, temporarily hide a review during an investigation, restore legitimate reviews, and document moderation decisions.</p></div><div id="complaints" class="profile-section"><h2>Reports and complaints</h2><p>Users may report inaccurate information, misconduct, impersonation, suspicious reviews, or unsafe content. Businesses have a fair opportunity to respond, and serious actions are recorded in audit logs.</p></div><div id="privacy" class="profile-section"><h2>Privacy and document handling</h2><p>Private identity and verification documents are stored separately from public profile data. The platform supports consent records, privacy controls, account deletion requests, secure uploads, and role-based access.</p></div></div></section></main>`;
+}
+function signInPage() {
+  return `<main class="auth-shell"><section class="auth-visual"><h1>Manage your visibility in the Philippine pageant industry.</h1></section><section class="auth-panel"><div class="auth-card">${brandLockup()}<h2>Sign in</h2><p class="muted">Access your profile, inquiries, subscription, verification requests, and analytics.</p><form id="signin-form"><div class="field"><label for="signin-email">Email</label><input id="signin-email" type="email" required autocomplete="email"></div><div class="field"><label for="signin-password">Password</label><input id="signin-password" type="password" required autocomplete="current-password"></div><label class="check-row"><input type="checkbox"> Keep me signed in</label><button class="btn btn-primary btn-block">Sign In</button><a class="btn btn-ghost btn-block" href="/claim-profile/">Create an Account</a><p class="muted" style="font-size:.68rem;text-align:center">Preview login: any valid email and password.</p></form></div></section></main>`;
+}
+function profilePage() {
+  const slug = path.split("/").filter(Boolean).pop();
+  const p = profiles.find((x) => x.id === slug) || profiles[0];
+  return `<main><section class="profile-hero"><div class="container"><div class="breadcrumbs"><a href="/">Home</a> / <a href="/directory/">Directory</a> / ${p.name}</div><div class="profile-summary"><img class="profile-avatar" src="/public/images/${p.image}" alt="${p.name}"><div><h1 class="profile-name">${p.name}</h1><div class="profile-badges">${badgeHtml(p)}<span class="badge gold-badge">Founding Member</span></div><div class="card-meta">${p.category} · ${p.city}, ${p.location}</div><div class="card-meta"><span class="rating">★ ${p.rating}</span> ${p.reviews} verified reviews · ${p.years} years experience</div><div class="card-meta">${p.nationwide ? "Accepts nationwide projects" : "Regional service"} · ${p.travel ? "Available for travel" : "Local projects only"}</div></div><div class="profile-actions"><button class="btn btn-primary inquiry-trigger" data-profile="${p.id}">Send Inquiry</button><button class="btn btn-ghost save-profile" data-profile="${p.id}">Save Profile</button><button class="btn btn-ghost share-profile">Share Profile</button></div></div></div></section><div class="profile-nav"><div class="container" style="display:flex;gap:30px"><button class="active" data-tab="overview">Overview</button><button data-tab="portfolio">Portfolio</button><button data-tab="services">Services</button><button data-tab="reviews">Reviews</button><button data-tab="faqs">FAQs</button><button data-tab="info">Info</button></div></div><div class="container profile-layout"><section class="profile-main"><div class="profile-section" data-section="overview"><h2>About</h2><p>${p.desc} The team works with candidates, pageant organizations, tourism offices, schools, LGUs, and producers. Every project begins with a written scope, timeline, deliverables, and project-specific terms.</p><div class="details-grid"><div class="detail"><strong>Specialties</strong><span>${p.services.slice(0, 2).join(", ")}</span></div><div class="detail"><strong>Years of experience</strong><span>${p.years} years</span></div><div class="detail"><strong>Languages</strong><span>English, Filipino</span></div><div class="detail"><strong>Service areas</strong><span>${p.nationwide ? "Nationwide" : "Region-based"}</span></div><div class="detail"><strong>Travel availability</strong><span>${p.travel ? "Available" : "Not available"}</span></div><div class="detail"><strong>Last updated</strong><span>${p.updated}</span></div></div></div><div class="profile-section" data-section="portfolio"><h2>Professional Portfolio</h2><div class="gallery-grid">${[1, 2, 3, 4].map((i) => `<img src="/public/images/gallery-${i}.jpg" alt="${p.name} portfolio ${i}">`).join("")}</div></div><div class="profile-section" data-section="services"><h2>Services and packages</h2><p class="section-copy private-services-copy">Project rates are confidential and shared privately after the professional reviews the scope.</p><div class="service-grid">${p.services.map((s, i) => `<article class="service-card"><h3>${s}</h3><p>${["Project planning, creative direction, and professional execution based on an approved scope.", "Includes a discovery consultation, written deliverables, and timeline.", "Custom package for pageant candidates, organizations, or production teams."][i]}</p><div class="price">Private quotation</div></article>`).join("")}</div></div><div class="profile-section" data-section="reviews"><h2>Verified client reviews</h2>${[
+    ["Professionalism", "5.0"],
+    ["Communication", "4.9"],
+    ["Quality of work", "4.9"],
+    ["Timeliness", "4.8"],
+    ["Value", "4.8"],
+  ]
+    .map(
+      (x) =>
+        `<div class="detail" style="margin-bottom:8px"><strong>${x[0]}</strong><span>★ ${x[1]}</span></div>`,
+    )
+    .join(
+      "",
+    )}<article class="info-panel" style="margin-top:18px"><strong>Mariel Santos · Verified project</strong><p style="margin-top:8px">The scope, timeline, and deliverables were explained clearly. Communication remained professional throughout the project.</p><small class="muted">Service received: ${p.services[0]} · Project date: June 2026</small></article><form class="form-card" style="margin-top:18px" data-generic-form data-success="Your review was submitted for verification and moderation."><h3 class="display" style="font-size:1.5rem;margin-top:0">Write a review</h3><div class="form-grid"><div class="field"><label>Overall experience</label><select><option>5 - Excellent</option><option>4 - Good</option><option>3 - Average</option><option>2 - Poor</option><option>1 - Very poor</option></select></div><div class="field"><label>Project date</label><input type="date" required></div><div class="field full"><label>Written review</label><textarea required></textarea></div><div class="field full"><button class="btn btn-primary">Submit Review</button></div></div></form></div><div class="profile-section" data-section="faqs"><h2>Frequently asked questions</h2>${["How early should clients inquire?", "Do you accept nationwide projects?", "What is required to reserve a date?", "Are travel costs included?"].map((q, i) => `<details class="info-panel" style="margin-bottom:10px"><summary style="font-weight:700;cursor:pointer">${q}</summary><p>${["Booking 6–12 weeks ahead is recommended for major pageant projects.", "Nationwide availability depends on the service scope, schedule, and travel requirements.", "A signed agreement and reservation fee may be required after the scope is approved.", "Travel and accommodation are quoted separately unless explicitly included."][i]}</p></details>`).join("")}</div><div class="profile-section" data-section="info"><h2>Credentials and verification</h2><div class="details-grid"><div class="detail"><strong>Identity</strong><span>Verified</span></div><div class="detail"><strong>Business evidence</strong><span>Reviewed</span></div><div class="detail"><strong>Portfolio evidence</strong><span>Reviewed</span></div></div><div class="disclosure" style="margin-top:18px">Verification confirms submitted information based on category requirements. It is not a guarantee of service quality, conduct, or outcomes.</div></div></section><aside class="profile-aside"><div class="contact-card"><h3>Contact information</h3><div class="contact-row">● ${p.city}, ${p.location}</div><div class="contact-row">● ${p.nationwide ? "Nationwide service" : "Regional service"}</div><div class="contact-row">Direct contact details are shared privately after an inquiry is accepted.</div><button class="btn btn-primary btn-block inquiry-trigger" data-profile="${p.id}" style="margin-top:14px">Send Private Inquiry</button></div><div class="contact-card"><h3>Verification details</h3><div class="contact-row">✓ Identity verified</div><div class="contact-row">✓ Business evidence reviewed</div><div class="contact-row">✓ Portfolio evidence reviewed</div><div class="contact-row">Verified July 2026</div></div><div class="disclosure">${p.featured ? "This profile has paid featured visibility. Featured placement does not change its organic ranking score." : "This profile is not currently using paid featured placement."}</div><button class="btn btn-ghost btn-block" data-report-profile>Report Profile</button></aside></div><button class="btn btn-primary sticky-inquiry inquiry-trigger" data-profile="${p.id}">Send Inquiry to ${p.name}</button></main>`;
+}
+function claimPage() {
+  return `<main>${pageHero("Claim an existing profile.", "Take ownership of an unclaimed listing, submit evidence privately, and manage your public profile after review.", "Claim Profile")}<section class="section"><div class="container" style="max-width:900px"><div class="claim-steps">${["Find profile", "Create account", "Submit evidence", "Confirm contact", "Review"].map((x, i) => `<div class="claim-step ${i === 0 ? "active" : ""}" data-step-indicator="${i}"><b>${i + 1}</b><span>${x}</span></div>`).join("")}</div><div class="form-card"><section class="claim-panel active" data-claim-step="0"><h2 class="display">Find your profile</h2><div class="field"><label>Business or professional name</label><input id="claim-search" placeholder="Search existing unclaimed profiles"></div><div class="info-panel" id="claim-result" style="margin-top:18px"><strong>Sample unclaimed listing</strong><p>Horizon Pageant Hosts · Hosts and Choreographers · Iloilo City</p><button class="btn btn-primary claim-next">Claim This Profile</button></div></section><section class="claim-panel" data-claim-step="1"><h2 class="display">Create your account</h2><div class="form-grid"><div class="field"><label>Full name</label><input required></div><div class="field"><label>Email</label><input type="email" required></div><div class="field"><label>Mobile number</label><input required></div><div class="field"><label>Password</label><input type="password" required></div></div><div class="form-actions"><button class="btn btn-ghost claim-back">Back</button><button class="btn btn-primary claim-next">Continue</button></div></section><section class="claim-panel" data-claim-step="2"><h2 class="display">Submit supporting information</h2><div class="form-grid"><div class="field"><label>Relationship to business</label><select><option>Owner</option><option>Authorized representative</option><option>Team member</option></select></div><div class="field"><label>Evidence type</label><select><option>Business registration</option><option>Government ID</option><option>Official social account</option><option>Proof of completed work</option></select></div><div class="field full"><label>Evidence summary</label><textarea placeholder="Describe the documents you will submit securely."></textarea></div></div><div class="disclosure" style="margin-top:18px">Private documents will not be displayed publicly.</div><div class="form-actions"><button class="btn btn-ghost claim-back">Back</button><button class="btn btn-primary claim-next">Continue</button></div></section><section class="claim-panel" data-claim-step="3"><h2 class="display">Confirm contact information</h2><div class="form-grid"><div class="field"><label>Public business email</label><input type="email"></div><div class="field"><label>Public mobile number</label><input></div><div class="field full"><label>Website or official social profile</label><input type="url"></div></div><label class="checkbox-consent"><input type="checkbox" required> I confirm that I am authorized to manage this profile.</label><div class="form-actions"><button class="btn btn-ghost claim-back">Back</button><button class="btn btn-primary claim-next">Submit Claim</button></div></section><section class="claim-panel" data-claim-step="4"><div class="empty-state"><h3>Claim submitted</h3><p>Your claim is now pending review. The admin team may approve it, request revisions, or ask for additional evidence.</p><a class="btn btn-primary" href="/dashboard/">Open Demo Dashboard</a></div></section></div></div></section></main>`;
+}
+function dashboardPage() {
+  return `<main class="dashboard-shell"><aside class="dashboard-sidebar">${brandLockup(true)}<nav class="dash-nav">${["Dashboard", "Profile", "Inquiries", "Portfolio", "Services", "Reviews", "Analytics", "Subscription", "Verification", "Team", "Support"].map((x, i) => `<button class="${i === 0 ? "active" : ""}" data-dash-tab="${x.toLowerCase()}">${x}</button>`).join("")}<a href="/">View Public Site</a></nav></aside><section class="dashboard-main"><div class="dash-head"><div><div class="eyebrow">Professional dashboard</div><h1>Welcome back, Alon.</h1><p class="muted">Here is what is happening with your profile.</p></div><a class="btn btn-primary" href="/professional/alon-mendoza-designs/">View Profile</a></div><div class="stat-grid"><div class="stat-card"><span>Profile views</span><strong>1,248</strong><small>↑ 12% this month</small></div><div class="stat-card"><span>Inquiries</span><strong id="dash-inquiry-count">12</strong><small>↑ 8% this month</small></div><div class="stat-card"><span>Profile saves</span><strong>89</strong><small>↑ 5% this month</small></div><div class="stat-card"><span>Review score</span><strong>4.9</strong><small>128 verified reviews</small></div></div><div class="dash-grid"><div class="panel"><h2>Recent inquiries</h2><div class="inquiry-list" id="dashboard-inquiries">${[
+    ["Maria Santos", "Municipal pageant gown", "New"],
+    ["Cebu Queen Org", "Coronation wardrobe", "Replied"],
+    ["Juan Dela Cruz", "Portrait session referral", "New"],
+  ]
+    .map(
+      (x, i) =>
+        `<div class="inquiry-row"><img class="avatar-sm" src="/public/images/gallery-${i + 1}.jpg" alt=""><div><strong>${x[0]}</strong><span>${x[1]} · July ${29 - i}, 2026</span></div><span class="status ${x[2] === "New" ? "open" : "upcoming"}">${x[2]}</span></div>`,
+    )
+    .join(
+      "",
+    )}</div><button class="text-link" style="margin-top:14px">View all inquiries →</button></div><div class="panel"><h2>Profile completion</h2><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:8px"><span>Complete profile</span><strong>92%</strong></div><div class="progress"><span style="width:92%"></span></div><ul class="feature-list"><li>Basic information</li><li>Portfolio</li><li>Services</li><li>Verification</li><li>Reviews</li></ul><button class="btn btn-secondary btn-block">Complete Profile</button></div></div><div class="dash-grid"><div class="panel"><h2>Analytics overview</h2><div class="mini-chart">${[35, 60, 48, 82, 72, 95, 74, 90, 54, 76, 43, 68].map((h) => `<i style="height:${h}%"></i>`).join("")}</div></div><div class="panel"><h2>Subscription</h2><span class="badge pink-badge">Professional Plan</span><p class="muted" style="font-size:.76rem">Renews August 20, 2026</p><button class="btn btn-primary btn-block plan-select" data-plan="Manage Professional Subscription">Manage Subscription</button></div></div></section></main>`;
+}
+function adminPage() {
+  return `<main class="dashboard-shell"><aside class="dashboard-sidebar">${brandLockup(true)}<div class="eyebrow" style="color:var(--light-gold);margin-bottom:12px">Secure admin</div><nav class="dash-nav">${["Overview", "Profiles", "Claims", "Verification", "Subscriptions", "Featured", "Inquiries", "Reviews", "Reports", "Articles", "Events", "Badges", "Audit Logs", "Analytics", "Exports"].map((x, i) => `<button class="${i === 1 ? "active" : ""}">${x}</button>`).join("")}<a href="/">View Public Site</a></nav></aside><section class="dashboard-main"><div class="dash-head"><div><div class="eyebrow">Administration</div><h1>Profile management</h1><p class="muted">Manage listing status, verification, badges, claims, and visibility.</p></div><button class="btn btn-primary" id="admin-create">Create Profile</button></div><div class="stat-grid"><div class="stat-card"><span>Total profiles</span><strong>1,248</strong><small>432 verified</small></div><div class="stat-card"><span>Pending claims</span><strong>27</strong><small>8 require action</small></div><div class="stat-card"><span>Verification queue</span><strong>19</strong><small>Oldest: 3 days</small></div><div class="stat-card"><span>Reports</span><strong>6</strong><small>2 high priority</small></div></div><div class="panel" style="margin-top:18px"><div class="admin-toolbar"><input id="admin-search" placeholder="Search profiles, owners, locations, or categories"><button class="btn btn-secondary">Export CSV</button><button class="btn btn-ghost">Filters</button></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Profile</th><th>Category</th><th>Location</th><th>Status</th><th>Verified</th><th>Featured</th><th>Updated</th><th>Actions</th></tr></thead><tbody id="admin-tbody">${profiles.map((p, i) => `<tr data-admin-name="${p.name.toLowerCase()}"><td><strong>${p.name}</strong><br><small>${p.id}</small></td><td>${p.category}</td><td>${p.location}</td><td><select class="status-select" data-profile="${p.id}">${["Unclaimed", "Claim Pending", "Basic", "Verified", "Professional", "Featured", "Founding Member", "Suspended", "Archived"].map((s) => `<option ${s === (p.featured ? "Featured" : p.verified ? "Verified" : "Basic") ? "selected" : ""}>${s}</option>`).join("")}</select></td><td>${p.verified ? "Yes" : "No"}</td><td>${p.featured ? "Yes" : "No"}</td><td>${p.updated}</td><td><button class="btn btn-small btn-ghost admin-edit" data-profile="${p.id}">Edit</button></td></tr>`).join("")}</tbody></table></div></div></section></main>`;
+}
+function articleDetailPage() {
+  const slug = path.split("/").filter(Boolean).pop();
+  const a = articles.find((x) => x.slug === slug) || articles[0];
+  return `<main>${pageHero(a.title, a.summary, "Articles")}<article class="section"><div class="container" style="max-width:900px"><img src="/public/images/${a.image}" alt="${a.title}" style="width:100%;height:min(480px,55vw);object-fit:cover;border-radius:14px"><div class="article-meta" style="margin:18px 0">By ${a.author} · Published ${a.date} · Updated July 29, 2026 · ${a.time}</div><div class="display" style="font-size:1.8rem;line-height:1.4"><p>Choosing the right professional is not only about liking a portfolio. It is about understanding the process, responsibilities, deliverables, communication style, timelines, usage rights, and how the professional works under pressure.</p></div><p>Start by defining what you need. A pageant campaign, headshot session, gown commission, coaching program, or coronation production can involve very different expectations. Ask for a written scope and make sure the quoted price clearly states what is included, what is optional, and what may create additional cost.</p><h2 class="display" style="font-size:2rem">Questions worth asking</h2><ul class="feature-list"><li>What experience is directly relevant to this type of project?</li><li>What deliverables, timelines, and revision limits are included?</li><li>Who owns the final files and how may they be used?</li><li>What happens if the event date, location, or scope changes?</li><li>How are deposits, cancellations, travel, and overtime handled?</li><li>Can references or documented completed projects be reviewed?</li></ul><div class="disclosure">Related professionals shown on Pageant Index may include organic, featured, sponsored, or editorial selections. Each label should be interpreted separately.</div><section class="section-tight"><h2 class="section-title small">Related professionals</h2><div class="listing-grid" style="grid-template-columns:repeat(2,1fr)">${profiles.slice(0, 2).map(listingCard).join("")}</div></section></div></article></main>`;
+}
+
+function render() {
+  let content = "";
+  switch (page) {
+    case "home":
+      content = homePage();
+      break;
+    case "directory":
+      content = directoryPage();
+      break;
+    case "categories":
+      content = categoriesPage();
+      break;
+    case "locations":
+      content = locationsPage();
+      break;
+    case "rankings":
+      content = rankingsPage();
+      break;
+    case "calendar":
+      content = calendarPage();
+      break;
+    case "articles":
+      content = articlesPage();
+      break;
+    case "article":
+      content = articleDetailPage();
+      break;
+    case "pricing":
+      content = pricingPage();
+      break;
+    case "verification":
+      content = verificationPage();
+      break;
+    case "methodology":
+      content = methodologyPage();
+      break;
+    case "about":
+      content = aboutPage();
+      break;
+    case "signin":
+      content = signInPage();
+      break;
+    case "profile":
+      content = profilePage();
+      break;
+    case "claim":
+      content = claimPage();
+      break;
+    case "dashboard":
+      document.getElementById("app").innerHTML =
+        header() +
+        previewBanner() +
+        dashboardPage() +
+        modalHtml() +
+        toastHtml();
+      init();
+      return;
+    case "admin":
+      document.getElementById("app").innerHTML =
+        header() + previewBanner() + adminPage() + modalHtml() + toastHtml();
+      init();
+      return;
+    default:
+      content = homePage();
+  }
+  document.getElementById("app").innerHTML =
+    header() + previewBanner() + content + footer() + modalHtml() + toastHtml();
+  init();
+}
+
+function modalHtml() {
+  return `<div class="modal-backdrop" id="modal-backdrop" aria-hidden="true"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-head"><h2 id="modal-title">Send Inquiry</h2><button class="modal-close" aria-label="Close dialog">${svgIcon("close")}</button></div><div class="modal-body" id="modal-body"></div></div></div>`;
+}
+function toastHtml() {
+  return `<div class="toast" id="toast" role="status" aria-live="polite"></div>`;
+}
+function showToast(message, type = "success") {
+  const t = document.getElementById("toast");
+  if (!t) return;
+  t.textContent = message;
+  t.className = `toast ${type} show`;
+  clearTimeout(window.__toast);
+  window.__toast = setTimeout(() => t.classList.remove("show"), 3500);
+}
+function openModal(title, html) {
+  const b = document.getElementById("modal-backdrop");
+  document.getElementById("modal-title").textContent = title;
+  document.getElementById("modal-body").innerHTML = html;
+  b.classList.add("open");
+  b.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  setTimeout(
+    () => b.querySelector("input,button,select,textarea")?.focus(),
+    50,
+  );
+}
+function closeModal() {
+  const b = document.getElementById("modal-backdrop");
+  if (!b) return;
+  b.classList.remove("open");
+  b.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+function inquiryForm(p) {
+  return `<p class="muted">Your inquiry will be saved in the professional dashboard and sent to <strong>${p.name}</strong>.</p><form id="inquiry-form" class="form-grid"><input type="hidden" name="profile" value="${p.name}"><div class="field"><label>Full name</label><input name="name" required autocomplete="name"></div><div class="field"><label>Email</label><input name="email" type="email" required autocomplete="email"></div><div class="field"><label>Mobile number</label><input name="mobile" required inputmode="tel"></div><div class="field"><label>Type of event</label><select name="eventType" required><option value="">Select event type</option><option>Municipal Pageant</option><option>Provincial Pageant</option><option>National Pageant</option><option>School Pageant</option><option>Festival Pageant</option><option>Corporate Event</option><option>Campaign or Photoshoot</option></select></div><div class="field"><label>Event date</label><input name="date" type="date" required></div><div class="field"><label>Location</label><input name="location" required></div><div class="field"><label>Required service</label><select name="service" required>${p.services.map((s) => `<option>${s}</option>`).join("")}</select></div><div class="field"><label>Estimated budget</label><select name="budget" required><option>Below ₱10,000</option><option>₱10,000–₱30,000</option><option>₱30,001–₱75,000</option><option>₱75,001–₱150,000</option><option>₱150,000+</option><option>Requesting a proposal</option></select></div><div class="field full"><label>Project details</label><textarea name="details" required placeholder="Tell the professional what you need, expected deliverables, and important dates."></textarea></div><div class="field full"><label>Preferred contact method</label><select name="contact"><option>Email</option><option>Mobile call</option><option>SMS</option><option>Messaging app</option></select></div><label class="checkbox-consent field full"><input name="consent" type="checkbox" required> I consent to Pageant Index sharing this inquiry with the selected professional and storing it for account and anti-spam purposes.</label><div class="field full"><button class="btn btn-primary btn-block">Send Inquiry</button></div></form>`;
+}
+function init() {
+  document.querySelector(".menu-toggle")?.addEventListener("click", (e) => {
+    const m = document.querySelector(".mobile-nav");
+    const open = m.classList.toggle("open");
+    e.currentTarget.setAttribute("aria-expanded", String(open));
+    e.currentTarget.setAttribute(
+      "aria-label",
+      open ? "Close menu" : "Open menu",
+    );
+    e.currentTarget.innerHTML = svgIcon(open ? "close" : "menu");
+  });
+  document.querySelector(".modal-close")?.addEventListener("click", closeModal);
+  document.getElementById("modal-backdrop")?.addEventListener("click", (e) => {
+    if (e.target.id === "modal-backdrop") closeModal();
+  });
+  document.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key === "Escape") closeModal();
+    },
+    { once: false },
+  );
+  document.querySelectorAll("[data-main-search]").forEach((f) =>
+    f.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const q = new FormData(f).get("q") || "";
+      location.href = `/directory/?q=${encodeURIComponent(q)}`;
+    }),
+  );
+  document.querySelectorAll(".inquiry-trigger").forEach((b) =>
+    b.addEventListener("click", () => {
+      const p = profiles.find((x) => x.id === b.dataset.profile) || profiles[0];
+      openModal(`Send Inquiry to ${p.name}`, inquiryForm(p));
+      document
+        .getElementById("inquiry-form")
+        ?.addEventListener("submit", (ev) => {
+          ev.preventDefault();
+          const data = Object.fromEntries(new FormData(ev.target));
+          const existing = JSON.parse(
+            localStorage.getItem("pi_inquiries") || "[]",
+          );
+          existing.unshift({ ...data, createdAt: new Date().toISOString() });
+          localStorage.setItem("pi_inquiries", JSON.stringify(existing));
+          ev.target.innerHTML = `<div class="empty-state"><h3>Inquiry sent</h3><p>${p.name} will receive your project details. A copy has been saved in your account activity.</p><button type="button" class="btn btn-primary" id="close-success">Done</button></div>`;
+          document.getElementById("close-success").onclick = closeModal;
+          showToast("Inquiry sent successfully.");
+        });
+    }),
+  );
+  document.querySelectorAll(".save-profile").forEach((b) =>
+    b.addEventListener("click", () => {
+      const saves = new Set(
+        JSON.parse(localStorage.getItem("pi_saved") || "[]"),
+      );
+      saves.add(b.dataset.profile);
+      localStorage.setItem("pi_saved", JSON.stringify([...saves]));
+      b.textContent = "Saved";
+      showToast("Profile saved.");
+    }),
+  );
+  document.querySelectorAll(".share-profile").forEach((b) =>
+    b.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        showToast("Profile link copied.");
+      } catch {
+        showToast("Copy this page URL to share.");
+      }
+    }),
+  );
+  document
+    .querySelectorAll("[data-report-profile]")
+    .forEach((b) =>
+      b.addEventListener("click", () =>
+        openModal(
+          "Report Profile",
+          `<form class="form-grid" data-modal-form><div class="field full"><label>Reason</label><select><option>Incorrect information</option><option>Impersonation</option><option>Unsafe or abusive conduct</option><option>Suspicious reviews</option><option>Other</option></select></div><div class="field full"><label>Details</label><textarea required></textarea></div><div class="field full"><button class="btn btn-primary">Submit Report</button></div></form>`,
+        ),
+      ),
+    );
+  document.querySelectorAll("[data-generic-form]").forEach((f) =>
+    f.addEventListener("submit", (e) => {
+      e.preventDefault();
+      f.reset();
+      showToast(f.dataset.success || "Submitted successfully.");
+    }),
+  );
+  document.querySelectorAll("[data-newsletter]").forEach((f) =>
+    f.addEventListener("submit", (e) => {
+      e.preventDefault();
+      f.reset();
+      showToast("You are subscribed to Pageant Index updates.");
+    }),
+  );
+  document
+    .querySelectorAll(".plan-select")
+    .forEach((b) =>
+      b.addEventListener("click", () =>
+        openModal(
+          b.dataset.plan,
+          `<p class="muted">Complete the details below to start the ${b.dataset.plan} onboarding process.</p><form class="form-grid" data-modal-form><div class="field"><label>Business or professional name</label><input required></div><div class="field"><label>Email</label><input type="email" required></div><div class="field"><label>Mobile number</label><input required></div><div class="field"><label>Primary category</label><select>${categories.map((c) => `<option>${c[0]}</option>`).join("")}</select></div><label class="checkbox-consent field full"><input type="checkbox" required> I understand that paid visibility is clearly labeled and does not purchase a higher organic ranking.</label><div class="field full"><button class="btn btn-primary btn-block">Continue</button></div></form>`,
+        ),
+      ),
+    );
+  document.addEventListener("submit", (e) => {
+    if (e.target.matches("[data-modal-form]")) {
+      e.preventDefault();
+      e.target.innerHTML =
+        '<div class="empty-state"><h3>Request received</h3><p>The Pageant Index onboarding team will contact you with the next steps.</p></div>';
+      showToast("Request submitted.");
+    }
+  });
+  if (page === "directory") initDirectory();
+  if (page === "profile") initProfileTabs();
+  if (page === "claim") initClaim();
+  if (page === "signin") initSignIn();
+  if (page === "calendar") initCalendar();
+  if (page === "admin") initAdmin();
+  if (page === "dashboard") initDashboard();
+}
+function initDirectory() {
+  const q = new URLSearchParams(window.__APP_SEARCH ?? location.search);
+  const kw = document.getElementById("filter-keyword"),
+    cat = document.getElementById("filter-category"),
+    loc = document.getElementById("filter-location"),
+    ver = document.getElementById("filter-verified"),
+    nat = document.getElementById("filter-nationwide"),
+    trav = document.getElementById("filter-travel"),
+    feat = document.getElementById("filter-featured"),
+    sort = document.getElementById("sort-select");
+  kw.value = q.get("q") || "";
+  cat.value = q.get("category") || "";
+  loc.value = q.get("location") || "";
+  ver.checked = q.get("verified") === "true";
+  feat.checked = q.get("featured") === "true";
+  const apply = () => {
+    const cards = [...document.querySelectorAll("[data-profile-card]")];
+    cards.forEach((c) => {
+      const hay = (
+        c.dataset.search ||
+        c.dataset.name + " " + c.dataset.category + " " + c.dataset.location
+      ).toLowerCase();
+      const ok =
+        (!kw.value || hay.includes(kw.value.toLowerCase())) &&
+        (!cat.value || c.dataset.category === cat.value) &&
+        (!loc.value || c.dataset.location === loc.value) &&
+        (!ver.checked || c.dataset.verified === "true") &&
+        (!nat.checked || c.dataset.nationwide === "true") &&
+        (!trav.checked || c.dataset.travel === "true") &&
+        (!feat.checked || c.dataset.featured === "true");
+      c.hidden = !ok;
+    });
+    const visible = cards.filter((c) => !c.hidden);
+    const list = document.getElementById("results-list");
+    const sorted = [...visible].sort((a, b) => {
+      if (sort.value === "rating") return +b.dataset.rating - +a.dataset.rating;
+      if (sort.value === "views") return +b.dataset.views - +a.dataset.views;
+      if (sort.value === "alphabetical")
+        return a.dataset.name.localeCompare(b.dataset.name);
+      if (sort.value === "recommended")
+        return (
+          Number(b.dataset.featured) - Number(a.dataset.featured) ||
+          +b.dataset.rating - +a.dataset.rating
+        );
+      return 0;
+    });
+    sorted.forEach((c) => list.appendChild(c));
+    document.getElementById("result-count").textContent = visible.length;
+    document.getElementById("empty-results").hidden = visible.length !== 0;
+  };
+  [kw, cat, loc, ver, nat, trav, feat, sort].forEach((el) =>
+    el.addEventListener(
+      el.tagName === "INPUT" && el.type === "text" ? "input" : "change",
+      apply,
+    ),
+  );
+  const reset = () => {
+    kw.value = "";
+    cat.value = "";
+    loc.value = "";
+    ver.checked = nat.checked = trav.checked = feat.checked = false;
+    apply();
+  };
+  document.getElementById("clear-filters").onclick = reset;
+  document.getElementById("empty-reset").onclick = reset;
+  document.getElementById("filter-toggle").onclick = () =>
+    document.getElementById("filter-panel").classList.add("open");
+  document.getElementById("apply-mobile-filters").onclick = () => {
+    apply();
+    document.getElementById("filter-panel").classList.remove("open");
+  };
+  apply();
+}
+function initProfileTabs() {
+  document.querySelectorAll(".profile-nav button").forEach((b) =>
+    b.addEventListener("click", () => {
+      document
+        .querySelectorAll(".profile-nav button")
+        .forEach((x) => x.classList.remove("active"));
+      b.classList.add("active");
+      document
+        .querySelector(`[data-section="${b.dataset.tab}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }),
+  );
+}
+function initClaim() {
+  let step = 0;
+  const show = () => {
+    document
+      .querySelectorAll("[data-claim-step]")
+      .forEach((x) =>
+        x.classList.toggle("active", +x.dataset.claimStep === step),
+      );
+    document
+      .querySelectorAll("[data-step-indicator]")
+      .forEach((x) =>
+        x.classList.toggle("active", +x.dataset.stepIndicator <= step),
+      );
+  };
+  document.querySelectorAll(".claim-next").forEach((b) =>
+    b.addEventListener("click", () => {
+      step = Math.min(4, step + 1);
+      show();
+    }),
+  );
+  document.querySelectorAll(".claim-back").forEach((b) =>
+    b.addEventListener("click", () => {
+      step = Math.max(0, step - 1);
+      show();
+    }),
+  );
+}
+function initSignIn() {
+  document.getElementById("signin-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    showToast("Signed in to the demo account.");
+    setTimeout(() => (location.href = "/dashboard/"), 600);
+  });
+}
+function initCalendar() {
+  document
+    .getElementById("submit-event-btn")
+    ?.addEventListener("click", () =>
+      openModal(
+        "Submit a Pageant Event",
+        `<form class="form-grid" data-modal-form><div class="field"><label>Pageant name</label><input required></div><div class="field"><label>Organization</label><input required></div><div class="field"><label>Event date</label><input type="date" required></div><div class="field"><label>Application deadline</label><input type="date"></div><div class="field"><label>Location</label><input required></div><div class="field"><label>Event type</label><select><option>Municipal</option><option>Provincial</option><option>Regional</option><option>National</option><option>School</option><option>Festival</option><option>Tourism</option></select></div><div class="field full"><label>Official link</label><input type="url"></div><div class="field full"><label>Organizer contact</label><input required></div><div class="field full"><button class="btn btn-primary btn-block">Submit for Approval</button></div></form>`,
+      ),
+    );
+}
+function initAdmin() {
+  document
+    .getElementById("admin-search")
+    .addEventListener("input", (e) =>
+      document
+        .querySelectorAll("[data-admin-name]")
+        .forEach(
+          (r) =>
+            (r.hidden = !r.dataset.adminName.includes(
+              e.target.value.toLowerCase(),
+            )),
+        ),
+    );
+  document.querySelectorAll(".status-select").forEach((s) =>
+    s.addEventListener("change", () => {
+      const states = JSON.parse(
+        localStorage.getItem("pi_admin_status") || "{}",
+      );
+      states[s.dataset.profile] = s.value;
+      localStorage.setItem("pi_admin_status", JSON.stringify(states));
+      showToast(`Profile status changed to ${s.value}.`);
+    }),
+  );
+  document.querySelectorAll(".admin-edit").forEach((b) =>
+    b.addEventListener("click", () => {
+      const p = profiles.find((x) => x.id === b.dataset.profile);
+      openModal(
+        `Edit ${p.name}`,
+        `<form class="form-grid" data-modal-form><div class="field"><label>Profile name</label><input value="${p.name}"></div><div class="field"><label>Category</label><select>${categories.map((c) => `<option ${c[0] === p.category ? "selected" : ""}>${c[0]}</option>`).join("")}</select></div><div class="field"><label>Location</label><select>${locations.map((l) => `<option ${l === p.location ? "selected" : ""}>${l}</option>`).join("")}</select></div><div class="field"><label>Badge</label><select><option>None</option><option>Verified</option><option>Featured</option><option>Founding Member</option></select></div><div class="field full"><label>Admin notes</label><textarea></textarea></div><div class="field full"><button class="btn btn-primary">Save Changes</button></div></form>`,
+      );
+    }),
+  );
+  document.getElementById("admin-create").onclick = () =>
+    openModal(
+      "Create Profile",
+      `<form class="form-grid" data-modal-form><div class="field"><label>Name</label><input required></div><div class="field"><label>Category</label><select>${categories.map((c) => `<option>${c[0]}</option>`).join("")}</select></div><div class="field"><label>Location</label><select>${locations.map((l) => `<option>${l}</option>`).join("")}</select></div><div class="field"><label>Status</label><select><option>Unclaimed</option><option>Basic</option><option>Claim Pending</option></select></div><div class="field full"><button class="btn btn-primary">Create Profile</button></div></form>`,
+    );
+}
+function initDashboard() {
+  const stored = JSON.parse(localStorage.getItem("pi_inquiries") || "[]");
+  if (stored.length) {
+    document.getElementById("dash-inquiry-count").textContent =
+      12 + stored.length;
+    const list = document.getElementById("dashboard-inquiries");
+    stored
+      .slice(0, 3)
+      .forEach((x, i) =>
+        list.insertAdjacentHTML(
+          "afterbegin",
+          `<div class="inquiry-row"><img class="avatar-sm" src="/public/images/gallery-${(i % 4) + 1}.jpg" alt=""><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.eventType)} · New website inquiry</span></div><span class="status open">New</span></div>`,
+        ),
+      );
+  }
+}
+render();

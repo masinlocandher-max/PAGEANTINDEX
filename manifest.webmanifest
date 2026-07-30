@@ -1,0 +1,18 @@
+{
+  "id": "/",
+  "name": "PageantIndex Philippines",
+  "short_name": "PageantIndex",
+  "description": "Discover pageant professionals, suppliers, creatives, and production partners across the Philippines.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff1478",
+  "icons": [
+    {
+      "src": "/public/images/pageant-icon.png",
+      "sizes": "190x170",
+      "type": "image/png"
+    }
+  ]
+}
