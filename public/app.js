@@ -843,7 +843,7 @@ function init() {
   if (page === "directory") initDirectory();
   if (page === "profile") initProfileTabs();
   if (page === "claim") initClaim();
-  if (page === "signin") initSignIn();
+  if (page === "signin" || page === "signup") initSignIn();
   if (page === "calendar") initCalendar();
   if (page === "admin") initAdmin();
   if (page === "dashboard") initDashboard();
