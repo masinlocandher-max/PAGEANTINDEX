@@ -79,8 +79,19 @@ const articles = [
 ];
 const events = [];
 
-const page = document.body.dataset.page || "home";
+const isAdminHost = window.location.hostname === "admin.pageantindex.com";
+const page = isAdminHost ? "admin" : document.body.dataset.page || "home";
 const path = window.__APP_PATH || window.location.pathname;
+if (isAdminHost) {
+  document.title = "Admin Dashboard | Pageant Index Philippines";
+  let robots = document.querySelector('meta[name="robots"]');
+  if (!robots) {
+    robots = document.createElement("meta");
+    robots.name = "robots";
+    document.head.appendChild(robots);
+  }
+  robots.content = "noindex,nofollow";
+}
 
 const categoryIconPaths = {
   scissors:
@@ -380,7 +391,8 @@ function aboutPage() {
   return `<main>${pageHero("Trusted infrastructure for Philippine pageantry.", "Pageant Index Philippines is built to make professional discovery clearer, safer, more credible, and commercially sustainable without selling fake authority.", "About")}<section class="section"><div class="container"><div class="how-grid"><div><div class="eyebrow">Our purpose</div><h2 class="section-title">Make the industry easier to navigate.</h2><p class="section-copy">Candidates, parents, directors, LGUs, schools, tourism offices, festivals, producers, and event organizers need a reliable way to compare professionals and suppliers. Professionals need a credible place to present work, build trust, receive inquiries, and grow visibility.</p></div><div class="info-panel"><h3>What we will not become</h3><ul class="feature-list"><li>A fan page or beauty-pageant organization</li><li>An award-selling website</li><li>A pay-to-win ranking scheme</li><li>A platform that hides sponsored visibility</li><li>A public archive of private verification documents</li></ul></div></div><div id="advertising" class="profile-section" style="margin-top:52px"><h2>Advertising disclosure</h2><p>Featured placements, sponsored events, sponsored articles, and commercial campaigns are visibly labeled. Payment does not directly change organic ranking scores.</p></div><div id="reviews" class="profile-section"><h2>Review policy</h2><p>Reviews should come from verified accounts or transactions when possible. Negative reviews are not automatically removed because a business complains. Administrators may request evidence, temporarily hide a review during an investigation, restore legitimate reviews, and document moderation decisions.</p></div><div id="complaints" class="profile-section"><h2>Reports and complaints</h2><p>Users may report inaccurate information, misconduct, impersonation, suspicious reviews, or unsafe content. Businesses have a fair opportunity to respond, and serious actions are recorded in audit logs.</p></div><div id="privacy" class="profile-section"><h2>Privacy and document handling</h2><p>Private identity and verification documents are stored separately from public profile data. The platform supports consent records, privacy controls, account deletion requests, secure uploads, and role-based access.</p></div></div></section></main>`;
 }
 function signInPage() {
-  return `<main class="auth-shell"><section class="auth-visual"><h1>Manage your visibility in the Philippine pageant industry.</h1></section><section class="auth-panel"><div class="auth-card">${brandLockup()}<h2>Professional portal</h2><p class="muted">Portal access is issued to approved profile owners during onboarding.</p><div class="info-panel"><strong>Need access?</strong><p>Apply for a listing or submit a profile claim. The Pageant Index team will review ownership before activating an account.</p></div><a class="btn btn-primary btn-block" href="/list-your-business/">Apply to be listed</a><a class="btn btn-ghost btn-block" href="/claim-profile/">Claim a profile</a></div></section></main>`;
+  const createFirst = page === "signup";
+  return `<main class="auth-shell official-auth"><section class="auth-visual"><div class="auth-visual-copy">${brandLockup(true)}<h1>The professional home of Philippine pageantry.</h1><p>Build a trusted profile, present your portfolio, receive qualified inquiries, and manage your visibility.</p></div></section><section class="auth-panel"><div class="auth-card"><a href="/" class="auth-mobile-brand">${brandLockup()}</a><h2>Professional account</h2><p class="muted">Access and manage your Pageant Index professional profile.</p><div class="auth-tabs" role="tablist"><button class="${createFirst ? "" : "active"}" data-auth-tab="signin">Sign In</button><button class="${createFirst ? "active" : ""}" data-auth-tab="signup">Create Account</button></div><form id="signin-form" class="auth-form ${createFirst ? "" : "active"}" data-auth-panel="signin"><div class="field"><label for="signin-email">Email</label><input id="signin-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></div><div class="field"><label for="signin-password">Password</label><input id="signin-password" name="password" type="password" required autocomplete="current-password" placeholder="Enter your password"></div><div class="auth-options"><label class="check-row"><input type="checkbox"> Keep me signed in</label><button type="button" class="text-link" data-forgot-password>Forgot password?</button></div><button class="btn btn-primary btn-block">Sign In</button><p class="form-note">Accounts are activated after profile ownership review.</p></form><form id="signup-form" class="auth-form ${createFirst ? "active" : ""}" data-auth-panel="signup"><div class="form-grid"><div class="field"><label>Full name</label><input name="name" required autocomplete="name"></div><div class="field"><label>Business or professional name</label><input name="business" required></div><div class="field"><label>Email</label><input name="email" type="email" required autocomplete="email"></div><div class="field"><label>Primary category</label><select name="category" required><option value="">Select category</option>${categories.map(([name]) => `<option>${name}</option>`).join("")}</select></div><div class="field"><label>Password</label><input name="password" type="password" minlength="8" required autocomplete="new-password"></div><div class="field"><label>Confirm password</label><input name="confirm" type="password" minlength="8" required autocomplete="new-password"></div></div><label class="checkbox-consent"><input type="checkbox" required> I confirm that I am authorized to represent this professional or business.</label><button class="btn btn-primary btn-block">Create Account</button><p class="form-note">Creating an account does not automatically publish a profile. Every listing is reviewed.</p></form><div class="auth-apply">Not listed yet? <a href="/list-your-business/">Apply to be listed</a></div><p class="auth-privacy">By continuing, you agree to our profile standards and privacy policy.</p></div></section></main>`;
 }
 function profilePage() {
   const slug = path.split("/").filter(Boolean).pop();
@@ -405,7 +417,8 @@ function claimPage() {
   return `<main>${pageHero("Claim an existing profile.", "Ownership claims are reviewed privately before a listing or account is activated.", "Claim Profile")}<section class="section"><div class="container" style="max-width:820px"><div class="form-card"><h2 class="display">Submit a profile claim</h2><p class="section-copy">If Pageant Index has contacted you about an unpublished listing, provide the details below. New businesses should use the listing application.</p><form class="form-grid" data-generic-form data-success="Your profile claim has been submitted for ownership review."><div class="field"><label>Business or professional name</label><input required></div><div class="field"><label>Full name</label><input required autocomplete="name"></div><div class="field"><label>Email</label><input type="email" required autocomplete="email"></div><div class="field"><label>Mobile number</label><input required></div><div class="field full"><label>Official website or social profile</label><input type="url" required></div><div class="field full"><label>Ownership evidence summary</label><textarea required placeholder="Explain your relationship to the business and the evidence available for private review."></textarea></div><label class="checkbox-consent field full"><input type="checkbox" required> I confirm that I am authorized to represent this business or professional profile.</label><div class="field full"><button class="btn btn-primary">Submit Claim</button></div></form></div></div></section></main>`;
 }
 function dashboardPage() {
-  return `<main>${pageHero("Professional portal access.", "Approved profile owners receive secure portal access during onboarding.", "Professional Portal")}<section class="section"><div class="container"><div class="directory-launch"><div class="directory-empty-icon">${assetIcon("shield-check")}</div><div><h2 class="section-title small">This area requires an approved account.</h2><p class="section-copy">Apply for a listing or claim an existing profile to begin ownership and verification review.</p><div class="empty-actions"><a class="btn btn-primary" href="/list-your-business/">Apply to be listed</a><a class="btn btn-secondary" href="/claim-profile/">Claim a profile</a></div></div></div></div></section></main>`;
+  const portfolioRows = [1,2,3,4].map((i) => `<div class="portfolio-row" data-portfolio-row><button class="drag-handle" aria-label="Reorder asset">⋮⋮</button><div class="portfolio-thumb">${assetIcon("camera")}<img alt="" hidden></div><input aria-label="Portfolio caption" value="" placeholder="Add a descriptive caption"><select aria-label="Portfolio category"><option>Editorial</option><option>Event</option><option>Campaign</option><option>Product</option><option>Behind the scenes</option></select><label class="cover-radio"><input type="radio" name="cover" ${i===1?"checked":""}> Cover</label><button class="icon-button remove-asset" aria-label="Remove asset">×</button></div>`).join("");
+  return `<main class="product-shell"><aside class="product-sidebar">${brandLockup(true)}<nav>${[["file-user","Profile"],["camera","Portfolio"],["clipboard-list","Services"],["inbox","Inquiries"],["message-circle","Reviews"],["shield-check","Verification"],["chart-no-axes-combined","Analytics"],["settings","Settings"]].map(([icon,label],i)=>`<button class="${i===1?"active":""}">${assetIcon(icon)}<span>${label}</span></button>`).join("")}</nav><div class="profile-progress"><strong>Complete your profile</strong><p>Add all required details before review.</p><div class="progress"><span style="width:28%"></span></div><small>28% complete</small></div><a href="/">View public site</a></aside><section class="product-main"><header class="product-topbar"><div><h1>Edit Professional Profile</h1><p>Build the public landing page clients will see.</p></div><div><button class="btn btn-secondary" id="save-profile-draft">Save Draft</button><button class="btn btn-primary" id="submit-profile-review">Submit for Review</button></div></header><div class="profile-steps">${["Basics","About","Services","Portfolio","Credentials","Contact","Preview"].map((x,i)=>`<button class="${i===3?"active":i<3?"done":""}"><b>${i<3?"✓":i+1}</b><span>${x}</span></button>`).join("")}</div><div class="profile-workspace"><section class="portfolio-editor"><div class="workspace-title"><h2>Portfolio assets</h2><p>Show only original, high-quality work you are authorized to publish.</p></div><label class="asset-dropzone" for="portfolio-upload">${assetIcon("inbox")}<strong>Drag and drop HD images here</strong><span>or choose files from your device</span><input id="portfolio-upload" type="file" accept="image/jpeg,image/png,image/webp" multiple><span class="btn btn-secondary">Choose Files</span></label><div class="asset-requirements"><strong>Image requirements</strong><span>Minimum 1200px on the longest side</span><span>JPG, PNG, or WEBP</span><span>Maximum 10MB per file</span><span>No unauthorized logos or watermarks</span></div><div class="portfolio-list-head"><strong id="asset-count">0 uploaded assets</strong><span>Choose one cover image and add descriptive captions.</span></div><div class="portfolio-list" id="portfolio-list">${portfolioRows}</div><button class="text-link" id="add-portfolio-row">+ Add another asset</button></section><aside class="public-profile-preview"><div class="preview-head"><h2>Public profile preview</h2><button class="text-link" id="open-full-preview">Full preview</button></div><div class="preview-cover"><div class="preview-logo">${assetIcon("crown")}</div></div><div class="preview-identity"><input id="preview-business-name" placeholder="Business or professional name"><select id="preview-category">${categories.map(([name])=>`<option>${name}</option>`).join("")}</select><input id="preview-location" placeholder="City, Province, Philippines"><span class="status pending">Verification pending</span></div><div class="preview-section"><h3>About</h3><textarea id="preview-about" placeholder="Describe your expertise, approach, and the clients you serve."></textarea></div><div class="preview-section"><h3>Services</h3><input id="preview-services" placeholder="Example: Pageant photography, campaign portraits"></div><div class="preview-section"><h3>Portfolio</h3><div class="preview-portfolio" id="preview-portfolio">${[1,2,3,4].map(()=>`<span>${assetIcon("camera")}</span>`).join("")}</div></div><button class="btn btn-primary btn-block" disabled>Send Inquiry</button><small>Inquiries activate after the profile is approved and published.</small></aside></div></section></main>`;
   return `<main class="dashboard-shell"><aside class="dashboard-sidebar">${brandLockup(true)}<nav class="dash-nav">${["Dashboard", "Profile", "Inquiries", "Portfolio", "Services", "Reviews", "Analytics", "Subscription", "Verification", "Team", "Support"].map((x, i) => `<button class="${i === 0 ? "active" : ""}" data-dash-tab="${x.toLowerCase()}">${x}</button>`).join("")}<a href="/">View Public Site</a></nav></aside><section class="dashboard-main"><div class="dash-head"><div><div class="eyebrow">Professional dashboard</div><h1>Welcome back, Alon.</h1><p class="muted">Here is what is happening with your profile.</p></div><a class="btn btn-primary" href="/professional/alon-mendoza-designs/">View Profile</a></div><div class="stat-grid"><div class="stat-card"><span>Profile views</span><strong>1,248</strong><small>↑ 12% this month</small></div><div class="stat-card"><span>Inquiries</span><strong id="dash-inquiry-count">12</strong><small>↑ 8% this month</small></div><div class="stat-card"><span>Profile saves</span><strong>89</strong><small>↑ 5% this month</small></div><div class="stat-card"><span>Review score</span><strong>4.9</strong><small>128 verified reviews</small></div></div><div class="dash-grid"><div class="panel"><h2>Recent inquiries</h2><div class="inquiry-list" id="dashboard-inquiries">${[
     ["Maria Santos", "Municipal pageant gown", "New"],
     ["Cebu Queen Org", "Coronation wardrobe", "Replied"],
@@ -420,7 +433,8 @@ function dashboardPage() {
     )}</div><button class="text-link" style="margin-top:14px">View all inquiries →</button></div><div class="panel"><h2>Profile completion</h2><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:8px"><span>Complete profile</span><strong>92%</strong></div><div class="progress"><span style="width:92%"></span></div><ul class="feature-list"><li>Basic information</li><li>Portfolio</li><li>Services</li><li>Verification</li><li>Reviews</li></ul><button class="btn btn-secondary btn-block">Complete Profile</button></div></div><div class="dash-grid"><div class="panel"><h2>Analytics overview</h2><div class="mini-chart">${[35, 60, 48, 82, 72, 95, 74, 90, 54, 76, 43, 68].map((h) => `<i style="height:${h}%"></i>`).join("")}</div></div><div class="panel"><h2>Subscription</h2><span class="badge pink-badge">Professional Plan</span><p class="muted" style="font-size:.76rem">Renews August 20, 2026</p><button class="btn btn-primary btn-block plan-select" data-plan="Manage Professional Subscription">Manage Subscription</button></div></div></section></main>`;
 }
 function adminPage() {
-  return `<main>${pageHero("Restricted administration.", "This area is available only to authorized Pageant Index administrators.", "Administration")}<section class="section"><div class="container"><div class="directory-launch"><div class="directory-empty-icon">${assetIcon("shield-check")}</div><div><h2 class="section-title small">Authorization required.</h2><p class="section-copy">Return to the public site to browse official Pageant Index content.</p><a class="btn btn-primary" href="/">Return home</a></div></div></div></section></main>`;
+  const adminNav = [["building-2","Overview"],["file-user","Profiles"],["clipboard-list","Applications"],["shield-check","Verification"],["camera","Portfolio Review"],["calendar","Events"],["newspaper","Articles"],["search","SEO"],["chart-no-axes-combined","Reports"],["settings","Settings"]];
+  return `<main class="product-shell admin-product"><aside class="product-sidebar">${brandLockup(true)}<nav>${adminNav.map(([icon,label],i)=>`<button class="${i===0?"active":""}">${assetIcon(icon)}<span>${label}</span></button>`).join("")}</nav><a href="/">View public site</a></aside><section class="product-main"><header class="product-topbar"><div><h1>Directory Administration</h1><p>Review, verify, publish, and protect the Pageant Index directory.</p></div><div class="admin-account"><span>AD</span><strong>Administrator</strong></div></header><div class="admin-zero-stats">${[["file-user","Published Profiles"],["clipboard-list","Pending Applications"],["shield-check","Verification Queue"],["calendar","Published Events"]].map(([icon,label])=>`<div>${assetIcon(icon)}<strong>0</strong><span>${label}</span></div>`).join("")}</div><div class="admin-layout"><section class="admin-primary"><div class="panel-title"><h2>Applications</h2><button class="text-link" id="review-applications">View all applications</button></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Applicant</th><th>Category</th><th>Location</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead><tbody><tr class="empty-table-row"><td colspan="6">${assetIcon("inbox")}<strong>No applications yet</strong><span>Owner-submitted listing applications will appear here.</span></td></tr></tbody></table></div><div class="panel-title activity-title"><h2>Recent Activity</h2></div><div class="admin-empty">${assetIcon("chart-no-axes-combined")}<strong>No administrative activity yet</strong><span>Publishing and verification actions will be recorded here.</span></div></section><aside class="admin-secondary"><section><h2>Launch checklist</h2>${["Confirm directory categories","Finalize verification requirements","Connect authentication","Connect portfolio storage","Publish privacy terms","Submit sitemap to search engines","Connect admin subdomain"].map((x,i)=>`<label><input type="checkbox" ${i<2?"checked":""}><span>${x}</span></label>`).join("")}</section><section><h2>Quick actions</h2><button class="btn btn-secondary btn-block" data-admin-action="Add Profile">Add Profile</button><button class="btn btn-secondary btn-block" data-admin-action="Review Application">Review Application</button><button class="btn btn-secondary btn-block" data-admin-action="Publish Article">Publish Article</button></section></aside></div></section></main>`;
   return `<main class="dashboard-shell"><aside class="dashboard-sidebar">${brandLockup(true)}<div class="eyebrow" style="color:var(--light-gold);margin-bottom:12px">Secure admin</div><nav class="dash-nav">${["Overview", "Profiles", "Claims", "Verification", "Subscriptions", "Featured", "Inquiries", "Reviews", "Reports", "Articles", "Events", "Badges", "Audit Logs", "Analytics", "Exports"].map((x, i) => `<button class="${i === 1 ? "active" : ""}">${x}</button>`).join("")}<a href="/">View Public Site</a></nav></aside><section class="dashboard-main"><div class="dash-head"><div><div class="eyebrow">Administration</div><h1>Profile management</h1><p class="muted">Manage listing status, verification, badges, claims, and visibility.</p></div><button class="btn btn-primary" id="admin-create">Create Profile</button></div><div class="stat-grid"><div class="stat-card"><span>Total profiles</span><strong>1,248</strong><small>432 verified</small></div><div class="stat-card"><span>Pending claims</span><strong>27</strong><small>8 require action</small></div><div class="stat-card"><span>Verification queue</span><strong>19</strong><small>Oldest: 3 days</small></div><div class="stat-card"><span>Reports</span><strong>6</strong><small>2 high priority</small></div></div><div class="panel" style="margin-top:18px"><div class="admin-toolbar"><input id="admin-search" placeholder="Search profiles, owners, locations, or categories"><button class="btn btn-secondary">Export CSV</button><button class="btn btn-ghost">Filters</button></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Profile</th><th>Category</th><th>Location</th><th>Status</th><th>Verified</th><th>Featured</th><th>Updated</th><th>Actions</th></tr></thead><tbody id="admin-tbody">${profiles.map((p, i) => `<tr data-admin-name="${p.name.toLowerCase()}"><td><strong>${p.name}</strong><br><small>${p.id}</small></td><td>${p.category}</td><td>${p.location}</td><td><select class="status-select" data-profile="${p.id}">${["Unclaimed", "Claim Pending", "Basic", "Verified", "Professional", "Featured", "Founding Member", "Suspended", "Archived"].map((s) => `<option ${s === (p.featured ? "Featured" : p.verified ? "Verified" : "Basic") ? "selected" : ""}>${s}</option>`).join("")}</select></td><td>${p.verified ? "Yes" : "No"}</td><td>${p.featured ? "Yes" : "No"}</td><td>${p.updated}</td><td><button class="btn btn-small btn-ghost admin-edit" data-profile="${p.id}">Edit</button></td></tr>`).join("")}</tbody></table></div></div></section></main>`;
 }
 const articleBodies = {
@@ -506,6 +520,9 @@ function render() {
     case "signin":
       content = signInPage();
       break;
+    case "signup":
+      content = signInPage();
+      break;
     case "profile":
       content = profilePage();
       break;
@@ -514,20 +531,24 @@ function render() {
       break;
     case "dashboard":
       document.getElementById("app").innerHTML =
-        header() +
         dashboardPage() +
-        footer() +
         modalHtml() +
         toastHtml();
       init();
       return;
     case "admin":
       document.getElementById("app").innerHTML =
-        header() + adminPage() + footer() + modalHtml() + toastHtml();
+        adminPage() + modalHtml() + toastHtml();
       init();
       return;
     default:
       content = homePage();
+  }
+  if (page === "signin" || page === "signup") {
+    document.getElementById("app").innerHTML =
+      content + modalHtml() + toastHtml();
+    init();
+    return;
   }
   document.getElementById("app").innerHTML =
     header() + content + footer() + modalHtml() + toastHtml();
@@ -805,7 +826,34 @@ function initClaim() {
   );
 }
 function initSignIn() {
-  document.getElementById("signin-form")?.addEventListener("submit", (e) => e.preventDefault());
+  const setTab = (name) => {
+    document.querySelectorAll("[data-auth-tab]").forEach((button) =>
+      button.classList.toggle("active", button.dataset.authTab === name));
+    document.querySelectorAll("[data-auth-panel]").forEach((panel) =>
+      panel.classList.toggle("active", panel.dataset.authPanel === name));
+  };
+  document.querySelectorAll("[data-auth-tab]").forEach((button) =>
+    button.addEventListener("click", () => setTab(button.dataset.authTab)));
+  document.getElementById("signin-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    showToast("Account access requires an approved profile.");
+  });
+  document.getElementById("signup-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.currentTarget));
+    if (data.password !== data.confirm) {
+      showToast("Passwords do not match.", "error");
+      return;
+    }
+    localStorage.setItem("pi_account_application", JSON.stringify({
+      name: data.name, business: data.business, email: data.email,
+      category: data.category, createdAt: new Date().toISOString()
+    }));
+    showToast("Account application saved for profile review.");
+    setTimeout(() => location.href = "/dashboard/", 800);
+  });
+  document.querySelector("[data-forgot-password]")?.addEventListener("click", () =>
+    showToast("Password recovery will activate with secure authentication."));
 }
 function initCalendar() {
   document
@@ -818,6 +866,12 @@ function initCalendar() {
     );
 }
 function initAdmin() {
+  if (!document.getElementById("admin-search")) {
+    document.querySelectorAll("[data-admin-action]").forEach((button) =>
+      button.addEventListener("click", () =>
+        showToast(`${button.dataset.adminAction} is ready for secure admin authentication.`)));
+    return;
+  }
   document
     .getElementById("admin-search")
     .addEventListener("input", (e) =>
@@ -856,19 +910,34 @@ function initAdmin() {
     );
 }
 function initDashboard() {
-  const stored = JSON.parse(localStorage.getItem("pi_inquiries") || "[]");
-  if (stored.length) {
-    document.getElementById("dash-inquiry-count").textContent =
-      12 + stored.length;
-    const list = document.getElementById("dashboard-inquiries");
-    stored
-      .slice(0, 3)
-      .forEach((x, i) =>
-        list.insertAdjacentHTML(
-          "afterbegin",
-          `<div class="inquiry-row"><img class="avatar-sm" src="/public/images/gallery-${(i % 4) + 1}.jpg" alt=""><div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.eventType)} · New website inquiry</span></div><span class="status open">New</span></div>`,
-        ),
-      );
-  }
+  const upload = document.getElementById("portfolio-upload");
+  if (!upload) return;
+  const updatePreview = (files) => {
+    const slots = [...document.querySelectorAll("#preview-portfolio span")];
+    [...files].slice(0, slots.length).forEach((file, index) => {
+      slots[index].innerHTML = `<img src="${URL.createObjectURL(file)}" alt="">`;
+    });
+    document.getElementById("asset-count").textContent =
+      `${files.length} uploaded asset${files.length === 1 ? "" : "s"}`;
+  };
+  upload.addEventListener("change", () => updatePreview(upload.files));
+  document.querySelectorAll(".remove-asset").forEach((button) =>
+    button.addEventListener("click", () => button.closest("[data-portfolio-row]")?.remove()));
+  document.getElementById("save-profile-draft")?.addEventListener("click", () => {
+    const draft = {
+      business: document.getElementById("preview-business-name").value,
+      category: document.getElementById("preview-category").value,
+      location: document.getElementById("preview-location").value,
+      about: document.getElementById("preview-about").value,
+      services: document.getElementById("preview-services").value,
+      savedAt: new Date().toISOString()
+    };
+    localStorage.setItem("pi_profile_draft", JSON.stringify(draft));
+    showToast("Profile draft saved on this device.");
+  });
+  document.getElementById("submit-profile-review")?.addEventListener("click", () =>
+    showToast("Complete all profile sections before submitting for review."));
+  document.getElementById("add-portfolio-row")?.addEventListener("click", () =>
+    upload.click());
 }
 render();

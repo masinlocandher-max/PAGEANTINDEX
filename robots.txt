@@ -3,5 +3,6 @@ Allow: /
 Disallow: /admin/
 Disallow: /dashboard/
 Disallow: /sign-in/
+Disallow: /sign-up/
 Disallow: /claim-profile/
 Sitemap: https://www.pageantindex.com/sitemap.xml
