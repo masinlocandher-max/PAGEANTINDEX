@@ -930,6 +930,11 @@ function initClaim() {
   );
 }
 function initSignIn() {
+  const signupMessage = document.querySelector("#signup-form .form-note");
+  if (signupMessage) {
+    signupMessage.id = "signup-message";
+    signupMessage.setAttribute("aria-live", "polite");
+  }
   const setTab = (name) => {
     document.querySelectorAll("[data-auth-tab]").forEach((button) =>
       button.classList.toggle("active", button.dataset.authTab === name));
@@ -961,11 +966,15 @@ function initSignIn() {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
     if (data.password !== data.confirm) {
+      const status = document.getElementById("signup-message");
+      if (status) status.textContent = "Passwords do not match.";
       showToast("Passwords do not match.", "error");
       return;
     }
     const button = event.currentTarget.querySelector('button[type="submit"]');
     button.disabled = true;
+    const status = document.getElementById("signup-message");
+    if (status) status.textContent = "Creating your secure account…";
     try {
       const response = await supabaseRequest("/auth/v1/signup", {
         method:"POST",
@@ -976,9 +985,14 @@ function initSignIn() {
         }),
       });
       if (response?.access_token) localStorage.setItem(SESSION_KEY, JSON.stringify(response));
-      showToast(response?.access_token ? "Account created." : "Check your email to confirm your account.");
+      const message = response?.access_token ? "Account created." : "Check your email to confirm your account.";
+      const status = document.getElementById("signup-message");
+      if (status) status.textContent = message;
+      showToast(message);
       setTimeout(() => location.href = response?.access_token ? "/dashboard/" : "/sign-in/", 800);
     } catch (error) {
+      const status = document.getElementById("signup-message");
+      if (status) status.textContent = error.message;
       showToast(error.message, "error");
       button.disabled = false;
     }
