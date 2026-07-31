@@ -51,7 +51,9 @@ grant insert (
   contact_mobile,
   payload
 ) on public.intake_submissions to anon, authenticated;
-grant select, update on public.intake_submissions to authenticated;
+grant select on public.intake_submissions to authenticated;
+grant update (status, reviewed_by, reviewed_at)
+  on public.intake_submissions to authenticated;
 
 create policy "Public can create pending intake"
 on public.intake_submissions

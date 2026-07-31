@@ -66,6 +66,8 @@ test("Supabase migrations preserve trust boundaries", async () => {
   assert.match(migration, /alter table public\.professional_profile_drafts enable row level security/i);
   assert.match(migration, /app_metadata' ->> 'role'\) = 'admin'/i);
   assert.match(migration, /'pageant-profile-drafts'[\s\S]+false/i);
+  assert.match(migration, /grant update \(status, reviewed_by, reviewed_at\)/i);
+  assert.doesNotMatch(migration, /grant select, update on public\.intake_submissions/i);
   assert.doesNotMatch(migration, /user_metadata/i);
   assert.doesNotMatch(migration, /for select\s+to anon[\s\S]+intake_submissions/i);
 });
