@@ -31,19 +31,82 @@ const locations = [
   "Bulacan",
 ];
 let profiles = [];
+let adminIntake = [];
+let adminDrafts = [];
 const SUPABASE_URL = "https://uwcqvsitjtknxsaypjxj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_qsC-udp3YoJQFuE-lHPivg_wa8gYMeg";
 const SESSION_KEY = "pi_supabase_session";
+const PROFILE_ASSET_BUCKET = "pageant-profile-drafts";
+let verifiedSession = null;
 
-function readSession() {
+function parseStoredSession(storage) {
   try {
-    return JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+    return JSON.parse(storage.getItem(SESSION_KEY) || "null");
   } catch {
     return null;
   }
 }
+function readStoredSession() {
+  return parseStoredSession(sessionStorage) || parseStoredSession(localStorage);
+}
+function readSession() {
+  return verifiedSession || readStoredSession();
+}
+function sessionIsPersistent() {
+  return Boolean(localStorage.getItem(SESSION_KEY));
+}
+function saveSession(session, persist = false) {
+  localStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+  (persist ? localStorage : sessionStorage).setItem(SESSION_KEY, JSON.stringify(session));
+  verifiedSession = session;
+}
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+  verifiedSession = null;
+}
 function isAdminSession() {
   return readSession()?.user?.app_metadata?.role === "admin";
+}
+async function authRequest(pathname, options = {}, accessToken = null) {
+  const headers = {
+    apikey: SUPABASE_KEY,
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+  const response = await fetch(`${SUPABASE_URL}${pathname}`, {...options, headers});
+  const responseText = response.status === 204 ? "" : await response.text();
+  let payload = null;
+  if (responseText) {
+    try { payload = JSON.parse(responseText); } catch { payload = {message: responseText}; }
+  }
+  if (!response.ok) {
+    throw new Error(payload?.message || payload?.error_description || payload?.hint || `Request failed (${response.status})`);
+  }
+  return payload;
+}
+async function validateStoredSession() {
+  let session = readStoredSession();
+  if (!session?.access_token) return null;
+  const persist = sessionIsPersistent();
+  try {
+    const expiresSoon = Number(session.expires_at || 0) * 1000 < Date.now() + 60000;
+    if (expiresSoon && session.refresh_token) {
+      session = await authRequest("/auth/v1/token?grant_type=refresh_token", {
+        method: "POST",
+        body: JSON.stringify({refresh_token: session.refresh_token}),
+      });
+    }
+    const user = await authRequest("/auth/v1/user", {method: "GET"}, session.access_token);
+    const validated = {...session, user};
+    saveSession(validated, persist);
+    return validated;
+  } catch {
+    clearSession();
+    return null;
+  }
 }
 async function supabaseRequest(pathname, options = {}) {
   const session = readSession();
@@ -55,9 +118,106 @@ async function supabaseRequest(pathname, options = {}) {
   };
   if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
   const response = await fetch(`${SUPABASE_URL}${pathname}`, {...options, headers});
-  const payload = response.status === 204 ? null : await response.json().catch(() => null);
+  const responseText = response.status === 204 ? "" : await response.text();
+  let payload = null;
+  if (responseText) {
+    try { payload = JSON.parse(responseText); } catch { payload = {message: responseText}; }
+  }
   if (!response.ok) throw new Error(payload?.message || payload?.error_description || payload?.hint || `Request failed (${response.status})`);
   return payload;
+}
+function formPayload(form) {
+  const payload = {};
+  [...form.elements].forEach((field) => {
+    if (!field || field.disabled || ["button", "submit", "file"].includes(field.type)) return;
+    const label = field.closest(".field")?.querySelector("label")?.textContent || field.closest("label")?.textContent;
+    const key = field.name || field.id || slugify(label || "field");
+    if (!key) return;
+    payload[key] = field.type === "checkbox" ? field.checked : field.value;
+  });
+  return payload;
+}
+async function submitIntake(submissionType, form, extra = {}) {
+  const payload = {...formPayload(form), ...(extra.payload || {})};
+  const record = {
+    submission_type: submissionType,
+    supplier_id: extra.supplierId || null,
+    contact_name: payload.name || payload.full_name || payload["full-name"] || payload.contact || payload.sender || null,
+    contact_email: payload.email || payload["work-email"] || payload.senderEmail || payload.professionalEmail || null,
+    contact_mobile: payload.mobile || payload.mobile_number || payload["mobile-number"] || null,
+    payload,
+  };
+  await supabaseRequest("/rest/v1/intake_submissions", {
+    method: "POST",
+    headers: {Prefer: "return=minimal"},
+    body: JSON.stringify(record),
+  });
+}
+async function uploadProfileAsset(file, userId) {
+  const extension = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const path = `${userId}/${crypto.randomUUID()}.${extension}`;
+  const encodedPath = path.split("/").map(encodeURIComponent).join("/");
+  const session = readSession();
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${PROFILE_ASSET_BUCKET}/${encodedPath}`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": file.type,
+      "x-upsert": "false",
+    },
+    body: file,
+  });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(payload?.message || payload?.error || `Asset upload failed (${response.status})`);
+  return {path, originalName: file.name, mimeType: file.type, size: file.size};
+}
+async function validateProfileImage(file) {
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    throw new Error(`${file.name} is not a supported image type.`);
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error(`${file.name} is larger than 10 MB.`);
+  }
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const dimensions = await new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve({width: image.naturalWidth, height: image.naturalHeight});
+      image.onerror = () => reject(new Error(`${file.name} could not be read as an image.`));
+      image.src = objectUrl;
+    });
+    if (Math.max(dimensions.width, dimensions.height) < 1200) {
+      throw new Error(`${file.name} must be at least 1200px on its longest side.`);
+    }
+    return dimensions;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+function recoveryParameters() {
+  const hash = new URLSearchParams(location.hash.replace(/^#/, ""));
+  if (hash.get("type") !== "recovery" || !hash.get("access_token")) return null;
+  return {
+    access_token: hash.get("access_token"),
+    refresh_token: hash.get("refresh_token"),
+    expires_at: Math.floor(Date.now() / 1000) + Number(hash.get("expires_in") || 3600),
+    token_type: hash.get("token_type") || "bearer",
+  };
+}
+function secureInquiryForm(profile) {
+  return `<p class="muted">Your inquiry will enter the private Pageant Index review queue for routing to <strong>${escapeHtml(profile.name)}</strong>. Submission does not guarantee acceptance or a response.</p><form id="inquiry-form" class="form-grid"><input type="hidden" name="profile" value="${escapeHtml(profile.name)}"><div class="field"><label>Full name</label><input name="name" required autocomplete="name"></div><div class="field"><label>Email</label><input name="email" type="email" required autocomplete="email"></div><div class="field"><label>Mobile number</label><input name="mobile" required inputmode="tel"></div><div class="field"><label>Type of event</label><select name="eventType" required><option value="">Select event type</option><option>Municipal Pageant</option><option>Provincial Pageant</option><option>National Pageant</option><option>School Pageant</option><option>Festival Pageant</option><option>Corporate Event</option><option>Campaign or Photoshoot</option></select></div><div class="field"><label>Event date</label><input name="date" type="date" required></div><div class="field"><label>Location</label><input name="location" required></div><div class="field"><label>Required service</label><select name="service" required>${profile.services.map((service) => `<option>${escapeHtml(service)}</option>`).join("")}</select></div><div class="field"><label>Estimated budget</label><select name="budget" required><option>Below ₱10,000</option><option>₱10,000–₱30,000</option><option>₱30,001–₱75,000</option><option>₱75,001–₱150,000</option><option>₱150,000+</option><option>Requesting a proposal</option></select></div><div class="field full"><label>Project details</label><textarea name="details" required placeholder="Tell the professional what you need, expected deliverables, and important dates."></textarea></div><div class="field full"><label>Preferred contact method</label><select name="preferred_contact"><option>Email</option><option>Mobile call</option><option>SMS</option><option>Messaging app</option></select></div><label class="checkbox-consent field full"><input name="consent" type="checkbox" required> I consent to Pageant Index storing and reviewing this inquiry and, when accepted, sharing it with the selected professional.</label><div class="field full"><button class="btn btn-primary btn-block">Submit Inquiry</button></div></form>`;
+}
+function accessRequiredPage() {
+  return `<main class="admin-auth-shell"><section class="admin-auth-card">${brandLockup()}<h1>Professional sign-in required</h1><p>Your profile workspace is private. Sign in with the account that owns the professional application.</p><a class="btn btn-primary btn-block" href="/sign-in/?next=/dashboard/">Sign in securely</a><a href="/sign-up/">Create a professional account</a></section></main>`;
+}
+function modalSubmissionType() {
+  const title = document.getElementById("modal-title")?.textContent || "";
+  if (title === "Report Profile") return "report";
+  if (title === "Invite a Professional") return "professional_invitation";
+  if (title === "Submit a Pageant Event") return "event";
+  if (title.startsWith("Be notified")) return "newsletter";
+  return "membership_interest";
 }
 function normalizeSupplier(row) {
   return {
@@ -88,6 +248,21 @@ async function loadSuppliers(admin = false) {
   } catch (error) {
     profiles = [];
     window.__supplierLoadError = error.message;
+  }
+}
+async function loadAdminQueues() {
+  if (!isAdminSession()) return;
+  try {
+    const [intake, drafts] = await Promise.all([
+      supabaseRequest("/rest/v1/intake_submissions?select=id,submission_type,supplier_id,contact_name,contact_email,contact_mobile,status,created_at&order=created_at.desc&limit=100"),
+      supabaseRequest("/rest/v1/professional_profile_drafts?select=user_id,business_name,category,location,public_email,submission_state,review_state,submitted_at,updated_at&order=updated_at.desc&limit=100"),
+    ]);
+    adminIntake = intake || [];
+    adminDrafts = drafts || [];
+  } catch (error) {
+    adminIntake = [];
+    adminDrafts = [];
+    window.__adminQueueLoadError = error.message;
   }
 }
 const articles = [
@@ -223,51 +398,22 @@ function escapeHtml(value) {
       })[character],
   );
 }
+function safeHttpUrl(value, fallback = "") {
+  try {
+    const url = new URL(String(value || ""), location.origin);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : fallback;
+  } catch {
+    return fallback;
+  }
+}
 function badgeHtml(p) {
   return `${p.verified ? '<span class="badge verified-badge">Verified</span>' : ""}${p.featured ? '<span class="badge gold-badge">Featured</span>' : ""}`;
 }
-function listingCard(p) {
-  return `<article class="listing-card">
-    ${p.featured ? '<span class="ribbon">Featured</span>' : ""}
-    <div class="card-media"><img src="/public/images/${p.image}" alt="Portfolio preview for ${p.name}" decoding="async"></div>
-    <div class="card-body">
-      <h3 class="card-title">${p.name}</h3><div class="card-category">${p.category}</div>
-      <div class="card-meta">● ${p.city}, ${p.location}</div>
-      <div class="card-meta"><span class="rating">★ ${p.rating}</span> <span>(${p.reviews} verified reviews)</span></div>
-      <div class="verified">${p.verified ? "Verified profile" : "Basic profile"}</div>
-      <div class="portfolio-strip">${[1, 2, 3, 4].map((i) => `<img loading="lazy" src="/public/images/gallery-${i}.jpg" alt="${p.name} portfolio item ${i}">`).join("")}</div>
-      <div class="card-actions"><a class="btn btn-secondary btn-small" href="/professional/${p.id}/">View Profile</a><button class="btn btn-primary btn-small inquiry-trigger" data-profile="${p.id}">Send Inquiry</button></div>
-    </div></article>`;
-}
-function resultCard(p) {
-  const aliases =
-    {
-      Photography: "photographer pageant photographer photo studio",
-      "Hair and Makeup": "makeup artist hair stylist hmu",
-      Designers: "gown designer national costume designer fashion designer",
-      "Pageant Camps": "pageant camp training",
-      Coaches: "pageant coach q and a coach",
-      "Voting and Tabulation": "voting provider tabulation provider",
-      "Events and Production":
-        "production team lights sound led wall livestreaming team",
-      "Crown and Sash Suppliers": "crown supplier sash supplier",
-      "PR and Digital Services":
-        "pr agency branding social media website digital services",
-    }[p.category] || "";
-  const searchText =
-    `${p.name} ${p.category} ${p.location} ${p.city} ${p.desc} ${p.services.join(" ")} ${aliases}`
-      .toLowerCase()
-      .replaceAll('"', "");
-  return `<article class="result-card ${p.featured ? "featured-result" : ""}" data-profile-card data-name="${p.name.toLowerCase()}" data-search="${searchText}" data-category="${p.category}" data-location="${p.location}" data-verified="${p.verified}" data-featured="${p.featured}" data-nationwide="${p.nationwide}" data-travel="${p.travel}" data-rating="${p.rating}" data-views="${p.views}" data-updated="${p.updated}">
-    ${p.featured ? '<span class="ribbon">Featured</span>' : ""}<div class="card-media"><img loading="lazy" src="/public/images/${p.image}" alt="${p.name} portfolio"></div>
-    <div class="result-content"><div class="profile-badges">${badgeHtml(p)}</div><h3>${p.name}</h3><div class="card-category">${p.category} · ${p.city}, ${p.location}</div><p class="result-desc">${p.desc}</p><div class="card-meta"><span class="rating">★ ${p.rating}</span> ${p.reviews} verified reviews · ${p.years} years experience</div><div class="card-meta">${p.nationwide ? "Accepts nationwide projects" : "Regional service"} · ${p.travel ? "Available for travel" : "Local projects"}</div></div>
-    <div class="result-actions"><a class="btn btn-secondary btn-small" href="/professional/${p.id}/">View Profile</a><button class="btn btn-primary btn-small inquiry-trigger" data-profile="${p.id}">Send Inquiry</button></div>
-  </article>`;
-}
 function publicSupplierCard(p) {
+  const imageUrl = safeHttpUrl(p.imageUrl, "/public/images/pageant-icon.png");
   return `<article class="result-card ${p.featured ? "featured-result" : ""}" data-profile-card data-name="${escapeHtml(p.name.toLowerCase())}" data-search="${escapeHtml(`${p.name} ${p.category} ${p.location} ${p.services.join(" ")}`.toLowerCase())}" data-category="${escapeHtml(p.category)}" data-location="${escapeHtml(p.location)}" data-verified="${p.verified}" data-featured="${p.featured}" data-nationwide="${p.nationwide}" data-travel="${p.travel}">
     ${p.featured ? '<span class="ribbon">Featured</span>' : ""}
-    <div class="card-media"><img loading="lazy" src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.name)} portfolio" onerror="this.src='/public/images/pageant-icon.png'"></div>
+    <div class="card-media"><img loading="lazy" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(p.name)} portfolio" data-fallback-image></div>
     <div class="result-content"><div class="profile-badges">${badgeHtml(p)}</div><h3>${escapeHtml(p.name)}</h3><div class="card-category">${escapeHtml(p.category)} · ${escapeHtml(p.city)}, ${escapeHtml(p.location)}</div><p class="result-desc">${escapeHtml(p.desc)}</p><div class="card-meta">${p.nationwide ? "Accepts nationwide projects" : "Regional service"} · ${p.travel ? "Available for travel" : "Local projects"}</div></div>
     <div class="result-actions"><a class="btn btn-secondary btn-small" href="/professional/${encodeURIComponent(p.id)}/">View profile</a><button class="btn btn-primary btn-small inquiry-trigger" data-profile="${escapeHtml(p.id)}">Send inquiry</button></div>
   </article>`;
@@ -485,25 +631,6 @@ function signInPage() {
   const createFirst = page === "signup";
   return `<main class="auth-shell official-auth"><section class="auth-visual"><div class="auth-visual-copy">${brandLockup(true)}<h1>The professional home of Philippine pageantry.</h1><p>Build a trusted profile, present your portfolio, receive qualified inquiries, and manage your visibility.</p></div></section><section class="auth-panel"><div class="auth-card"><a href="/" class="auth-mobile-brand">${brandLockup()}</a><h2>Professional account</h2><p class="muted">Access and manage your Pageant Index professional profile.</p><div class="auth-tabs" role="tablist"><button class="${createFirst ? "" : "active"}" data-auth-tab="signin">Sign In</button><button class="${createFirst ? "active" : ""}" data-auth-tab="signup">Create Account</button></div><form id="signin-form" class="auth-form ${createFirst ? "" : "active"}" data-auth-panel="signin"><div class="field"><label for="signin-email">Email</label><input id="signin-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></div><div class="field"><label for="signin-password">Password</label><input id="signin-password" name="password" type="password" required autocomplete="current-password" placeholder="Enter your password"></div><div class="auth-options"><label class="check-row"><input type="checkbox"> Keep me signed in</label><button type="button" class="text-link" data-forgot-password>Forgot password?</button></div><button class="btn btn-primary btn-block">Sign In</button><p class="form-note">Accounts are activated after profile ownership review.</p></form><form id="signup-form" class="auth-form ${createFirst ? "active" : ""}" data-auth-panel="signup"><div class="form-grid"><div class="field"><label>Full name</label><input name="name" required autocomplete="name"></div><div class="field"><label>Business or professional name</label><input name="business" required></div><div class="field"><label>Email</label><input name="email" type="email" required autocomplete="email"></div><div class="field"><label>Primary category</label><select name="category" required><option value="">Select category</option>${categories.map(([name]) => `<option>${name}</option>`).join("")}</select></div><div class="field"><label>Password</label><input name="password" type="password" minlength="8" required autocomplete="new-password"></div><div class="field"><label>Confirm password</label><input name="confirm" type="password" minlength="8" required autocomplete="new-password"></div></div><label class="checkbox-consent"><input type="checkbox" required> I confirm that I am authorized to represent this professional or business.</label><button class="btn btn-primary btn-block">Create Account</button><p class="form-note">Creating an account does not automatically publish a profile. Every listing is reviewed.</p></form><div class="auth-apply">Not listed yet? <a href="/list-your-business/">Apply to be listed</a></div><p class="auth-privacy">By continuing, you agree to our profile standards and privacy policy.</p></div></section></main>`;
 }
-function profilePage() {
-  const slug = path.split("/").filter(Boolean).pop();
-  const p = profiles.find((x) => x.id === slug) || profiles[0];
-  if (!p) return `<main>${pageHero("Profile unavailable.", "This supplier profile is not published in the approved Pageant Index directory.", "Directory")}<section class="section"><div class="container"><div class="directory-launch"><div class="directory-empty-icon">${assetIcon("shield-check")}</div><div><h2 class="section-title small">This listing is not available.</h2><p class="section-copy">Browse the official directory or apply to create an owner-verified profile.</p><div class="empty-actions"><a class="btn btn-primary" href="/directory/">Open directory</a><a class="btn btn-secondary" href="/list-your-business/">Apply to be listed</a></div></div></div></div></section></main>`;
-  return `<main><section class="profile-hero"><div class="container"><div class="breadcrumbs"><a href="/">Home</a> / <a href="/directory/">Directory</a> / ${p.name}</div><div class="profile-summary"><img class="profile-avatar" src="/public/images/${p.image}" alt="${p.name}"><div><h1 class="profile-name">${p.name}</h1><div class="profile-badges">${badgeHtml(p)}<span class="badge gold-badge">Founding Member</span></div><div class="card-meta">${p.category} · ${p.city}, ${p.location}</div><div class="card-meta"><span class="rating">★ ${p.rating}</span> ${p.reviews} verified reviews · ${p.years} years experience</div><div class="card-meta">${p.nationwide ? "Accepts nationwide projects" : "Regional service"} · ${p.travel ? "Available for travel" : "Local projects only"}</div></div><div class="profile-actions"><button class="btn btn-primary inquiry-trigger" data-profile="${p.id}">Send Inquiry</button><button class="btn btn-ghost save-profile" data-profile="${p.id}">Save Profile</button><button class="btn btn-ghost share-profile">Share Profile</button></div></div></div></section><div class="profile-nav"><div class="container" style="display:flex;gap:30px"><button class="active" data-tab="overview">Overview</button><button data-tab="portfolio">Portfolio</button><button data-tab="services">Services</button><button data-tab="reviews">Reviews</button><button data-tab="faqs">FAQs</button><button data-tab="info">Info</button></div></div><div class="container profile-layout"><section class="profile-main"><div class="profile-section" data-section="overview"><h2>About</h2><p>${p.desc} The team works with candidates, pageant organizations, tourism offices, schools, LGUs, and producers. Every project begins with a written scope, timeline, deliverables, and project-specific terms.</p><div class="details-grid"><div class="detail"><strong>Specialties</strong><span>${p.services.slice(0, 2).join(", ")}</span></div><div class="detail"><strong>Years of experience</strong><span>${p.years} years</span></div><div class="detail"><strong>Languages</strong><span>English, Filipino</span></div><div class="detail"><strong>Service areas</strong><span>${p.nationwide ? "Nationwide" : "Region-based"}</span></div><div class="detail"><strong>Travel availability</strong><span>${p.travel ? "Available" : "Not available"}</span></div><div class="detail"><strong>Last updated</strong><span>${p.updated}</span></div></div></div><div class="profile-section" data-section="portfolio"><h2>Professional Portfolio</h2><div class="gallery-grid">${[1, 2, 3, 4].map((i) => `<img src="/public/images/gallery-${i}.jpg" alt="${p.name} portfolio ${i}">`).join("")}</div></div><div class="profile-section" data-section="services"><h2>Services and packages</h2><p class="section-copy private-services-copy">Project rates are confidential and shared privately after the professional reviews the scope.</p><div class="service-grid">${p.services.map((s, i) => `<article class="service-card"><h3>${s}</h3><p>${["Project planning, creative direction, and professional execution based on an approved scope.", "Includes a discovery consultation, written deliverables, and timeline.", "Custom package for pageant candidates, organizations, or production teams."][i]}</p><div class="price">Private quotation</div></article>`).join("")}</div></div><div class="profile-section" data-section="reviews"><h2>Verified client reviews</h2>${[
-    ["Professionalism", "5.0"],
-    ["Communication", "4.9"],
-    ["Quality of work", "4.9"],
-    ["Timeliness", "4.8"],
-    ["Value", "4.8"],
-  ]
-    .map(
-      (x) =>
-        `<div class="detail" style="margin-bottom:8px"><strong>${x[0]}</strong><span>★ ${x[1]}</span></div>`,
-    )
-    .join(
-      "",
-    )}<article class="info-panel" style="margin-top:18px"><strong>Mariel Santos · Verified project</strong><p style="margin-top:8px">The scope, timeline, and deliverables were explained clearly. Communication remained professional throughout the project.</p><small class="muted">Service received: ${p.services[0]} · Project date: June 2026</small></article><form class="form-card" style="margin-top:18px" data-generic-form data-success="Your review was submitted for verification and moderation."><h3 class="display" style="font-size:1.5rem;margin-top:0">Write a review</h3><div class="form-grid"><div class="field"><label>Overall experience</label><select><option>5 - Excellent</option><option>4 - Good</option><option>3 - Average</option><option>2 - Poor</option><option>1 - Very poor</option></select></div><div class="field"><label>Project date</label><input type="date" required></div><div class="field full"><label>Written review</label><textarea required></textarea></div><div class="field full"><button class="btn btn-primary">Submit Review</button></div></div></form></div><div class="profile-section" data-section="faqs"><h2>Frequently asked questions</h2>${["How early should clients inquire?", "Do you accept nationwide projects?", "What is required to reserve a date?", "Are travel costs included?"].map((q, i) => `<details class="info-panel" style="margin-bottom:10px"><summary style="font-weight:700;cursor:pointer">${q}</summary><p>${["Booking 6–12 weeks ahead is recommended for major pageant projects.", "Nationwide availability depends on the service scope, schedule, and travel requirements.", "A signed agreement and reservation fee may be required after the scope is approved.", "Travel and accommodation are quoted separately unless explicitly included."][i]}</p></details>`).join("")}</div><div class="profile-section" data-section="info"><h2>Credentials and verification</h2><div class="details-grid"><div class="detail"><strong>Identity</strong><span>Verified</span></div><div class="detail"><strong>Business evidence</strong><span>Reviewed</span></div><div class="detail"><strong>Portfolio evidence</strong><span>Reviewed</span></div></div><div class="disclosure" style="margin-top:18px">Verification confirms submitted information based on category requirements. It is not a guarantee of service quality, conduct, or outcomes.</div></div></section><aside class="profile-aside"><div class="contact-card"><h3>Contact information</h3><div class="contact-row">● ${p.city}, ${p.location}</div><div class="contact-row">● ${p.nationwide ? "Nationwide service" : "Regional service"}</div><div class="contact-row">Direct contact details are shared privately after an inquiry is accepted.</div><button class="btn btn-primary btn-block inquiry-trigger" data-profile="${p.id}" style="margin-top:14px">Send Private Inquiry</button></div><div class="contact-card"><h3>Verification details</h3><div class="contact-row">✓ Identity verified</div><div class="contact-row">✓ Business evidence reviewed</div><div class="contact-row">✓ Portfolio evidence reviewed</div><div class="contact-row">Verified July 2026</div></div><div class="disclosure">${p.featured ? "This profile has paid featured visibility. Featured placement does not change its organic ranking score." : "This profile is not currently using paid featured placement."}</div><button class="btn btn-ghost btn-block" data-report-profile>Report Profile</button></aside></div><button class="btn btn-primary sticky-inquiry inquiry-trigger" data-profile="${p.id}">Send Inquiry to ${p.name}</button></main>`;
-}
 function claimPage() {
   return `<main>${pageHero("Claim an existing profile.", "Ownership claims are reviewed privately before a listing or account is activated.", "Claim Profile")}<section class="section"><div class="container" style="max-width:820px"><div class="form-card"><h2 class="display">Submit a profile claim</h2><p class="section-copy">If Pageant Index has contacted you about an unpublished listing, provide the details below. New businesses should use the listing application.</p><form class="form-grid" data-generic-form data-success="Your profile claim has been submitted for ownership review."><div class="field"><label>Business or professional name</label><input required></div><div class="field"><label>Full name</label><input required autocomplete="name"></div><div class="field"><label>Email</label><input type="email" required autocomplete="email"></div><div class="field"><label>Mobile number</label><input required></div><div class="field full"><label>Official website or social profile</label><input type="url" required></div><div class="field full"><label>Ownership evidence summary</label><textarea required placeholder="Explain your relationship to the business and the evidence available for private review."></textarea></div><label class="checkbox-consent field full"><input type="checkbox" required> I confirm that I am authorized to represent this business or professional profile.</label><div class="field full"><button class="btn btn-primary">Submit Claim</button></div></form></div></div></section></main>`;
 }
@@ -511,7 +638,10 @@ function databaseProfilePage() {
   const slug = path.split("/").filter(Boolean).pop();
   const p = profiles.find((supplier) => supplier.id === slug);
   if (!p) return `<main>${pageHero("Profile unavailable.", "This supplier profile is not published in the approved Pageant Index directory.", "Directory")}<section class="section"><div class="container"><div class="directory-launch"><div class="directory-empty-icon">${assetIcon("shield-check")}</div><div><h2 class="section-title small">This listing is not available.</h2><p class="section-copy">Browse the official directory or apply to create an owner-verified profile.</p><div class="empty-actions"><a class="btn btn-primary" href="/directory/">Open directory</a><a class="btn btn-secondary" href="/list-your-business/">Apply to be listed</a></div></div></div></div></section></main>`;
-  return `<main><section class="profile-hero"><div class="container"><div class="breadcrumbs"><a href="/">Home</a> / <a href="/directory/">Directory</a> / ${escapeHtml(p.name)}</div><div class="profile-summary"><img class="profile-avatar" src="${escapeHtml(p.logo_url || p.imageUrl)}" alt="${escapeHtml(p.name)}" onerror="this.src='/public/images/pageant-icon.png'"><div><h1 class="profile-name">${escapeHtml(p.name)}</h1><div class="profile-badges">${badgeHtml(p)}</div><div class="card-meta">${escapeHtml(p.category)} · ${escapeHtml(p.city)}, ${escapeHtml(p.location)}</div><div class="card-meta">${p.nationwide ? "Accepts nationwide projects" : "Regional service"} · ${p.travel ? "Available for travel" : "Local projects"}</div></div><div class="profile-actions"><button class="btn btn-primary inquiry-trigger" data-profile="${escapeHtml(p.id)}">Send Inquiry</button><button class="btn btn-ghost share-profile">Share Profile</button></div></div></div></section><div class="container profile-layout"><section class="profile-main"><div class="profile-section"><h2>About</h2>${p.headline ? `<h3>${escapeHtml(p.headline)}</h3>` : ""}<p>${escapeHtml(p.desc || "Profile information is being completed.")}</p><div class="details-grid"><div class="detail"><strong>Category</strong><span>${escapeHtml(p.category)}</span></div><div class="detail"><strong>Years of experience</strong><span>${p.years || "Not specified"}</span></div><div class="detail"><strong>Service area</strong><span>${p.nationwide ? "Nationwide" : escapeHtml(p.location)}</span></div><div class="detail"><strong>Travel</strong><span>${p.travel ? "Available" : "Not specified"}</span></div></div></div><div class="profile-section"><h2>Services</h2>${p.services.length ? `<div class="service-grid">${p.services.map((service)=>`<article class="service-card"><h3>${escapeHtml(service)}</h3><p>Contact the professional with your project scope for availability and private terms.</p></article>`).join("")}</div>` : '<p class="muted">Service details are being completed.</p>'}</div></section><aside class="profile-aside"><div class="contact-card"><h3>Contact this professional</h3><div class="contact-row">${escapeHtml(p.city)}, ${escapeHtml(p.location)}</div>${p.website_url ? `<a class="text-link" href="${escapeHtml(p.website_url)}" target="_blank" rel="noopener">Official website</a>` : ""}${p.social_url ? `<a class="text-link" href="${escapeHtml(p.social_url)}" target="_blank" rel="noopener">Official social page</a>` : ""}<button class="btn btn-primary btn-block inquiry-trigger" data-profile="${escapeHtml(p.id)}">Send private inquiry</button></div><div class="contact-card"><h3>Profile status</h3><div class="contact-row">${p.verified ? "Identity or business evidence verified" : "Verification not completed"}</div><div class="disclosure">Verification confirms reviewed information. It is not a guarantee of service quality, conduct, availability, or results.</div></div>${p.featured ? '<div class="disclosure">This profile has clearly labeled paid featured visibility. Featured placement does not change its organic ranking score.</div>' : ""}</aside></div></main>`;
+  const imageUrl = safeHttpUrl(p.logo_url || p.imageUrl, "/public/images/pageant-icon.png");
+  const websiteUrl = safeHttpUrl(p.website_url);
+  const socialUrl = safeHttpUrl(p.social_url);
+  return `<main><section class="profile-hero"><div class="container"><div class="breadcrumbs"><a href="/">Home</a> / <a href="/directory/">Directory</a> / ${escapeHtml(p.name)}</div><div class="profile-summary"><img class="profile-avatar" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(p.name)}" data-fallback-image><div><h1 class="profile-name">${escapeHtml(p.name)}</h1><div class="profile-badges">${badgeHtml(p)}</div><div class="card-meta">${escapeHtml(p.category)} · ${escapeHtml(p.city)}, ${escapeHtml(p.location)}</div><div class="card-meta">${p.nationwide ? "Accepts nationwide projects" : "Regional service"} · ${p.travel ? "Available for travel" : "Local projects"}</div></div><div class="profile-actions"><button class="btn btn-primary inquiry-trigger" data-profile="${escapeHtml(p.id)}">Send Inquiry</button><button class="btn btn-ghost share-profile">Share Profile</button></div></div></div></section><div class="container profile-layout"><section class="profile-main"><div class="profile-section"><h2>About</h2>${p.headline ? `<h3>${escapeHtml(p.headline)}</h3>` : ""}<p>${escapeHtml(p.desc || "Profile information is being completed.")}</p><div class="details-grid"><div class="detail"><strong>Category</strong><span>${escapeHtml(p.category)}</span></div><div class="detail"><strong>Years of experience</strong><span>${p.years || "Not specified"}</span></div><div class="detail"><strong>Service area</strong><span>${p.nationwide ? "Nationwide" : escapeHtml(p.location)}</span></div><div class="detail"><strong>Travel</strong><span>${p.travel ? "Available" : "Not specified"}</span></div></div></div><div class="profile-section"><h2>Services</h2>${p.services.length ? `<div class="service-grid">${p.services.map((service)=>`<article class="service-card"><h3>${escapeHtml(service)}</h3><p>Contact the professional with your project scope for availability and private terms.</p></article>`).join("")}</div>` : '<p class="muted">Service details are being completed.</p>'}</div></section><aside class="profile-aside"><div class="contact-card"><h3>Contact this professional</h3><div class="contact-row">${escapeHtml(p.city)}, ${escapeHtml(p.location)}</div>${websiteUrl ? `<a class="text-link" href="${escapeHtml(websiteUrl)}" target="_blank" rel="noopener">Official website</a>` : ""}${socialUrl ? `<a class="text-link" href="${escapeHtml(socialUrl)}" target="_blank" rel="noopener">Official social page</a>` : ""}<button class="btn btn-primary btn-block inquiry-trigger" data-profile="${escapeHtml(p.id)}">Send private inquiry</button></div><div class="contact-card"><h3>Profile status</h3><div class="contact-row">${p.verified ? "Identity or business evidence verified" : "Verification not completed"}</div><div class="disclosure">Verification confirms reviewed information. It is not a guarantee of service quality, conduct, availability, or results.</div></div>${p.featured ? '<div class="disclosure">This profile has clearly labeled paid featured visibility. Featured placement does not change its organic ranking score.</div>' : ""}</aside></div></main>`;
 }
 function privateMembershipOptions() {
   return `<section class="private-memberships" id="private-memberships" hidden>
@@ -526,18 +656,6 @@ function privateMembershipOptions() {
 function dashboardPage() {
   const portfolioRows = [1,2,3,4].map((i) => `<div class="portfolio-row" data-portfolio-row><button class="drag-handle" aria-label="Reorder asset">⋮⋮</button><div class="portfolio-thumb">${assetIcon("camera")}<img alt="" hidden></div><input aria-label="Portfolio caption" value="" placeholder="Add a descriptive caption"><select aria-label="Portfolio category"><option>Editorial</option><option>Event</option><option>Campaign</option><option>Product</option><option>Behind the scenes</option></select><label class="cover-radio"><input type="radio" name="cover" ${i===1?"checked":""}> Cover</label><button class="icon-button remove-asset" aria-label="Remove asset">×</button></div>`).join("");
   return `<main class="product-shell"><aside class="product-sidebar">${brandLockup(true)}<nav>${[["building-2","Overview"],["file-user","Public Profile"],["camera","Portfolio"],["clipboard-list","Services"],["inbox","Inquiries"],["megaphone","Advertising"],["settings","Settings"]].map(([icon,label],i)=>`<button class="${i===1?"active":""}" data-workspace-nav="${label.toLowerCase().replace(" ","-")}">${assetIcon(icon)}<span>${label}</span></button>`).join("")}</nav><div class="profile-progress"><strong>Profile readiness</strong><p id="readiness-message">Complete the required public details.</p><div class="progress"><span id="readiness-bar" style="width:0%"></span></div><small id="readiness-label">0% complete</small></div><a href="/">View public site</a></aside><section class="product-main"><header class="product-topbar"><div><h1>Professional Profile Workspace</h1><p>Create the public landing page clients and organizers will trust.</p></div><div><button class="btn btn-secondary" id="save-profile-draft">Save draft</button><button class="btn btn-primary" id="submit-profile-review">Submit for review</button></div></header><div class="profile-readiness"><div><strong id="readiness-score">0%</strong><span>Profile readiness</span></div><ul id="readiness-checklist"><li data-check="identity">Add your professional or business name</li><li data-check="about">Write a useful introduction</li><li data-check="services">Describe your services</li><li data-check="location">Add your service location</li><li data-check="contact">Add a public contact email</li><li data-check="portfolio">Upload at least three HD portfolio images</li></ul></div>${privateMembershipOptions()}<div class="profile-steps">${["Basics","About","Services","Portfolio","Credentials","Contact","Preview"].map((x,i)=>`<button data-step-target="${i}" class="${i===0?"active":""}"><b>${i+1}</b><span>${x}</span></button>`).join("")}</div><div class="profile-workspace"><section class="portfolio-editor"><div class="workspace-title"><h2>Public profile details</h2><p>Complete the information below, then add original portfolio work you are authorized to publish.</p></div><form class="form-grid profile-editor-form" id="profile-editor-form"><div class="field"><label>Business or professional name</label><input id="preview-business-name" name="business" required placeholder="Official public name"></div><div class="field"><label>Primary category</label><select id="preview-category" name="category">${categories.map(([name])=>`<option>${name}</option>`).join("")}</select></div><div class="field"><label>City and province</label><input id="preview-location" name="location" required placeholder="City, Province"></div><div class="field"><label>Public contact email</label><input id="preview-email" name="email" type="email" required placeholder="hello@yourbusiness.com"></div><div class="field full"><label>About your work</label><textarea id="preview-about" name="about" required placeholder="Describe your expertise, approach, and the clients you serve."></textarea></div><div class="field full"><label>Services offered</label><textarea id="preview-services" name="services" required placeholder="List the services clients can inquire about."></textarea></div><div class="field"><label>Service coverage</label><select id="preview-coverage" name="coverage"><option>Local and regional</option><option>Nationwide</option><option>Available for travel</option></select></div><div class="field"><label>Official website or social page</label><input id="preview-link" name="link" type="url" placeholder="https://"></div></form><div class="workspace-title portfolio-heading"><h2>Portfolio assets</h2><p>Images must be clear enough for clients to evaluate your work.</p></div><label class="asset-dropzone" for="portfolio-upload">${assetIcon("inbox")}<strong>Drag and drop HD images here</strong><span>or choose files from your device</span><input id="portfolio-upload" type="file" accept="image/jpeg,image/png,image/webp" multiple><span class="btn btn-secondary">Choose files</span></label><div class="asset-requirements"><strong>Image requirements</strong><span>Minimum 1200px on the longest side</span><span>JPG, PNG, or WEBP</span><span>Maximum 10MB per file</span><span>Original or authorized work only</span></div><div class="portfolio-list-head"><strong id="asset-count">0 uploaded assets</strong><span>Select one cover image and add descriptive captions.</span></div><div class="portfolio-list" id="portfolio-list">${portfolioRows}</div><button class="text-link" id="add-portfolio-row">+ Add another asset</button></section><aside class="public-profile-preview"><div class="preview-head"><h2>Live public preview</h2><button class="text-link" id="open-full-preview">Preview details</button></div><div class="preview-cover"><div class="preview-logo">${assetIcon("crown")}</div></div><div class="preview-identity"><strong id="live-business-name">Your business name</strong><span id="live-category">Professional category</span><span id="live-location">Location, Philippines</span><span class="status pending">Review required</span></div><div class="preview-section"><h3>About</h3><p id="live-about">Your professional introduction will appear here.</p></div><div class="preview-section"><h3>Services</h3><p id="live-services">Your services will appear here.</p></div><div class="preview-section"><h3>Portfolio</h3><div class="preview-portfolio" id="preview-portfolio">${[1,2,3,4].map(()=>`<span>${assetIcon("camera")}</span>`).join("")}</div></div><button class="btn btn-primary btn-block" disabled>Send inquiry</button><small>Inquiries activate after approval and publication.</small><a class="dashboard-ad-link" href="/advertise/">${assetIcon("megaphone")}<span><strong>Promote after publication</strong><small>Request a clearly labeled campaign.</small></span></a></aside></div></section></main>`;
-  return `<main class="dashboard-shell"><aside class="dashboard-sidebar">${brandLockup(true)}<nav class="dash-nav">${["Dashboard", "Profile", "Inquiries", "Portfolio", "Services", "Reviews", "Analytics", "Subscription", "Verification", "Team", "Support"].map((x, i) => `<button class="${i === 0 ? "active" : ""}" data-dash-tab="${x.toLowerCase()}">${x}</button>`).join("")}<a href="/">View Public Site</a></nav></aside><section class="dashboard-main"><div class="dash-head"><div><div class="eyebrow">Professional dashboard</div><h1>Welcome back, Alon.</h1><p class="muted">Here is what is happening with your profile.</p></div><a class="btn btn-primary" href="/professional/alon-mendoza-designs/">View Profile</a></div><div class="stat-grid"><div class="stat-card"><span>Profile views</span><strong>1,248</strong><small>↑ 12% this month</small></div><div class="stat-card"><span>Inquiries</span><strong id="dash-inquiry-count">12</strong><small>↑ 8% this month</small></div><div class="stat-card"><span>Profile saves</span><strong>89</strong><small>↑ 5% this month</small></div><div class="stat-card"><span>Review score</span><strong>4.9</strong><small>128 verified reviews</small></div></div><div class="dash-grid"><div class="panel"><h2>Recent inquiries</h2><div class="inquiry-list" id="dashboard-inquiries">${[
-    ["Maria Santos", "Municipal pageant gown", "New"],
-    ["Cebu Queen Org", "Coronation wardrobe", "Replied"],
-    ["Juan Dela Cruz", "Portrait session referral", "New"],
-  ]
-    .map(
-      (x, i) =>
-        `<div class="inquiry-row"><img class="avatar-sm" src="/public/images/gallery-${i + 1}.jpg" alt=""><div><strong>${x[0]}</strong><span>${x[1]} · July ${29 - i}, 2026</span></div><span class="status ${x[2] === "New" ? "open" : "upcoming"}">${x[2]}</span></div>`,
-    )
-    .join(
-      "",
-    )}</div><button class="text-link" style="margin-top:14px">View all inquiries →</button></div><div class="panel"><h2>Profile completion</h2><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:8px"><span>Complete profile</span><strong>92%</strong></div><div class="progress"><span style="width:92%"></span></div><ul class="feature-list"><li>Basic information</li><li>Portfolio</li><li>Services</li><li>Verification</li><li>Reviews</li></ul><button class="btn btn-secondary btn-block">Complete Profile</button></div></div><div class="dash-grid"><div class="panel"><h2>Analytics overview</h2><div class="mini-chart">${[35, 60, 48, 82, 72, 95, 74, 90, 54, 76, 43, 68].map((h) => `<i style="height:${h}%"></i>`).join("")}</div></div><div class="panel"><h2>Subscription</h2><span class="badge pink-badge">Professional Plan</span><p class="muted" style="font-size:.76rem">Renews August 20, 2026</p><button class="btn btn-primary btn-block plan-select" data-plan="Manage Professional Subscription">Manage Subscription</button></div></div></section></main>`;
 }
 function adminPage() {
   if (!isAdminSession()) {
@@ -653,7 +771,7 @@ function render() {
     case "dashboard":
       document.getElementById("app").innerHTML =
         announcementBar() +
-        dashboardPage() +
+        (verifiedSession ? dashboardPage() : accessRequiredPage()) +
         modalHtml() +
         toastHtml();
       init();
@@ -709,12 +827,14 @@ function closeModal() {
   b.classList.remove("open");
   b.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
-}
-function inquiryForm(p) {
-  return `<p class="muted">Your inquiry will be saved in the professional dashboard and sent to <strong>${p.name}</strong>.</p><form id="inquiry-form" class="form-grid"><input type="hidden" name="profile" value="${p.name}"><div class="field"><label>Full name</label><input name="name" required autocomplete="name"></div><div class="field"><label>Email</label><input name="email" type="email" required autocomplete="email"></div><div class="field"><label>Mobile number</label><input name="mobile" required inputmode="tel"></div><div class="field"><label>Type of event</label><select name="eventType" required><option value="">Select event type</option><option>Municipal Pageant</option><option>Provincial Pageant</option><option>National Pageant</option><option>School Pageant</option><option>Festival Pageant</option><option>Corporate Event</option><option>Campaign or Photoshoot</option></select></div><div class="field"><label>Event date</label><input name="date" type="date" required></div><div class="field"><label>Location</label><input name="location" required></div><div class="field"><label>Required service</label><select name="service" required>${p.services.map((s) => `<option>${s}</option>`).join("")}</select></div><div class="field"><label>Estimated budget</label><select name="budget" required><option>Below ₱10,000</option><option>₱10,000–₱30,000</option><option>₱30,001–₱75,000</option><option>₱75,001–₱150,000</option><option>₱150,000+</option><option>Requesting a proposal</option></select></div><div class="field full"><label>Project details</label><textarea name="details" required placeholder="Tell the professional what you need, expected deliverables, and important dates."></textarea></div><div class="field full"><label>Preferred contact method</label><select name="contact"><option>Email</option><option>Mobile call</option><option>SMS</option><option>Messaging app</option></select></div><label class="checkbox-consent field full"><input name="consent" type="checkbox" required> I consent to Pageant Index sharing this inquiry with the selected professional and storing it for account and anti-spam purposes.</label><div class="field full"><button class="btn btn-primary btn-block">Send Inquiry</button></div></form>`;
+  window.__directoryInterest = null;
 }
 function init() {
   document.documentElement.classList.add("motion-enabled");
+  document.querySelectorAll("[data-fallback-image]").forEach((image) =>
+    image.addEventListener("error", () => {
+      image.src = "/public/images/pageant-icon.png";
+    }, {once: true}));
   const revealTargets = document.querySelectorAll(
     ".section-head, .supplier-placeholder, .article-card, .location-card, .directory-launch, .price-card, .info-panel",
   );
@@ -764,20 +884,28 @@ function init() {
   document.querySelectorAll(".inquiry-trigger").forEach((b) =>
     b.addEventListener("click", () => {
       const p = profiles.find((x) => x.id === b.dataset.profile) || profiles[0];
-      openModal(`Send Inquiry to ${p.name}`, inquiryForm(p));
+      if (!p) return showToast("This supplier is not available for inquiries.", "error");
+      openModal(`Send Inquiry to ${p.name}`, secureInquiryForm(p));
       document
         .getElementById("inquiry-form")
-        ?.addEventListener("submit", (ev) => {
+        ?.addEventListener("submit", async (ev) => {
           ev.preventDefault();
-          const data = Object.fromEntries(new FormData(ev.target));
-          const existing = JSON.parse(
-            localStorage.getItem("pi_inquiries") || "[]",
-          );
-          existing.unshift({ ...data, createdAt: new Date().toISOString() });
-          localStorage.setItem("pi_inquiries", JSON.stringify(existing));
-          ev.target.innerHTML = `<div class="empty-state"><h3>Inquiry sent</h3><p>${p.name} will receive your project details. A copy has been saved in your account activity.</p><button type="button" class="btn btn-primary" id="close-success">Done</button></div>`;
-          document.getElementById("close-success").onclick = closeModal;
-          showToast("Inquiry sent successfully.");
+          const button = ev.target.querySelector('button[type="submit"]');
+          button.disabled = true;
+          button.textContent = "Submitting…";
+          try {
+            await submitIntake("inquiry", ev.target, {
+              supplierId: p.databaseId,
+              payload: {supplier_slug: p.id},
+            });
+            ev.target.innerHTML = `<div class="empty-state"><h3>Inquiry received</h3><p>Your project details are now in the private Pageant Index review queue. The selected professional will receive them only after routing and anti-spam review.</p><button type="button" class="btn btn-primary" id="close-success">Done</button></div>`;
+            document.getElementById("close-success").onclick = closeModal;
+            showToast("Inquiry received by Pageant Index.");
+          } catch (error) {
+            showToast(error.message, "error");
+            button.disabled = false;
+            button.textContent = "Submit Inquiry";
+          }
         });
     }),
   );
@@ -813,17 +941,32 @@ function init() {
       ),
     );
   document.querySelectorAll("[data-generic-form]").forEach((f) =>
-    f.addEventListener("submit", (e) => {
+    f.addEventListener("submit", async (e) => {
       e.preventDefault();
-      f.reset();
-      showToast(f.dataset.success || "Submitted successfully.");
+      const type = page === "claim" ? "claim" : page === "verification" ? "verification" : "review";
+      const button = f.querySelector('button[type="submit"]');
+      button.disabled = true;
+      try {
+        await submitIntake(type, f);
+        f.reset();
+        showToast(f.dataset.success || "Submission received for review.");
+      } catch (error) {
+        showToast(error.message, "error");
+      } finally {
+        button.disabled = false;
+      }
     }),
   );
   document.querySelectorAll("[data-newsletter]").forEach((f) =>
-    f.addEventListener("submit", (e) => {
+    f.addEventListener("submit", async (e) => {
       e.preventDefault();
-      f.reset();
-      showToast("You are subscribed to Pageant Index updates.");
+      try {
+        await submitIntake("newsletter", f);
+        f.reset();
+        showToast("Your subscription request was received.");
+      } catch (error) {
+        showToast(error.message, "error");
+      }
     }),
   );
   document
@@ -845,23 +988,39 @@ function init() {
     button.addEventListener("click", inviteProfessional));
   document.querySelector("[data-directory-interest]")?.addEventListener("submit", (event) => {
     event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget));
-    localStorage.setItem("pi_directory_interest", JSON.stringify({...data, createdAt:new Date().toISOString()}));
+    window.__directoryInterest = formPayload(event.currentTarget);
     openModal("Be notified when matches are published", `<p class="muted">The founding directory is accepting verified profiles. Leave your email and we will notify you when matching professionals are published.</p><form class="form-grid" data-modal-form><div class="field full"><label>Email</label><input name="email" type="email" required autocomplete="email"></div><div class="field full"><button class="btn btn-primary btn-block">Notify me</button></div></form>`);
   });
-  document.getElementById("campaign-form")?.addEventListener("submit", (event) => {
+  document.getElementById("campaign-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget));
-    localStorage.setItem("pi_campaign_request", JSON.stringify({...data, createdAt:new Date().toISOString()}));
-    event.currentTarget.innerHTML = `<div class="empty-state"><h3>Campaign request received</h3><p>Your brief has been saved. The Pageant Index team will review fit, timing, inventory, and private commercial terms before activation.</p><a class="btn btn-primary" href="/">Return home</a></div>`;
-    showToast("Campaign request submitted.");
+    const button = event.currentTarget.querySelector('button[type="submit"]');
+    button.disabled = true;
+    try {
+      await submitIntake("advertising", event.currentTarget);
+      event.currentTarget.innerHTML = `<div class="empty-state"><h3>Campaign request received</h3><p>Your brief is now in the private Pageant Index review queue. The team will review fit, timing, inventory, and commercial terms before contacting you.</p><a class="btn btn-primary" href="/">Return home</a></div>`;
+      showToast("Campaign request received.");
+    } catch (error) {
+      showToast(error.message, "error");
+      button.disabled = false;
+    }
   });
-  document.addEventListener("submit", (e) => {
+  document.addEventListener("submit", async (e) => {
     if (e.target.matches("[data-modal-form]")) {
       e.preventDefault();
-      e.target.innerHTML =
-        '<div class="empty-state"><h3>Request received</h3><p>The Pageant Index onboarding team will contact you with the next steps.</p></div>';
-      showToast("Request submitted.");
+      const button = e.target.querySelector('button[type="submit"]');
+      button.disabled = true;
+      try {
+        await submitIntake(modalSubmissionType(), e.target, {
+          payload: window.__directoryInterest || {},
+        });
+        window.__directoryInterest = null;
+        e.target.innerHTML =
+          '<div class="empty-state"><h3>Request received</h3><p>Your details are now in the private Pageant Index review queue. The team will contact you if follow-up is required.</p></div>';
+        showToast("Request received.");
+      } catch (error) {
+        showToast(error.message, "error");
+        button.disabled = false;
+      }
     }
   });
   if (page === "directory") initDirectory();
@@ -954,6 +1113,34 @@ function initClaim() {
   );
 }
 function initSignIn() {
+  const recovery = recoveryParameters();
+  if (recovery) {
+    history.replaceState(null, "", `${location.pathname}${location.search}`);
+    saveSession(recovery, false);
+    const card = document.querySelector(".auth-card");
+    card.innerHTML = `${brandLockup()}<h2>Choose a new password</h2><p class="muted">Use a unique password with at least eight characters.</p><form id="recovery-form" class="auth-form active"><div class="field"><label>New password</label><input name="password" type="password" minlength="8" required autocomplete="new-password"></div><div class="field"><label>Confirm new password</label><input name="confirm" type="password" minlength="8" required autocomplete="new-password"></div><button class="btn btn-primary btn-block">Update password</button></form>`;
+    document.getElementById("recovery-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const data = Object.fromEntries(new FormData(event.currentTarget));
+      if (data.password !== data.confirm) return showToast("Passwords do not match.", "error");
+      const button = event.currentTarget.querySelector('button[type="submit"]');
+      button.disabled = true;
+      try {
+        await authRequest("/auth/v1/user", {
+          method: "PUT",
+          body: JSON.stringify({password: data.password}),
+        }, recovery.access_token);
+        clearSession();
+        history.replaceState(null, "", "/sign-in/");
+        showToast("Password updated. Sign in with your new password.");
+        setTimeout(() => location.reload(), 700);
+      } catch (error) {
+        showToast(error.message, "error");
+        button.disabled = false;
+      }
+    });
+    return;
+  }
   const signupMessage = document.querySelector("#signup-form .form-note");
   if (signupMessage) {
     signupMessage.id = "signup-message";
@@ -961,6 +1148,8 @@ function initSignIn() {
   }
   const signupForm = document.getElementById("signup-form");
   if (signupForm) signupForm.noValidate = true;
+  const keepSignedIn = document.querySelector('.auth-options input[type="checkbox"]');
+  if (keepSignedIn) keepSignedIn.name = "keep_signed_in";
   const setTab = (name) => {
     document.querySelectorAll("[data-auth-tab]").forEach((button) =>
       button.classList.toggle("active", button.dataset.authTab === name));
@@ -980,9 +1169,11 @@ function initSignIn() {
         method:"POST",
         body:JSON.stringify({email:data.email,password:data.password}),
       });
-      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      saveSession(session, data.keep_signed_in === "on");
       showToast("Signed in successfully.");
-      setTimeout(() => location.href = isAdminSession() ? "/admin/" : "/dashboard/", 500);
+      const requestedNext = new URLSearchParams(location.search).get("next");
+      const safeNext = ["/dashboard/", "/admin/"].includes(requestedNext) ? requestedNext : null;
+      setTimeout(() => location.href = safeNext || (isAdminSession() ? "/admin/" : "/dashboard/"), 500);
     } catch (error) {
       showToast(error.message, "error");
       button.disabled = false;
@@ -1022,7 +1213,7 @@ function initSignIn() {
           data:{full_name:data.name,business_name:data.business,category:data.category},
         }),
       });
-      if (response?.access_token) localStorage.setItem(SESSION_KEY, JSON.stringify(response));
+      if (response?.access_token) saveSession(response, false);
       const message = response?.access_token ? "Account created." : "Check your email to confirm your account.";
       const status = document.getElementById("signup-message");
       if (status) status.textContent = message;
@@ -1035,8 +1226,22 @@ function initSignIn() {
       button.disabled = false;
     }
   });
-  document.querySelector("[data-forgot-password]")?.addEventListener("click", () =>
-    showToast("Password recovery will activate with secure authentication."));
+  document.querySelector("[data-forgot-password]")?.addEventListener("click", async () => {
+    const email = document.getElementById("signin-email");
+    if (!email.value || !email.validity.valid) {
+      email.focus();
+      return showToast("Enter your account email first.", "error");
+    }
+    try {
+      await authRequest(`/auth/v1/recover?redirect_to=${encodeURIComponent(`${location.origin}/sign-in/`)}`, {
+        method: "POST",
+        body: JSON.stringify({email: email.value}),
+      });
+      showToast("If the account exists, a secure recovery email has been sent.");
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  });
 }
 function initCalendar() {
   document
@@ -1119,6 +1324,19 @@ function supplierFormPayload(form, mode) {
     status: mode === "draft" ? "draft" : (form.dataset.databaseId ? requestedStatus : "published"),
   };
 }
+function adminQueueMarkup() {
+  const statusOptions = ["pending", "in_review", "resolved", "rejected", "spam"];
+  const intakeRows = adminIntake.length
+    ? adminIntake.map((item) => `<tr data-intake-id="${escapeHtml(item.id)}"><td><strong>${escapeHtml(item.submission_type.replaceAll("_", " "))}</strong></td><td>${escapeHtml(item.contact_name || "Not provided")}<br><small>${escapeHtml(item.contact_email || item.contact_mobile || "No contact supplied")}</small></td><td>${escapeHtml(new Date(item.created_at).toLocaleString("en-PH"))}</td><td><select data-intake-status>${statusOptions.map((status) => `<option value="${status}" ${status === item.status ? "selected" : ""}>${status.replaceAll("_", " ")}</option>`).join("")}</select></td><td><button class="btn btn-small btn-secondary" data-update-intake>Update</button></td></tr>`).join("")
+    : '<tr class="empty-table-row"><td colspan="5"><strong>No intake submissions</strong><span>New inquiries, claims, verification, advertising, and event requests will appear here.</span></td></tr>';
+  const draftRows = adminDrafts.length
+    ? adminDrafts.map((draft) => `<tr><td><strong>${escapeHtml(draft.business_name || "Unnamed draft")}</strong><br><small>${escapeHtml(draft.public_email || "No public email")}</small></td><td>${escapeHtml(draft.category || "Not selected")}</td><td>${escapeHtml(draft.location || "Not provided")}</td><td>${escapeHtml(draft.submission_state.replaceAll("_", " "))}</td><td>${escapeHtml(draft.review_state.replaceAll("_", " "))}</td><td>${escapeHtml(new Date(draft.updated_at).toLocaleString("en-PH"))}</td></tr>`).join("")
+    : '<tr class="empty-table-row"><td colspan="6"><strong>No professional drafts</strong><span>Authenticated professional applications will appear here after their first secure save.</span></td></tr>';
+  const loadError = window.__adminQueueLoadError
+    ? `<div class="disclosure admin-queue-error">Queue unavailable: ${escapeHtml(window.__adminQueueLoadError)}</div>`
+    : "";
+  return `${loadError}<section class="admin-primary admin-queue-section"><div class="panel-title"><h2>Private intake queue</h2><span>${adminIntake.length} records</span></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Type</th><th>Contact</th><th>Received</th><th>Status</th><th>Action</th></tr></thead><tbody>${intakeRows}</tbody></table></div></section><section class="admin-primary admin-queue-section"><div class="panel-title"><h2>Professional profile drafts</h2><span>${adminDrafts.length} records</span></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Professional</th><th>Category</th><th>Location</th><th>Submission</th><th>Review</th><th>Updated</th></tr></thead><tbody>${draftRows}</tbody></table></div></section>`;
+}
 function initAdmin() {
   const login = document.getElementById("admin-login-form");
   if (login) {
@@ -1130,18 +1348,41 @@ function initAdmin() {
         const credentials = Object.fromEntries(new FormData(login));
         const session = await supabaseRequest("/auth/v1/token?grant_type=password", {method:"POST", body:JSON.stringify(credentials)});
         if (session?.user?.app_metadata?.role !== "admin") throw new Error("This account is not authorized for administration.");
-        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        saveSession(session, false);
         location.reload();
       } catch (error) {
-        localStorage.removeItem(SESSION_KEY);
+        clearSession();
         message.textContent = error.message;
       }
     });
     return;
   }
+  const adminLayout = document.querySelector(".admin-suppliers-layout");
+  adminLayout?.insertAdjacentHTML("beforeend", adminQueueMarkup());
+  document.querySelectorAll("[data-update-intake]").forEach((button) =>
+    button.addEventListener("click", async () => {
+      const row = button.closest("[data-intake-id]");
+      const status = row.querySelector("[data-intake-status]").value;
+      button.disabled = true;
+      try {
+        await supabaseRequest(`/rest/v1/intake_submissions?id=eq.${encodeURIComponent(row.dataset.intakeId)}`, {
+          method: "PATCH",
+          headers: {Prefer: "return=minimal"},
+          body: JSON.stringify({
+            status,
+            reviewed_by: verifiedSession.user.id,
+            reviewed_at: new Date().toISOString(),
+          }),
+        });
+        showToast("Intake status updated.");
+      } catch (error) {
+        showToast(error.message, "error");
+        button.disabled = false;
+      }
+    }));
   document.getElementById("admin-signout")?.addEventListener("click", async () => {
     try { await supabaseRequest("/auth/v1/logout", {method:"POST"}); } catch {}
-    localStorage.removeItem(SESSION_KEY);
+    clearSession();
     location.reload();
   });
   const applyFilters = () => {
@@ -1212,8 +1453,10 @@ function initAdmin() {
 }
 function initDashboard() {
   const upload = document.getElementById("portfolio-upload");
-  if (!upload) return;
-  let uploadedCount = 0;
+  if (!upload || !verifiedSession?.user?.id) return;
+  let selectedFiles = [];
+  let portfolioManifest = [];
+  let previewUrls = [];
   const fields = {
     business: document.getElementById("preview-business-name"),
     category: document.getElementById("preview-category"),
@@ -1224,19 +1467,30 @@ function initDashboard() {
     coverage: document.getElementById("preview-coverage"),
     link: document.getElementById("preview-link"),
   };
+  const signout = document.createElement("button");
+  signout.className = "btn btn-ghost";
+  signout.type = "button";
+  signout.textContent = "Sign out";
+  document.querySelector(".product-topbar > div:last-child")?.prepend(signout);
+  signout.addEventListener("click", async () => {
+    try { await supabaseRequest("/auth/v1/logout", {method: "POST"}); } catch {}
+    clearSession();
+    location.href = "/sign-in/";
+  });
   const renderProfileState = () => {
     document.getElementById("live-business-name").textContent = fields.business.value || "Your business name";
     document.getElementById("live-category").textContent = fields.category.value || "Professional category";
     document.getElementById("live-location").textContent = fields.location.value || "Location, Philippines";
     document.getElementById("live-about").textContent = fields.about.value || "Your professional introduction will appear here.";
     document.getElementById("live-services").textContent = fields.services.value || "Your services will appear here.";
+    const assetCount = portfolioManifest.length + selectedFiles.length;
     const checks = {
       identity: Boolean(fields.business.value.trim()),
       about: fields.about.value.trim().length >= 40,
       services: fields.services.value.trim().length >= 10,
       location: Boolean(fields.location.value.trim()),
       contact: fields.email.validity.valid && Boolean(fields.email.value),
-      portfolio: uploadedCount >= 3,
+      portfolio: assetCount >= 3,
     };
     const completed = Object.values(checks).filter(Boolean).length;
     const score = Math.round(completed / Object.keys(checks).length * 100);
@@ -1244,65 +1498,136 @@ function initDashboard() {
     document.getElementById("readiness-label").textContent = `${score}% complete`;
     document.getElementById("readiness-bar").style.width = `${score}%`;
     document.getElementById("readiness-message").textContent = score === 100 ? "Ready for editorial review." : "Complete the required public details.";
+    document.getElementById("asset-count").textContent = `${portfolioManifest.length} saved · ${selectedFiles.length} selected`;
     const privateMemberships = document.getElementById("private-memberships");
     if (privateMemberships) privateMemberships.hidden = score !== 100;
     Object.entries(checks).forEach(([name, complete]) =>
       document.querySelector(`[data-check="${name}"]`)?.classList.toggle("complete", complete));
     return score;
   };
-  const updatePreview = (files) => {
-    uploadedCount = files.length;
+  const updatePreview = () => {
+    previewUrls.forEach(URL.revokeObjectURL);
+    previewUrls = selectedFiles.map((file) => URL.createObjectURL(file));
     const slots = [...document.querySelectorAll("#preview-portfolio span")];
-    [...files].slice(0, slots.length).forEach((file, index) => {
-      slots[index].innerHTML = `<img src="${URL.createObjectURL(file)}" alt="">`;
+    slots.forEach((slot, index) => {
+      if (previewUrls[index]) slot.innerHTML = `<img src="${previewUrls[index]}" alt="Selected portfolio preview">`;
+      else if (portfolioManifest[index]) slot.innerHTML = assetIcon("shield-check");
+      else slot.innerHTML = assetIcon("camera");
     });
-    document.getElementById("asset-count").textContent =
-      `${files.length} uploaded asset${files.length === 1 ? "" : "s"}`;
     renderProfileState();
   };
-  upload.addEventListener("change", () => updatePreview(upload.files));
+  upload.addEventListener("change", async () => {
+    const files = [...upload.files];
+    try {
+      await Promise.all(files.map(validateProfileImage));
+      selectedFiles = files;
+      updatePreview();
+    } catch (error) {
+      selectedFiles = [];
+      upload.value = "";
+      updatePreview();
+      showToast(error.message, "error");
+    }
+  });
   Object.values(fields).forEach((field) => field.addEventListener("input", renderProfileState));
   Object.values(fields).forEach((field) => field.addEventListener("change", renderProfileState));
   document.querySelectorAll(".remove-asset").forEach((button) =>
     button.addEventListener("click", () => button.closest("[data-portfolio-row]")?.remove()));
-  document.getElementById("save-profile-draft")?.addEventListener("click", () => {
-    const draft = {
-      business: document.getElementById("preview-business-name").value,
-      category: document.getElementById("preview-category").value,
-      location: document.getElementById("preview-location").value,
-      about: document.getElementById("preview-about").value,
-      email: fields.email.value,
-      services: document.getElementById("preview-services").value,
-      coverage: fields.coverage.value,
-      link: fields.link.value,
-      savedAt: new Date().toISOString()
-    };
-    localStorage.setItem("pi_profile_draft", JSON.stringify(draft));
-    showToast("Profile draft saved on this device.");
-  });
-  document.getElementById("submit-profile-review")?.addEventListener("click", () => {
+  const persistDraft = async (submissionState, button) => {
+    button.disabled = true;
+    const originalText = button.textContent;
+    button.textContent = submissionState === "submitted" ? "Submitting…" : "Saving…";
+    let uploadedThisAttempt = 0;
+    try {
+      for (const file of selectedFiles) {
+        portfolioManifest.push(await uploadProfileAsset(file, verifiedSession.user.id));
+        uploadedThisAttempt += 1;
+      }
+      selectedFiles = [];
+      upload.value = "";
+      await supabaseRequest("/rest/v1/professional_profile_drafts?on_conflict=user_id", {
+        method: "POST",
+        headers: {Prefer: "resolution=merge-duplicates,return=minimal"},
+        body: JSON.stringify({
+          user_id: verifiedSession.user.id,
+          business_name: fields.business.value.trim(),
+          category: fields.category.value || null,
+          location: fields.location.value.trim() || null,
+          public_email: fields.email.value.trim() || null,
+          about: fields.about.value.trim() || null,
+          services: fields.services.value.trim() || null,
+          coverage: fields.coverage.value || null,
+          official_link: fields.link.value.trim() || null,
+          portfolio_manifest: portfolioManifest,
+          submission_state: submissionState,
+        }),
+      });
+      updatePreview();
+      if (submissionState === "submitted") {
+        openModal("Profile submitted for review", `<div class="empty-state">${assetIcon("shield-check")}<h3>Your profile is now in review.</h3><p>Pageant Index will review ownership, public information, portfolio rights, and category evidence before publication. Submission does not guarantee approval, verification, ranking, or paid visibility.</p><button class="btn btn-primary" type="button" id="close-review-success">Done</button></div>`);
+        document.getElementById("close-review-success").onclick = closeModal;
+      } else {
+        showToast("Profile draft saved securely.");
+      }
+    } catch (error) {
+      if (uploadedThisAttempt) selectedFiles = selectedFiles.slice(uploadedThisAttempt);
+      showToast(error.message, "error");
+    } finally {
+      button.disabled = false;
+      button.textContent = originalText;
+      renderProfileState();
+    }
+  };
+  document.getElementById("save-profile-draft")?.addEventListener("click", (event) =>
+    persistDraft("draft", event.currentTarget));
+  document.getElementById("submit-profile-review")?.addEventListener("click", (event) => {
     if (renderProfileState() < 100) {
       showToast("Complete every readiness item before submitting.", "error");
       document.querySelector(".profile-readiness")?.scrollIntoView({behavior:"smooth"});
       return;
     }
-    localStorage.setItem("pi_profile_review", JSON.stringify({status:"submitted",submittedAt:new Date().toISOString()}));
-    openModal("Profile submitted for review", `<div class="empty-state">${assetIcon("shield-check")}<h3>Your profile is now in review.</h3><p>Pageant Index will review ownership, public information, portfolio rights, and category evidence before publication. Submission does not guarantee approval or ranking.</p><button class="btn btn-primary" type="button" id="close-review-success">Done</button></div>`);
-    document.getElementById("close-review-success").onclick = closeModal;
+    persistDraft("submitted", event.currentTarget);
   });
-  document.getElementById("add-portfolio-row")?.addEventListener("click", () =>
-    upload.click());
+  document.getElementById("add-portfolio-row")?.addEventListener("click", () => upload.click());
   document.getElementById("open-full-preview")?.addEventListener("click", () =>
     openModal("Public profile preview", `<div class="preview-dialog"><h3>${escapeHtml(fields.business.value || "Your business name")}</h3><p>${escapeHtml(fields.category.value)} · ${escapeHtml(fields.location.value || "Location, Philippines")}</p><h4>About</h4><p>${escapeHtml(fields.about.value || "Your professional introduction will appear here.")}</p><h4>Services</h4><p>${escapeHtml(fields.services.value || "Your services will appear here.")}</p></div>`));
-  const draft = JSON.parse(localStorage.getItem("pi_profile_draft") || "null");
-  if (draft) Object.entries(fields).forEach(([name, field]) => {
-    if (draft[name]) field.value = draft[name];
-  });
-  renderProfileState();
+  const loadDraft = async () => {
+    const metadata = verifiedSession.user.user_metadata || {};
+    fields.business.value = metadata.business_name || "";
+    fields.category.value = metadata.category || fields.category.value;
+    fields.email.value = verifiedSession.user.email || "";
+    try {
+      const rows = await supabaseRequest(`/rest/v1/professional_profile_drafts?select=business_name,category,location,public_email,about,services,coverage,official_link,portfolio_manifest,submission_state,review_state&user_id=eq.${encodeURIComponent(verifiedSession.user.id)}&limit=1`);
+      const draft = rows?.[0];
+      if (draft) {
+        fields.business.value = draft.business_name || fields.business.value;
+        fields.category.value = draft.category || fields.category.value;
+        fields.location.value = draft.location || "";
+        fields.email.value = draft.public_email || fields.email.value;
+        fields.about.value = draft.about || "";
+        fields.services.value = draft.services || "";
+        fields.coverage.value = draft.coverage || fields.coverage.value;
+        fields.link.value = draft.official_link || "";
+        portfolioManifest = Array.isArray(draft.portfolio_manifest) ? draft.portfolio_manifest : [];
+      }
+    } catch (error) {
+      showToast(`Profile workspace unavailable: ${error.message}`, "error");
+    }
+    localStorage.removeItem("pi_profile_draft");
+    localStorage.removeItem("pi_profile_review");
+    updatePreview();
+  };
+  loadDraft();
 }
 async function bootstrap() {
+  if (["dashboard", "admin"].includes(page)) {
+    await validateStoredSession();
+  }
   if (["home","directory","categories","locations","profile","admin"].includes(page)) {
     await loadSuppliers(page === "admin");
+  }
+  if (page === "admin" && isAdminSession()) {
+    await loadAdminQueues();
   }
   render();
 }
