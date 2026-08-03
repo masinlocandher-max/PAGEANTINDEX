@@ -17,6 +17,7 @@ test("audience browser scripts parse", async () => {
     "public/pageantindex-organizer-form-guards.js",
     "public/pageantindex-submission-controls.js",
     "public/pageantindex-admin-moderation.js",
+    "public/pageantindex-admin-results.js",
     "app/audience.js",
     "app/organizer.js",
     "app/pageant-data.js",
@@ -108,6 +109,7 @@ test("owners can explicitly submit reviewed media and organizer drafts", async (
 
 test("admin moderation covers every reviewed audience and content type", async () => {
   const admin = await read("public/pageantindex-admin-moderation.js");
+  const adminResults = await read("public/pageantindex-admin-results.js");
   const migration = await read("supabase/migrations/20260803171500_admin_moderation_extensions.sql");
   const hardened = await read("supabase/migrations/20260803172000_harden_pageant_organizer_reviews.sql");
   const loader = await read("public/seo.js");
@@ -118,6 +120,8 @@ test("admin moderation covers every reviewed audience and content type", async (
   ]) assert.match(admin, new RegExp(term));
   assert.match(admin, /Audience and content moderation/);
   assert.match(admin, /Approve and publish/);
+  assert.match(adminResults, /pageant_result_drafts/);
+  assert.match(adminResults, /admin_review_pageant_result/);
   assert.match(migration, /admin_review_pageant_edition/);
   assert.match(migration, /admin_review_pageant_experience/);
   assert.match(migration, /admin_review_organizer_announcement/);
@@ -126,6 +130,7 @@ test("admin moderation covers every reviewed audience and content type", async (
   assert.match(loader, /pageantindex-organizer-publishing\.js/);
   assert.match(loader, /pageantindex-organizer-form-guards\.js/);
   assert.match(loader, /pageantindex-admin-moderation\.js/);
+  assert.match(loader, /pageantindex-admin-results\.js/);
   assert.match(loader, /pageantindex-admin-moderation\.css/);
 });
 
