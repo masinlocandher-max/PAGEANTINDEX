@@ -24,9 +24,9 @@ Mobile-first application: [app.pageantindex.com](https://app.pageantindex.com)
   merchandise, and approved partners
 
 The public website remains open. Browsing, merchandise guest checkout,
-pay-per-view access, and public voting must not require a Pageant Index account
-unless a specific organizer or payment provider legally requires identity
-verification.
+pay-per-view access, livestream access, tickets, and public voting must not
+require a Pageant Index account unless a specific organizer or payment provider
+legitimately requires identity verification.
 
 ## Shared experience
 
@@ -113,49 +113,77 @@ invented businesses, candidates, organizations, media outlets, ratings,
 reviews, inquiries, partnerships, advertisements, events, results, or activity
 records.
 
-## Data model and deployment order
+## Live data model and trust controls
 
-The canonical live supplier directory model is `public.suppliers`, created and
-extended through versioned files in `supabase/migrations/`. Public clients can
-read only published rows. Only accounts with an administrator role in protected
-`app_metadata` may verify, feature, or publish supplier, media, organization,
-pageant-edition, public-experience, announcement, and official-result records.
+The canonical live supplier directory is `public.suppliers`. Private audience
+profiles, drafts, saved records, official pageant records, public experiences,
+and results use separate RLS-protected tables.
 
-Private identity is stored separately from public profile information.
-Enthusiast preferences, candidate drafts and history, supplier drafts, media
-profiles and articles, organization profiles, pageant editions, rosters,
-experience requests, announcement requests, and official result requests have
-their own row-level security policies. Owners cannot self-publish, self-verify,
-or purchase trust.
+All public tables have row-level security enabled. Owner column grants exclude
+review state, publication timestamps, linked public announcements, and other
+administrator controls. An Organizer owner may create and edit records only for
+her own organization and editions. Owners cannot self-publish, self-verify, or
+purchase trust.
 
-`supabase/schema.sql` is a future-platform reference, not a production migration.
-It must not be run against the live project as a shortcut.
+Administrator review endpoints are public-schema `SECURITY INVOKER` wrappers.
+The privileged implementation lives in the non-exposed `private` schema,
+requires the protected `app_metadata.role = admin` claim, accepts submitted
+records only, and cannot be executed anonymously.
 
-For a release containing database and frontend changes, apply these migrations
-in order:
+The private `pageant-profile-drafts` storage bucket accepts JPEG, PNG, and WebP
+files up to 10 MB. Owners can access only files inside their own user folder;
+administrators may review them.
 
-1. `20260731215441_add_pageantindex_intake_and_profile_drafts.sql`
-2. `20260803163000_global_candidate_supplier_ecosystem.sql`
-3. `20260803164000_global_public_supplier_fields.sql`
-4. `20260803170000_expand_audiences_media_content.sql`
-5. `20260803171000_add_pageant_organizers.sql`
-6. `20260803171500_admin_moderation_extensions.sql`
-7. `20260803171900_prepare_organizer_review_hardening.sql`
-8. `20260803172000_harden_pageant_organizer_reviews.sql`
-9. `20260803173000_fix_public_pageant_column_grants.sql`
-10. `20260803174000_admin_rpc_compatibility.sql`
+## Production migration history
 
-Then:
+`supabase/migrations/` mirrors the migration versions recorded by the live
+Supabase project. Apply them in timestamp order after the three existing
+supplier-admin migrations:
 
-1. Run Supabase Security Advisor and verify RLS with anonymous, Enthusiast,
-   Candidate, Supplier owner, Media owner, Organizer owner, and Administrator
+1. `20260803172117_pageantindex_foundation.sql`
+2. `20260803172305_pageantindex_profiles.sql`
+3. `20260803172436_pageantindex_media_content.sql`
+4. `20260803172616_pageantindex_organization_core.sql`
+5. `20260803172919_pageantindex_organization_operations.sql`
+6. `20260803173041_pageantindex_admin_functions.sql`
+7. `20260803173134_revoke_anonymous_admin_rpc_access.sql`
+8. `20260803173310_isolate_admin_review_implementations.sql`
+9. `20260803173435_optimize_pageantindex_rls_and_indexes.sql`
+
+The former draft migration chain was removed because it referenced a nonexistent
+`public.events` table. Saved pageants now correctly reference reviewed
+`public.pageant_edition_drafts` records.
+
+`supabase/schema.sql` remains a future-platform reference. It must not be applied
+to the live project as a shortcut.
+
+## Verification completed
+
+- Supabase Security Advisor reports no findings.
+- Every public table has RLS enabled.
+- Anonymous execution of administrator RPCs is revoked.
+- Non-administrators are rejected by protected review functions.
+- Organizer owners cannot write review or publication columns.
+- Organizer owners can create editions only for their own organization.
+- Anonymous reads return approved, submitted, published records only.
+- Foreign-key indexes and duplicate SELECT policies were optimized.
+- Repository regression tests cover the five roles, migration history,
+  protected grants, public feeds, admin RPC signatures, and responsive clients.
+
+## Remaining operational checks
+
+Before a public launch:
+
+1. Configure Supabase Auth site URLs, recovery redirects, SMTP, and allowed
+   origins.
+2. Test registration, confirmation, sign-in, recovery, and sign-out for all five
+   account types.
+3. Test supplier portfolios, candidate history, media submission, organization
+   editions, rosters, public experiences, announcements, and results with real
    accounts.
-2. Configure production Site URL, recovery redirects, SMTP, and allowed origins.
-3. Confirm `www.pageantindex.com` and `app.pageantindex.com` point to the reviewed
-   deployment.
-4. Deploy the frontend only after every required migration succeeds.
-5. Run `npm test` and smoke-test all five registration types, sign-in, recovery,
-   supplier multi-category selection, candidate history, media drafts and review,
-   organization editions and rosters, voting and broadcast requests, official
-   results, announcements, featured ads, saved suppliers, guest experiences,
-   country flags, portfolio uploads, admin review, and responsive layouts.
+4. Test administrator review and publication using an account whose protected
+   `app_metadata.role` is `admin`.
+5. Test guest voting, livestream, pay-per-view, ticket, and merchandise entry
+   paths without forcing unnecessary registration.
+6. Run `npm test` and complete mobile, tablet, and desktop browser QA before
+   merging the launch branch.
