@@ -11,6 +11,7 @@
   appendStyle("/public/pageantindex-ecosystem.css?v=20260803");
   appendStyle("/public/pageantindex-audience.css?v=20260803-3");
   appendStyle("/public/pageantindex-organizer.css?v=20260803");
+  appendStyle("/public/pageantindex-submission-controls.css?v=20260803");
   appendStyle("/public/pageantindex-admin-moderation.css?v=20260803");
 
   const appendScript = (src, onload) => {
@@ -28,8 +29,10 @@
           appendScript("/public/pageantindex-audience.js?v=20260803-2", () => {
             appendScript("/public/pageantindex-organizer-publishing.js?v=20260803", () => {
               appendScript("/public/pageantindex-organizer-form-guards.js?v=20260803", () => {
-                appendScript("/public/pageantindex-ecosystem.js?v=20260803", () => {
-                  appendScript("/public/pageantindex-admin-moderation.js?v=20260803");
+                appendScript("/public/pageantindex-submission-controls.js?v=20260803", () => {
+                  appendScript("/public/pageantindex-ecosystem.js?v=20260803", () => {
+                    appendScript("/public/pageantindex-admin-moderation.js?v=20260803");
+                  });
                 });
               });
             });
