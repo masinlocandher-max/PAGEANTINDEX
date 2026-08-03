@@ -12,6 +12,7 @@ test("audience browser scripts parse", async () => {
   for (const path of [
     "public/pageantindex-audience.js",
     "public/pageantindex-organizer.js",
+    "public/pageantindex-admin-moderation.js",
     "app/audience.js",
     "app/organizer.js",
   ]) {
@@ -75,6 +76,25 @@ test("organizers have a distinct official pageant workflow", async () => {
   assert.match(migration, /experience_type in \('voting','livestream','pay_per_view','tickets','merchandise'\)/);
   assert.match(migration, /guest_access_requested boolean not null default true/);
   assert.match(migration, /admin_review_pageant_organization/);
+});
+
+test("admin moderation covers every reviewed audience and content type", async () => {
+  const admin = await read("public/pageantindex-admin-moderation.js");
+  const migration = await read("supabase/migrations/20260803172000_admin_moderation_extensions.sql");
+  const loader = await read("public/seo.js");
+  for (const term of [
+    "media_profile_drafts", "media_articles", "pageant_organization_drafts",
+    "pageant_edition_drafts", "organizer_announcement_requests",
+    "pageant_experience_requests", "announcements", "featured_ads",
+  ]) assert.match(admin, new RegExp(term));
+  assert.match(admin, /Audience and content moderation/);
+  assert.match(admin, /Approve and publish/);
+  assert.match(migration, /admin_review_pageant_edition/);
+  assert.match(migration, /admin_review_pageant_experience/);
+  assert.match(migration, /admin_review_organizer_announcement/);
+  assert.match(loader, /pageantindex-admin-moderation\.js/);
+  assert.match(loader, /pageantindex-admin-moderation\.css/);
+  assert.doesNotMatch(loader, /organizer-preflight|organizer-publishing/);
 });
 
 test("common supplier announcements and featured content are visible to all audiences", async () => {
