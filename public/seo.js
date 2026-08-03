@@ -1,20 +1,17 @@
 "use strict";
 
 (() => {
-  const ecosystemStyle = document.createElement("link");
-  ecosystemStyle.rel = "stylesheet";
-  ecosystemStyle.href = "/public/pageantindex-ecosystem.css?v=20260803";
-  document.head.appendChild(ecosystemStyle);
+  const appendStyle = (href) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    document.head.appendChild(link);
+  };
 
-  const audienceStyle = document.createElement("link");
-  audienceStyle.rel = "stylesheet";
-  audienceStyle.href = "/public/pageantindex-audience.css?v=20260803-3";
-  document.head.appendChild(audienceStyle);
-
-  const organizerStyle = document.createElement("link");
-  organizerStyle.rel = "stylesheet";
-  organizerStyle.href = "/public/pageantindex-organizer.css?v=20260803";
-  document.head.appendChild(organizerStyle);
+  appendStyle("/public/pageantindex-ecosystem.css?v=20260803");
+  appendStyle("/public/pageantindex-audience.css?v=20260803-3");
+  appendStyle("/public/pageantindex-organizer.css?v=20260803");
+  appendStyle("/public/pageantindex-admin-moderation.css?v=20260803");
 
   const appendScript = (src, onload) => {
     const script = document.createElement("script");
@@ -26,12 +23,10 @@
 
   appendScript("/public/pageantindex-config.js?v=20260803-3", () => {
     appendScript("/public/pageantindex-preflight.js?v=20260803", () => {
-      appendScript("/public/pageantindex-organizer-preflight.js?v=20260803", () => {
-        appendScript("/public/pageantindex-organizer.js?v=20260803", () => {
-          appendScript("/public/pageantindex-audience.js?v=20260803-2", () => {
-            appendScript("/public/pageantindex-organizer-publishing.js?v=20260803", () => {
-              appendScript("/public/pageantindex-ecosystem.js?v=20260803");
-            });
+      appendScript("/public/pageantindex-organizer.js?v=20260803", () => {
+        appendScript("/public/pageantindex-audience.js?v=20260803-2", () => {
+          appendScript("/public/pageantindex-ecosystem.js?v=20260803", () => {
+            appendScript("/public/pageantindex-admin-moderation.js?v=20260803");
           });
         });
       });
@@ -76,14 +71,11 @@
     datePublished: item.published,
     dateModified: "2026-08-03",
     inLanguage: "en",
-    author: { "@type": "Organization", name: "Pageant Index Editorial" },
+    author: {"@type": "Organization", name: "Pageant Index Editorial"},
     publisher: {
       "@type": "Organization",
       name: "Pageant Index",
-      logo: {
-        "@type": "ImageObject",
-        url: `${origin}/public/images/pageant-icon.png`
-      }
+      logo: {"@type": "ImageObject", url: `${origin}/public/images/pageant-icon.png`}
     },
     mainEntityOfPage: `${origin}${location.pathname}`
   };
