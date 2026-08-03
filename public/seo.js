@@ -8,7 +8,7 @@
 
   const audienceStyle = document.createElement("link");
   audienceStyle.rel = "stylesheet";
-  audienceStyle.href = "/public/pageantindex-audience.css?v=20260803-2";
+  audienceStyle.href = "/public/pageantindex-audience.css?v=20260803-3";
   document.head.appendChild(audienceStyle);
 
   const appendScript = (src, onload) => {
@@ -19,10 +19,12 @@
     document.head.appendChild(script);
   };
 
-  appendScript("/public/pageantindex-config.js?v=20260803-2", () => {
+  appendScript("/public/pageantindex-config.js?v=20260803-3", () => {
     appendScript("/public/pageantindex-preflight.js?v=20260803", () => {
-      appendScript("/public/pageantindex-audience.js?v=20260803-2", () => {
-        appendScript("/public/pageantindex-ecosystem.js?v=20260803");
+      appendScript("/public/pageantindex-organizer.js?v=20260803", () => {
+        appendScript("/public/pageantindex-audience.js?v=20260803-2", () => {
+          appendScript("/public/pageantindex-ecosystem.js?v=20260803");
+        });
       });
     });
   });
