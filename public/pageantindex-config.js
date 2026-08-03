@@ -64,25 +64,84 @@
   ];
 
   const candidateGoals = [
-    "Find pageants",
     "Find suppliers",
+    "Track my current and previous pageants",
+    "Find pageants",
     "Build my candidate profile",
     "Find flights or hotels",
     "Find sponsors or opportunities",
+  ];
+
+  const mediaRoles = [
+    "Journalist / Writer",
+    "Editor / Publisher",
+    "Pageant Media Organization",
+    "News or Entertainment Platform",
+    "Content Creator / Correspondent",
+    "Broadcast / Livestream Media",
+    "Other",
+  ];
+
+  const mediaTypes = [
+    "Digital publication",
+    "Print publication",
+    "Television / Broadcast",
+    "Radio / Podcast",
+    "Social media publication",
+    "Independent column",
+    "Other",
+  ];
+
+  const publicMenu = [
+    {label: "Home", href: "/"},
+    {label: "Suppliers", href: "/directory/"},
+    {label: "Candidates", href: "/candidates/"},
+    {label: "Pageants", href: "/pageant-calendar/"},
+    {label: "Media", href: "/media/"},
+    {label: "Announcements", href: "/announcements/"},
+    {label: "Experiences", href: "/experiences/"},
+  ];
+
+  const appMenu = [
+    {id: "discover", icon: "⌕", label: "Discover"},
+    {id: "pageants", icon: "♕", label: "Pageants"},
+    {id: "media", icon: "▤", label: "Media"},
+    {id: "updates", icon: "◉", label: "Updates"},
+    {id: "account", icon: "☰", label: "Account"},
   ];
 
   window.PageantIndexConfig = Object.freeze({
     brandName: "Pageant Index",
     tagline: "The Global Network for Pageantry",
     accountTypes: Object.freeze([
+      {value: "enthusiast", label: "Enthusiast"},
       {value: "candidate", label: "Candidate"},
       {value: "supplier", label: "Supplier"},
+      {value: "media", label: "Media"},
     ]),
+    audienceDescriptions: Object.freeze({
+      enthusiast: "Follow pageants, save suppliers, and personalize the app. A public website account is not required to browse or use guest checkout.",
+      candidate: "Find suppliers and keep a private record of current and previous pageants.",
+      supplier: "Present services, receive qualified inquiries, and manage a reviewed professional profile.",
+      media: "Build a media column, publish reviewed articles, and share stories to other platforms.",
+    }),
+    publicMenu: Object.freeze(publicMenu),
+    appMenu: Object.freeze(appMenu),
     countries: Object.freeze(countries),
     supplierCategories: Object.freeze(supplierCategories),
     candidateStatuses: Object.freeze(candidateStatuses),
     candidateGoals: Object.freeze(candidateGoals),
+    mediaRoles: Object.freeze(mediaRoles),
+    mediaTypes: Object.freeze(mediaTypes),
     flagFromCode,
     travelDisclosure: "Pageant Index connects users with independent travel and accommodation providers. Availability, prices, bookings, refunds, and service terms are handled directly by each provider.",
+    guestAccessDisclosure: "Browsing, merchandise checkout, pay-per-view access, and public voting do not require a Pageant Index account unless a specific organizer or payment provider legally requires identity verification. Account creation must never be used as an unnecessary barrier to purchase or participate.",
+    sharedExperience: Object.freeze([
+      "Supplier directory",
+      "Official announcements",
+      "Clearly labeled featured advertising",
+      "Pageant calendar",
+      "Media articles",
+    ]),
   });
 })();
