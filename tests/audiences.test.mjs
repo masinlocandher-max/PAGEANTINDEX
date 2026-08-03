@@ -9,20 +9,26 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (path) => readFile(join(root, path), "utf8");
 
 test("audience browser scripts parse", async () => {
-  for (const path of ["public/pageantindex-audience.js", "app/audience.js"]) {
+  for (const path of [
+    "public/pageantindex-audience.js",
+    "public/pageantindex-organizer.js",
+    "app/audience.js",
+    "app/organizer.js",
+  ]) {
     const result = spawnSync(process.execPath, ["--check", join(root, path)], {encoding: "utf8"});
     assert.equal(result.status, 0, `${path}\n${result.stderr}`);
   }
 });
 
-test("configuration defines four distinct audience types", async () => {
+test("configuration defines five distinct audience types", async () => {
   const config = await read("public/pageantindex-config.js");
-  for (const role of ["enthusiast", "candidate", "supplier", "media"]) {
+  for (const role of ["enthusiast", "candidate", "supplier", "media", "organizer"]) {
     assert.match(config, new RegExp(`value: "${role}"`));
   }
   assert.match(config, /mediaRoles/);
-  assert.match(config, /mediaTypes/);
+  assert.match(config, /organizerTypes/);
   assert.match(config, /share stories to other platforms/);
+  assert.match(config, /official pageant profile/);
   assert.match(config, /guestAccessDisclosure/);
   assert.match(config, /merchandise checkout/);
   assert.match(config, /pay-per-view access/);
@@ -40,7 +46,7 @@ test("public menu remains concise and covers the ecosystem", async () => {
   }
 });
 
-test("website signup and workspaces support every role", async () => {
+test("website signup and workspaces support enthusiast candidate supplier and media", async () => {
   const audience = await read("public/pageantindex-audience.js");
   assert.match(audience, /data-pi-enthusiast-fields/);
   assert.match(audience, /data-pi-media-fields/);
@@ -50,6 +56,25 @@ test("website signup and workspaces support every role", async () => {
   assert.match(audience, /media_articles/);
   assert.match(audience, /candidate_pageant_history/);
   assert.match(audience, /role === "supplier"/);
+});
+
+test("organizers have a distinct official pageant workflow", async () => {
+  const organizer = await read("public/pageantindex-organizer.js");
+  const app = await read("app/organizer.js");
+  const migration = await read("supabase/migrations/20260803171000_add_pageant_organizers.sql");
+  assert.match(organizer, /data-pi-organizer-fields/);
+  assert.match(organizer, /pageant_organization_drafts/);
+  assert.match(organizer, /pageant_edition_drafts/);
+  assert.match(organizer, /pageant_candidate_roster_drafts/);
+  assert.match(organizer, /pageant_experience_requests/);
+  assert.match(organizer, /organizer_announcement_requests/);
+  assert.match(app, /Organization tools/);
+  assert.match(migration, /create table if not exists public\.pageant_organization_drafts/);
+  assert.match(migration, /create table if not exists public\.pageant_edition_drafts/);
+  assert.match(migration, /create table if not exists public\.pageant_candidate_roster_drafts/);
+  assert.match(migration, /experience_type in \('voting','livestream','pay_per_view','tickets','merchandise'\)/);
+  assert.match(migration, /guest_access_requested boolean not null default true/);
+  assert.match(migration, /admin_review_pageant_organization/);
 });
 
 test("common supplier announcements and featured content are visible to all audiences", async () => {
@@ -108,6 +133,7 @@ test("mobile-first app keeps five universal tabs and responsive layouts", async 
   assert.match(css, /@media\(min-width:980px\)/);
   assert.match(html, /app\/audience\.css/);
   assert.match(html, /app\/audience\.js/);
+  assert.match(html, /app\/organizer\.js/);
 });
 
 test("sitemap includes audience and public experience routes", async () => {
