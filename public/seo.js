@@ -6,20 +6,26 @@
   ecosystemStyle.href = "/public/pageantindex-ecosystem.css?v=20260803";
   document.head.appendChild(ecosystemStyle);
 
-  const configScript = document.createElement("script");
-  configScript.src = "/public/pageantindex-config.js?v=20260803";
-  configScript.onload = () => {
-    const preflightScript = document.createElement("script");
-    preflightScript.src = "/public/pageantindex-preflight.js?v=20260803";
-    preflightScript.onload = () => {
-      const ecosystemScript = document.createElement("script");
-      ecosystemScript.src = "/public/pageantindex-ecosystem.js?v=20260803";
-      ecosystemScript.defer = true;
-      document.head.appendChild(ecosystemScript);
-    };
-    document.head.appendChild(preflightScript);
+  const audienceStyle = document.createElement("link");
+  audienceStyle.rel = "stylesheet";
+  audienceStyle.href = "/public/pageantindex-audience.css?v=20260803-2";
+  document.head.appendChild(audienceStyle);
+
+  const appendScript = (src, onload) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = false;
+    if (onload) script.onload = onload;
+    document.head.appendChild(script);
   };
-  document.head.appendChild(configScript);
+
+  appendScript("/public/pageantindex-config.js?v=20260803-2", () => {
+    appendScript("/public/pageantindex-preflight.js?v=20260803", () => {
+      appendScript("/public/pageantindex-audience.js?v=20260803-2", () => {
+        appendScript("/public/pageantindex-ecosystem.js?v=20260803");
+      });
+    });
+  });
 
   const origin = "https://www.pageantindex.com";
   const articleData = {
