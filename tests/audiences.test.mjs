@@ -20,7 +20,9 @@ test("configuration defines four distinct audience types", async () => {
   for (const role of ["enthusiast", "candidate", "supplier", "media"]) {
     assert.match(config, new RegExp(`value: "${role}"`));
   }
-  assert.match(config, /Media publishing/);
+  assert.match(config, /mediaRoles/);
+  assert.match(config, /mediaTypes/);
+  assert.match(config, /share stories to other platforms/);
   assert.match(config, /guestAccessDisclosure/);
   assert.match(config, /merchandise checkout/);
   assert.match(config, /pay-per-view access/);
