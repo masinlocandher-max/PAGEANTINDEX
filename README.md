@@ -19,6 +19,9 @@ Mobile-first application: [app.pageantindex.com](https://app.pageantindex.com)
   travel coverage, and clearly labeled advertising tools
 - **Media**: reviewed column profile, private article drafts, publishing review,
   canonical links, and shareable published stories
+- **Pageant Organization**: official organization profile, pageant editions,
+  candidate rosters, announcements, results, voting, broadcasts, tickets,
+  merchandise, and approved partners
 
 The public website remains open. Browsing, merchandise guest checkout,
 pay-per-view access, and public voting must not require a Pageant Index account
@@ -39,7 +42,7 @@ Every audience can see the same reviewed foundation:
 
 ## Product surface
 
-- Four clear account types with role-specific private workspaces
+- Five clear account types with role-specific private workspaces
 - One clean public menu: Home, Suppliers, Candidates, Pageants, Media,
   Announcements, and Experiences
 - One clean mobile-app menu: Discover, Pageants, Media, Updates, and Account
@@ -48,9 +51,11 @@ Every audience can see the same reviewed foundation:
 - Complete country selection with country codes and flag display
 - Candidate current and previous pageant history
 - Media columns and shareable, reviewed articles
+- Official organization and pageant-edition workflows
+- Candidate roster, voting, broadcast, ticket, merchandise, and announcement
+  requests under administrator review
 - Public announcements and clearly labeled featured campaigns
 - Guest-friendly voting, pay-per-view, livestream, merchandise, and ticket hubs
-- Owner-submitted directory with category, location, and verification standards
 - Public ranking methodology and separation of organic, featured, sponsored,
   and editorial visibility
 - Responsive desktop, tablet, and mobile layouts
@@ -101,22 +106,24 @@ The mobile-first app is available at `http://localhost:4173/app/`.
 Commercial terms are confidential. The public interface describes profile and
 visibility options without publishing a rate card.
 
-Candidate, supplier, and media information is published only after the
-applicable review process. The platform intentionally contains no invented
-businesses, candidates, media outlets, ratings, reviews, inquiries,
-partnerships, advertisements, events, or activity records.
+Candidate, supplier, media, and organization information is published only
+after the applicable review process. The platform intentionally contains no
+invented businesses, candidates, organizations, media outlets, ratings,
+reviews, inquiries, partnerships, advertisements, events, or activity records.
 
 ## Data model and deployment order
 
 The canonical live supplier directory model is `public.suppliers`, created and
 extended through versioned files in `supabase/migrations/`. Public clients can
 read only published rows. Only accounts with an administrator role in protected
-`app_metadata` may verify, feature, or publish supplier and media records.
+`app_metadata` may verify, feature, or publish supplier, media, organization,
+and pageant-edition records.
 
 Private identity is stored separately from public profile information.
 Enthusiast preferences, candidate drafts and history, supplier drafts, media
-profiles, and media article drafts have their own row-level security policies.
-Owners cannot self-publish, self-verify, or purchase trust.
+profiles and articles, organization profiles, pageant editions, rosters, and
+experience requests have their own row-level security policies. Owners cannot
+self-publish, self-verify, or purchase trust.
 
 `supabase/schema.sql` is a future-platform reference, not a production migration.
 It must not be run against the live project as a shortcut.
@@ -125,12 +132,14 @@ For a release containing database and frontend changes:
 
 1. Review and apply pending files in `supabase/migrations/` in timestamp order.
 2. Run Supabase Security Advisor and verify RLS with anonymous, enthusiast,
-   candidate, supplier-owner, media-owner, and administrator accounts.
+   candidate, supplier-owner, media-owner, organizer-owner, and administrator
+   accounts.
 3. Configure production Site URL, recovery redirects, SMTP, and allowed origins.
 4. Confirm `www.pageantindex.com` and `app.pageantindex.com` point to the reviewed
    deployment.
 5. Deploy the frontend only after every required migration succeeds.
-6. Run `npm test` and smoke-test all four registration types, sign-in, recovery,
+6. Run `npm test` and smoke-test all five registration types, sign-in, recovery,
    supplier multi-category selection, candidate history, media drafts and review,
+   organization editions and rosters, voting and broadcast requests,
    announcements, featured ads, saved suppliers, guest experiences, country
    flags, portfolio uploads, admin review, and responsive layouts.
