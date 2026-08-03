@@ -22,17 +22,19 @@
     document.head.appendChild(script);
   };
 
-  appendScript("/public/pageantindex-config.js?v=20260803-3", () => {
-    appendScript("/public/pageantindex-preflight.js?v=20260803", () => {
-      appendScript("/public/pageantindex-organizer-preflight.js?v=20260803", () => {
-        appendScript("/public/pageantindex-organizer.js?v=20260803", () => {
-          appendScript("/public/pageantindex-audience.js?v=20260803-2", () => {
-            appendScript("/public/pageantindex-organizer-publishing.js?v=20260803", () => {
-              appendScript("/public/pageantindex-organizer-form-guards.js?v=20260803", () => {
-                appendScript("/public/pageantindex-submission-controls.js?v=20260803", () => {
-                  appendScript("/public/pageantindex-ecosystem.js?v=20260803", () => {
-                    appendScript("/public/pageantindex-admin-moderation.js?v=20260803", () => {
-                      appendScript("/public/pageantindex-admin-results.js?v=20260803");
+  appendScript("/public/pageantindex-auth-readiness.js?v=20260804", () => {
+    appendScript("/public/pageantindex-config.js?v=20260803-3", () => {
+      appendScript("/public/pageantindex-preflight.js?v=20260803", () => {
+        appendScript("/public/pageantindex-organizer-preflight.js?v=20260803", () => {
+          appendScript("/public/pageantindex-organizer.js?v=20260803", () => {
+            appendScript("/public/pageantindex-audience.js?v=20260803-2", () => {
+              appendScript("/public/pageantindex-organizer-publishing.js?v=20260803", () => {
+                appendScript("/public/pageantindex-organizer-form-guards.js?v=20260803", () => {
+                  appendScript("/public/pageantindex-submission-controls.js?v=20260803", () => {
+                    appendScript("/public/pageantindex-ecosystem.js?v=20260803", () => {
+                      appendScript("/public/pageantindex-admin-moderation.js?v=20260803", () => {
+                        appendScript("/public/pageantindex-admin-results.js?v=20260803");
+                      });
                     });
                   });
                 });
