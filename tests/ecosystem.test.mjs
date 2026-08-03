@@ -47,20 +47,24 @@ test("supplier onboarding supports primary and additional categories", async () 
 });
 
 test("candidate and supplier records have separate protected models", async () => {
-  const migration = await read("supabase/migrations/20260803163000_global_candidate_supplier_ecosystem.sql");
-  assert.match(migration, /create table if not exists public\.user_profiles/);
-  assert.match(migration, /account_type in \('candidate','supplier'\)/);
-  assert.match(migration, /create table if not exists public\.candidate_profile_drafts/);
-  assert.match(migration, /alter table public\.professional_profile_drafts/);
-  assert.match(migration, /additional_categories text\[\]/);
-  assert.match(migration, /alter table public\.user_profiles enable row level security/);
-  assert.match(migration, /alter table public\.candidate_profile_drafts enable row level security/);
-  assert.match(migration, /create table if not exists public\.saved_supplier_profiles/);
-  assert.match(migration, /create table if not exists public\.saved_pageant_events/);
+  const foundation = await read("supabase/migrations/20260803172117_pageantindex_foundation.sql");
+  const profiles = await read("supabase/migrations/20260803172305_pageantindex_profiles.sql");
+  const operations = await read("supabase/migrations/20260803172919_pageantindex_organization_operations.sql");
+  assert.match(foundation, /create table if not exists public\.user_profiles/);
+  assert.match(foundation, /'enthusiast','candidate','supplier','media','organizer'/);
+  assert.match(profiles, /create table if not exists public\.candidate_profile_drafts/);
+  assert.match(profiles, /create table if not exists public\.professional_profile_drafts/);
+  assert.match(profiles, /additional_categories text\[\]/);
+  assert.match(foundation, /alter table public\.user_profiles enable row level security/);
+  assert.match(profiles, /alter table public\.candidate_profile_drafts enable row level security/);
+  assert.match(operations, /create table if not exists public\.saved_supplier_profiles/);
+  assert.match(operations, /create table if not exists public\.saved_pageant_events/);
+  assert.match(operations, /event_id uuid not null references public\.pageant_edition_drafts/);
+  assert.doesNotMatch(operations, /references public\.events/);
 });
 
 test("published supplier model contains global directory fields", async () => {
-  const migration = await read("supabase/migrations/20260803164000_global_public_supplier_fields.sql");
+  const migration = await read("supabase/migrations/20260803172117_pageantindex_foundation.sql");
   assert.match(migration, /add column if not exists primary_category/);
   assert.match(migration, /add column if not exists additional_categories/);
   assert.match(migration, /add column if not exists country_code/);
@@ -112,12 +116,12 @@ test("global identity is static in critical metadata", async () => {
   assert.match(home, /"areaServed": "Worldwide"/);
 });
 
-test("shared loader and app-subdomain routing are configured", async () => {
+test("shared loader and app-host routing are configured", async () => {
   const seo = await read("public/seo.js");
   assert.match(seo, /pageantindex-config\.js/);
   assert.match(seo, /pageantindex-preflight\.js/);
   assert.match(seo, /pageantindex-ecosystem\.js/);
-  const vercel = JSON.parse(await read("vercel.json"));
-  assert.ok(vercel.rewrites.some((rewrite) => rewrite.destination === "/app/index.html"));
-  assert.ok(vercel.rewrites.some((rewrite) => rewrite.has?.some((condition) => condition.type === "host" && condition.value === "app.pageantindex.com")));
+  const deploymentConfig = JSON.parse(await read("vercel.json"));
+  assert.ok(deploymentConfig.rewrites.some((rewrite) => rewrite.destination === "/app/index.html"));
+  assert.ok(deploymentConfig.rewrites.some((rewrite) => rewrite.has?.some((condition) => condition.type === "host" && condition.value === "app.pageantindex.com")));
 });
