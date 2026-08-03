@@ -9,7 +9,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (path) => readFile(join(root, path), "utf8");
 
 function updateGrant(sql, table) {
-  const pattern = new RegExp(`grant update \\(([\\s\\S]*?)\\)\\s+on public\\.${table} to authenticated;`, "i");
+  const pattern = new RegExp(`grant update \\(([^)]*)\\)\\s+on public\\.${table} to authenticated;`, "i");
   return sql.match(pattern)?.[1] || "";
 }
 
@@ -65,7 +65,7 @@ test("organizer records must belong to the signed-in organizer and owned edition
   const sql = await read("supabase/migrations/20260803172000_harden_pageant_organizer_reviews.sql");
   assert.match(sql, /pageantindex_is_organizer\(\(select auth\.uid\(\)\)\)/);
   assert.match(sql, /edition\.organizer_user_id = \(select auth\.uid\(\)\)/);
-  assert.match(sql, /candidate roster drafts for their editions/i);
+  assert.match(sql, /create roster drafts for their editions/i);
   assert.match(sql, /experience requests for their editions/i);
   assert.match(sql, /results for their editions/i);
 });
@@ -118,5 +118,5 @@ test("documentation describes the five-audience reviewed ecosystem", async () =>
   assert.match(readme, /Five clear account types/);
   assert.match(readme, /Pageant Organization/);
   assert.match(readme, /official result/i);
-  assert.match(readme, /organizer-owner/);
+  assert.match(readme, /Organizer owner/);
 });
