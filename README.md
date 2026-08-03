@@ -2,36 +2,62 @@
 
 **The Global Network for Pageantry.**
 
-Pageant Index connects candidates, pageant suppliers, organizations, hotels,
-flights, travel providers, and opportunities worldwide.
+Pageant Index connects enthusiasts, candidates, suppliers, media, pageant
+organizations, hotels, flights, travel providers, and opportunities worldwide.
 
 Official website: [www.pageantindex.com](https://www.pageantindex.com)
 
 Mobile-first application: [app.pageantindex.com](https://app.pageantindex.com)
 
+## Audience model
+
+- **Enthusiast**: optional account for app personalization, saved suppliers,
+  followed pageants, and linked history
+- **Candidate**: supplier discovery plus a private record of current and previous
+  pageants, titles, placements, and official links
+- **Supplier**: reviewed professional profile, services, portfolio, inquiries,
+  travel coverage, and clearly labeled advertising tools
+- **Media**: reviewed column profile, private article drafts, publishing review,
+  canonical links, and shareable published stories
+
+The public website remains open. Browsing, merchandise guest checkout,
+pay-per-view access, and public voting must not require a Pageant Index account
+unless a specific organizer or payment provider legally requires identity
+verification.
+
+## Shared experience
+
+Every audience can see the same reviewed foundation:
+
+- Supplier directory
+- Official announcements
+- Clearly labeled featured advertising
+- Pageant calendar
+- Media articles
+- Countries and flags
+- Flights, hotels, travel agencies, transportation, and tour providers
+
 ## Product surface
 
-- Two clear account types: Candidate and Supplier
-- Candidate-specific profile and workspace
+- Four clear account types with role-specific private workspaces
+- One clean public menu: Home, Suppliers, Candidates, Pageants, Media,
+  Announcements, and Experiences
+- One clean mobile-app menu: Discover, Pageants, Media, Updates, and Account
 - Supplier profiles with one primary category and multiple additional categories
 - Separate Photographer and Videographer categories, which may both be selected
 - Complete country selection with country codes and flag display
-- Category and country discovery pages
-- Flights, airlines, travel agencies, hotels, accommodation, transportation,
-  and tour providers as reviewed supplier categories
+- Candidate current and previous pageant history
+- Media columns and shareable, reviewed articles
+- Public announcements and clearly labeled featured campaigns
+- Guest-friendly voting, pay-per-view, livestream, merchandise, and ticket hubs
 - Owner-submitted directory with category, location, and verification standards
-- Listing applications, profile claims, and verification requests
-- Public ranking methodology and clear separation of organic, featured,
-  sponsored, and editorial visibility
-- Complete editorial guides and a reviewed event-submission calendar
+- Public ranking methodology and separation of organic, featured, sponsored,
+  and editorial visibility
 - Responsive desktop, tablet, and mobile layouts
-- A separate mobile-first application that uses the same categories, countries,
-  account identity, saved suppliers, and published directory data
-- Canonical metadata, social sharing metadata, `robots.txt`, `sitemap.xml`,
-  web-app manifest, security headers, and custom-domain configuration
-- Versioned Supabase migrations for the reviewed supplier directory, private
-  intake queue, candidate drafts, supplier drafts, saved profiles, and private
-  portfolio assets
+- A separate mobile-first application using the same data model and policies
+- Canonical metadata, social metadata, `robots.txt`, `sitemap.xml`, manifest,
+  security headers, and custom-domain configuration
+- Versioned Supabase migrations with row-level security and owner/admin boundaries
 
 Pageant Index connects users to independent travel and accommodation providers.
 Availability, prices, bookings, refunds, and service terms are handled directly
@@ -52,15 +78,20 @@ The mobile-first app is available at `http://localhost:4173/app/`.
 
 - `/`
 - `/directory/`
+- `/candidates/`
+- `/pageant-calendar/`
+- `/media/`
+- `/announcements/`
+- `/experiences/`
 - `/categories/`
 - `/locations/`
-- `/pageant-calendar/`
+- `/rankings/`
+- `/articles/`
 - `/list-your-business/`
 - `/claim-profile/`
 - `/verification/`
-- `/rankings/`
 - `/ranking-methodology/`
-- `/articles/`
+- `/advertise/`
 - `/sign-in/`
 - `/sign-up/`
 - `/dashboard/`
@@ -70,20 +101,22 @@ The mobile-first app is available at `http://localhost:4173/app/`.
 Commercial terms are confidential. The public interface describes profile and
 visibility options without publishing a rate card.
 
-Candidate and supplier information is published only after the applicable
-review process. The public directory intentionally contains no invented
-businesses, ratings, reviews, inquiries, partnerships, or activity records.
+Candidate, supplier, and media information is published only after the
+applicable review process. The platform intentionally contains no invented
+businesses, candidates, media outlets, ratings, reviews, inquiries,
+partnerships, advertisements, events, or activity records.
 
 ## Data model and deployment order
 
-The canonical live directory model is `public.suppliers`, created and extended
-through versioned files in `supabase/migrations/`. Public clients can read only
-published rows. Only accounts with an administrator role in protected
-`app_metadata` may create, edit, verify, feature, or remove published suppliers.
+The canonical live supplier directory model is `public.suppliers`, created and
+extended through versioned files in `supabase/migrations/`. Public clients can
+read only published rows. Only accounts with an administrator role in protected
+`app_metadata` may verify, feature, or publish supplier and media records.
 
-Private account identity is stored separately from public candidate or supplier
-profile information. Candidate and supplier drafts have their own row-level
-security policies. Owners cannot self-publish, self-verify, or purchase trust.
+Private identity is stored separately from public profile information.
+Enthusiast preferences, candidate drafts and history, supplier drafts, media
+profiles, and media article drafts have their own row-level security policies.
+Owners cannot self-publish, self-verify, or purchase trust.
 
 `supabase/schema.sql` is a future-platform reference, not a production migration.
 It must not be run against the live project as a shortcut.
@@ -91,14 +124,13 @@ It must not be run against the live project as a shortcut.
 For a release containing database and frontend changes:
 
 1. Review and apply pending files in `supabase/migrations/` in timestamp order.
-2. Run the Supabase security advisor and verify RLS with anonymous, candidate,
-   supplier-owner, and administrator accounts.
-3. Configure the production site URL, allow the `/sign-in/` recovery redirect,
-   and verify that Supabase Auth SMTP delivery is working.
+2. Run Supabase Security Advisor and verify RLS with anonymous, enthusiast,
+   candidate, supplier-owner, media-owner, and administrator accounts.
+3. Configure production Site URL, recovery redirects, SMTP, and allowed origins.
 4. Confirm `www.pageantindex.com` and `app.pageantindex.com` point to the reviewed
    deployment.
 5. Deploy the frontend only after every required migration succeeds.
-6. Run `npm test` and smoke-test candidate registration, supplier registration,
-   multi-category selection, country flags, password recovery, profile saving,
-   portfolio uploads, admin review, published profiles, inquiries, saved
-   suppliers, and mobile-app discovery.
+6. Run `npm test` and smoke-test all four registration types, sign-in, recovery,
+   supplier multi-category selection, candidate history, media drafts and review,
+   announcements, featured ads, saved suppliers, guest experiences, country
+   flags, portfolio uploads, admin review, and responsive layouts.
