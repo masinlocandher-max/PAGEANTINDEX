@@ -11,10 +11,15 @@ const read = (path) => readFile(join(root, path), "utf8");
 test("audience browser scripts parse", async () => {
   for (const path of [
     "public/pageantindex-audience.js",
+    "public/pageantindex-organizer-preflight.js",
     "public/pageantindex-organizer.js",
+    "public/pageantindex-organizer-publishing.js",
+    "public/pageantindex-organizer-form-guards.js",
+    "public/pageantindex-submission-controls.js",
     "public/pageantindex-admin-moderation.js",
     "app/audience.js",
     "app/organizer.js",
+    "app/pageant-data.js",
   ]) {
     const result = spawnSync(process.execPath, ["--check", join(root, path)], {encoding: "utf8"});
     assert.equal(result.status, 0, `${path}\n${result.stderr}`);
@@ -61,26 +66,50 @@ test("website signup and workspaces support enthusiast candidate supplier and me
 
 test("organizers have a distinct official pageant workflow", async () => {
   const organizer = await read("public/pageantindex-organizer.js");
+  const publishing = await read("public/pageantindex-organizer-publishing.js");
   const app = await read("app/organizer.js");
+  const appData = await read("app/pageant-data.js");
   const migration = await read("supabase/migrations/20260803171000_add_pageant_organizers.sql");
+  const hardened = await read("supabase/migrations/20260803172000_harden_pageant_organizer_reviews.sql");
   assert.match(organizer, /data-pi-organizer-fields/);
   assert.match(organizer, /pageant_organization_drafts/);
   assert.match(organizer, /pageant_edition_drafts/);
   assert.match(organizer, /pageant_candidate_roster_drafts/);
   assert.match(organizer, /pageant_experience_requests/);
   assert.match(organizer, /organizer_announcement_requests/);
+  assert.match(publishing, /Submit edition for review/);
+  assert.match(publishing, /pageant_result_drafts/);
+  assert.match(publishing, /renderPublicPageantData/);
   assert.match(app, /Organization tools/);
+  assert.match(appData, /Approved pageant editions/);
   assert.match(migration, /create table if not exists public\.pageant_organization_drafts/);
   assert.match(migration, /create table if not exists public\.pageant_edition_drafts/);
   assert.match(migration, /create table if not exists public\.pageant_candidate_roster_drafts/);
   assert.match(migration, /experience_type in \('voting','livestream','pay_per_view','tickets','merchandise'\)/);
   assert.match(migration, /guest_access_requested boolean not null default true/);
-  assert.match(migration, /admin_review_pageant_organization/);
+  assert.match(hardened, /create table if not exists public\.pageant_result_drafts/);
+  assert.match(hardened, /Public reads approved pageant editions/);
+  assert.match(hardened, /Public reads approved pageant experiences/);
+});
+
+test("owners can explicitly submit reviewed media and organizer drafts", async () => {
+  const controls = await read("public/pageantindex-submission-controls.js");
+  const loader = await read("public/seo.js");
+  for (const term of [
+    "media_profile_drafts", "media_articles", "pageant_organization_drafts",
+    "pageant_edition_drafts", "pageant_experience_requests",
+    "organizer_announcement_requests", "submission_state: \"submitted\"",
+  ]) assert.match(controls, new RegExp(term));
+  assert.match(controls, /Submit media work for approval/);
+  assert.match(controls, /Submit pageant records for approval/);
+  assert.match(loader, /pageantindex-submission-controls\.js/);
+  assert.match(loader, /pageantindex-submission-controls\.css/);
 });
 
 test("admin moderation covers every reviewed audience and content type", async () => {
   const admin = await read("public/pageantindex-admin-moderation.js");
-  const migration = await read("supabase/migrations/20260803172000_admin_moderation_extensions.sql");
+  const migration = await read("supabase/migrations/20260803171500_admin_moderation_extensions.sql");
+  const hardened = await read("supabase/migrations/20260803172000_harden_pageant_organizer_reviews.sql");
   const loader = await read("public/seo.js");
   for (const term of [
     "media_profile_drafts", "media_articles", "pageant_organization_drafts",
@@ -92,9 +121,12 @@ test("admin moderation covers every reviewed audience and content type", async (
   assert.match(migration, /admin_review_pageant_edition/);
   assert.match(migration, /admin_review_pageant_experience/);
   assert.match(migration, /admin_review_organizer_announcement/);
+  assert.match(hardened, /published_at/);
+  assert.match(loader, /pageantindex-organizer-preflight\.js/);
+  assert.match(loader, /pageantindex-organizer-publishing\.js/);
+  assert.match(loader, /pageantindex-organizer-form-guards\.js/);
   assert.match(loader, /pageantindex-admin-moderation\.js/);
   assert.match(loader, /pageantindex-admin-moderation\.css/);
-  assert.doesNotMatch(loader, /organizer-preflight|organizer-publishing/);
 });
 
 test("common supplier announcements and featured content are visible to all audiences", async () => {
@@ -154,6 +186,7 @@ test("mobile-first app keeps five universal tabs and responsive layouts", async 
   assert.match(html, /app\/audience\.css/);
   assert.match(html, /app\/audience\.js/);
   assert.match(html, /app\/organizer\.js/);
+  assert.match(html, /app\/pageant-data\.js/);
 });
 
 test("sitemap includes audience and public experience routes", async () => {
