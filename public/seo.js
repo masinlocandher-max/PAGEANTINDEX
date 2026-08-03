@@ -9,10 +9,15 @@
   const configScript = document.createElement("script");
   configScript.src = "/public/pageantindex-config.js?v=20260803";
   configScript.onload = () => {
-    const ecosystemScript = document.createElement("script");
-    ecosystemScript.src = "/public/pageantindex-ecosystem.js?v=20260803";
-    ecosystemScript.defer = true;
-    document.head.appendChild(ecosystemScript);
+    const preflightScript = document.createElement("script");
+    preflightScript.src = "/public/pageantindex-preflight.js?v=20260803";
+    preflightScript.onload = () => {
+      const ecosystemScript = document.createElement("script");
+      ecosystemScript.src = "/public/pageantindex-ecosystem.js?v=20260803";
+      ecosystemScript.defer = true;
+      document.head.appendChild(ecosystemScript);
+    };
+    document.head.appendChild(preflightScript);
   };
   document.head.appendChild(configScript);
 
