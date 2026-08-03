@@ -26,9 +26,11 @@
 
   appendScript("/public/pageantindex-config.js?v=20260803-3", () => {
     appendScript("/public/pageantindex-preflight.js?v=20260803", () => {
-      appendScript("/public/pageantindex-organizer.js?v=20260803", () => {
-        appendScript("/public/pageantindex-audience.js?v=20260803-2", () => {
-          appendScript("/public/pageantindex-ecosystem.js?v=20260803");
+      appendScript("/public/pageantindex-organizer-preflight.js?v=20260803", () => {
+        appendScript("/public/pageantindex-organizer.js?v=20260803", () => {
+          appendScript("/public/pageantindex-audience.js?v=20260803-2", () => {
+            appendScript("/public/pageantindex-ecosystem.js?v=20260803");
+          });
         });
       });
     });
