@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "PageantIndex Philippines",
+  "name": "Pageant Index",
   "short_name": "PageantIndex",
-  "description": "Discover pageant professionals, suppliers, creatives, and production partners across the Philippines.",
+  "description": "The global network for pageantry, connecting candidates, suppliers, pageant organizations, hotels, flights, travel providers, and opportunities worldwide.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
