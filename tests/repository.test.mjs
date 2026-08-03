@@ -58,18 +58,29 @@ test("public workflows persist honestly", async () => {
 });
 
 test("Supabase migrations preserve trust boundaries", async () => {
-  const migration = await readFile(
-    join(root, "supabase", "migrations", "20260731215441_add_pageantindex_intake_and_profile_drafts.sql"),
+  const foundation = await readFile(
+    join(root, "supabase", "migrations", "20260803172117_pageantindex_foundation.sql"),
     "utf8",
   );
-  assert.match(migration, /alter table public\.intake_submissions enable row level security/i);
-  assert.match(migration, /alter table public\.professional_profile_drafts enable row level security/i);
-  assert.match(migration, /app_metadata' ->> 'role'\) = 'admin'/i);
-  assert.match(migration, /'pageant-profile-drafts'[\s\S]+false/i);
-  assert.match(migration, /grant update \(status, reviewed_by, reviewed_at\)/i);
-  assert.doesNotMatch(migration, /grant select, update on public\.intake_submissions/i);
-  assert.doesNotMatch(migration, /user_metadata/i);
-  assert.doesNotMatch(migration, /for select\s+to anon[\s\S]+intake_submissions/i);
+  const profiles = await readFile(
+    join(root, "supabase", "migrations", "20260803172305_pageantindex_profiles.sql"),
+    "utf8",
+  );
+  const admin = await readFile(
+    join(root, "supabase", "migrations", "20260803173041_pageantindex_admin_functions.sql"),
+    "utf8",
+  );
+  assert.match(foundation, /alter table public\.intake_submissions enable row level security/i);
+  assert.match(profiles, /alter table public\.professional_profile_drafts enable row level security/i);
+  assert.match(admin, /app_metadata' ->> 'role'\), ''\) <> 'admin'/i);
+  assert.match(profiles, /'pageant-profile-drafts'[\s\S]+false/i);
+  assert.match(foundation, /grant update \(status, reviewed_by, reviewed_at\)/i);
+  assert.doesNotMatch(foundation, /grant select, update on public\.intake_submissions/i);
+  assert.doesNotMatch(foundation + profiles + admin, /user_metadata' ->> 'role'/i);
+  assert.doesNotMatch(foundation, /for select\s+to anon[\s\S]+intake_submissions/i);
+  assert.match(admin, /private\.pageantindex_admin_review/);
+  assert.match(admin, /security invoker/i);
+  assert.match(admin, /from public, anon/i);
 });
 
 test("future schema cannot grant owner-controlled trust", async () => {
@@ -83,7 +94,7 @@ test("future schema cannot grant owner-controlled trust", async () => {
   assert.doesNotMatch(schema, /verification_admin_update/i);
 });
 
-test("Vercel applies baseline security headers", async () => {
+test("deployment configuration includes baseline security headers", async () => {
   const config = JSON.parse(await readFile(join(root, "vercel.json"), "utf8"));
   const headers = Object.fromEntries(config.headers[0].headers.map(({key, value}) => [key, value]));
   assert.match(headers["Content-Security-Policy"], /frame-ancestors 'none'/);
