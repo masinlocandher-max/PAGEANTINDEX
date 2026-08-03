@@ -1,6 +1,21 @@
 "use strict";
 
 (() => {
+  const ecosystemStyle = document.createElement("link");
+  ecosystemStyle.rel = "stylesheet";
+  ecosystemStyle.href = "/public/pageantindex-ecosystem.css?v=20260803";
+  document.head.appendChild(ecosystemStyle);
+
+  const configScript = document.createElement("script");
+  configScript.src = "/public/pageantindex-config.js?v=20260803";
+  configScript.onload = () => {
+    const ecosystemScript = document.createElement("script");
+    ecosystemScript.src = "/public/pageantindex-ecosystem.js?v=20260803";
+    ecosystemScript.defer = true;
+    document.head.appendChild(ecosystemScript);
+  };
+  document.head.appendChild(configScript);
+
   const origin = "https://www.pageantindex.com";
   const articleData = {
     "/articles/choose-pageant-photographer/": {
@@ -37,15 +52,15 @@
     description: item.description,
     image: `${origin}${item.image}`,
     datePublished: item.published,
-    dateModified: "2026-07-30",
-    inLanguage: "en-PH",
+    dateModified: "2026-08-03",
+    inLanguage: "en",
     author: { "@type": "Organization", name: "Pageant Index Editorial" },
     publisher: {
       "@type": "Organization",
-      name: "Pageant Index Philippines",
+      name: "Pageant Index",
       logo: {
         "@type": "ImageObject",
-        url: `${origin}/public/images/pageant-icon.png`
+        url: `${origin}/public/images/pageant-icon.png"
       }
     },
     mainEntityOfPage: `${origin}${location.pathname}`
