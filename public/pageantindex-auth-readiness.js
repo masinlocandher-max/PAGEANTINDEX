@@ -8,10 +8,6 @@
   const PENDING_TTL = 24 * 60 * 60 * 1000;
   const originalFetch = window.fetch.bind(window);
 
-  const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;",
-  })[character]);
-
   function websiteOrigin() {
     if (location.hostname === "pageantindex.com" || location.hostname.endsWith(".pageantindex.com")) {
       return "https://www.pageantindex.com";
@@ -23,7 +19,7 @@
     return `${websiteOrigin()}/sign-in/?auth=${encodeURIComponent(kind)}`;
   }
 
-  function parsePayload(form) {
+  function parseSignupPayload(form) {
     const payload = {};
     for (const [key, value] of new FormData(form).entries()) {
       if (["password", "confirm"].includes(key)) continue;
@@ -38,15 +34,11 @@
 
   function rememberPendingSignup(form) {
     if (!(form instanceof HTMLFormElement) || form.id !== "signup-form") return;
-    const payload = parsePayload(form);
+    const payload = parseSignupPayload(form);
     const email = String(payload.email || "").trim().toLowerCase();
     if (!email) return;
     try {
-      localStorage.setItem(PENDING_KEY, JSON.stringify({
-        email,
-        payload,
-        createdAt: Date.now(),
-      }));
+      localStorage.setItem(PENDING_KEY, JSON.stringify({email, payload, createdAt: Date.now()}));
     } catch {}
   }
 
@@ -91,7 +83,9 @@
     if (text) {
       try { payload = JSON.parse(text); } catch { payload = {message: text}; }
     }
-    if (!response.ok) throw new Error(payload?.message || payload?.error_description || payload?.hint || `Request failed (${response.status})`);
+    if (!response.ok) {
+      throw new Error(payload?.message || payload?.error_description || payload?.hint || `Request failed (${response.status})`);
+    }
     return payload;
   }
 
@@ -103,9 +97,18 @@
     }, token);
   }
 
-  function roleData(user) {
+  async function recordExists(table, ownerColumn, userId, token) {
+    const rows = await api(
+      `/rest/v1/${table}?select=${encodeURIComponent(ownerColumn)}&${encodeURIComponent(ownerColumn)}=eq.${encodeURIComponent(userId)}&limit=1`,
+      {},
+      token,
+    ).catch(() => []);
+    return Boolean(rows?.length);
+  }
+
+  function roleData(user, pendingRecord) {
     const metadata = user?.user_metadata || {};
-    const pending = pendingSignup(user?.email)?.payload || {};
+    const pending = pendingRecord?.payload || {};
     const role = normalizeRole(pending.account_type || metadata.account_type || "");
     const countryCode = pending.country_code || metadata.country_code || null;
     const countryName = pending.country_name || metadata.country_name || countryCode || null;
@@ -121,25 +124,42 @@
   }
 
   async function ensureRoleRecords(user, token) {
-    if (!user?.id || !token) return;
-    const data = roleData(user);
-    if (!["enthusiast", "candidate", "supplier", "media", "organizer"].includes(data.role)) return;
-    const now = new Date().toISOString();
+    if (!user?.id || !token) return "";
+    const pendingRecord = pendingSignup(user.email);
+    const existingProfiles = await api(
+      `/rest/v1/user_profiles?select=account_type,display_name&user_id=eq.${encodeURIComponent(user.id)}&limit=1`,
+      {},
+      token,
+    ).catch(() => []);
+    const existingProfile = existingProfiles?.[0] || null;
 
-    await upsert("user_profiles", {
-      user_id: user.id,
-      account_type: data.role,
-      full_name_private: data.fullName,
-      display_name: data.displayName,
-      country_code: data.countryCode,
-      country_name: data.countryName,
-      city: data.pending.city || data.metadata.city || null,
-      region: data.pending.region || data.metadata.region || null,
-      terms_accepted_at: now,
-      privacy_accepted_at: now,
-    }, token);
+    // A normal sign-in must never replace an established profile with empty
+    // confirmation metadata. Only finish onboarding when the profile is absent
+    // or a fresh, password-free pending signup payload is still available.
+    if (existingProfile && !pendingRecord) return existingProfile.account_type || "";
 
-    if (data.role === "enthusiast") {
+    const data = roleData(user, pendingRecord);
+    if (!["enthusiast", "candidate", "supplier", "media", "organizer"].includes(data.role)) {
+      return existingProfile?.account_type || "";
+    }
+
+    if (!existingProfile) {
+      const now = new Date().toISOString();
+      await upsert("user_profiles", {
+        user_id: user.id,
+        account_type: data.role,
+        full_name_private: data.fullName,
+        display_name: data.displayName,
+        country_code: data.countryCode,
+        country_name: data.countryName,
+        city: data.pending.city || data.metadata.city || null,
+        region: data.pending.region || data.metadata.region || null,
+        terms_accepted_at: now,
+        privacy_accepted_at: now,
+      }, token);
+    }
+
+    if (data.role === "enthusiast" && (pendingRecord || !await recordExists("enthusiast_profiles", "user_id", user.id, token))) {
       await upsert("enthusiast_profiles", {
         user_id: user.id,
         display_name: data.displayName || "",
@@ -147,7 +167,7 @@
       }, token);
     }
 
-    if (data.role === "candidate") {
+    if (data.role === "candidate" && (pendingRecord || !await recordExists("candidate_profile_drafts", "user_id", user.id, token))) {
       await upsert("candidate_profile_drafts", {
         user_id: user.id,
         display_name: data.displayName || "",
@@ -161,8 +181,8 @@
         city: data.pending.city || data.metadata.city || null,
         region: data.pending.region || data.metadata.region || null,
       }, token);
-      const existing = await api(`/rest/v1/candidate_pageant_history?select=id&user_id=eq.${encodeURIComponent(user.id)}&limit=1`, {}, token).catch(() => []);
-      if (!existing?.length) {
+      const historyExists = await recordExists("candidate_pageant_history", "user_id", user.id, token);
+      if (pendingRecord && !historyExists) {
         const history = [];
         if (data.pending.candidate_current_pageant) history.push({
           user_id: user.id,
@@ -183,7 +203,7 @@
       }
     }
 
-    if (data.role === "supplier") {
+    if (data.role === "supplier" && (pendingRecord || !await recordExists("professional_profile_drafts", "user_id", user.id, token))) {
       const primary = data.pending.supplier_primary_category || data.pending.category || data.metadata.category || null;
       const additional = arrayValue(data.pending.supplier_additional_categories).filter((category) => category !== primary);
       await upsert("professional_profile_drafts", {
@@ -202,7 +222,7 @@
       }, token);
     }
 
-    if (data.role === "media") {
+    if (data.role === "media" && (pendingRecord || !await recordExists("media_profile_drafts", "user_id", user.id, token))) {
       await upsert("media_profile_drafts", {
         user_id: user.id,
         column_name: data.displayName || "",
@@ -217,7 +237,7 @@
       }, token);
     }
 
-    if (data.role === "organizer") {
+    if (data.role === "organizer" && (pendingRecord || !await recordExists("pageant_organization_drafts", "user_id", user.id, token))) {
       await upsert("pageant_organization_drafts", {
         user_id: user.id,
         organization_name: data.displayName || "",
@@ -232,7 +252,10 @@
       }, token);
     }
 
-    try { localStorage.removeItem(PENDING_KEY); } catch {}
+    if (pendingRecord) {
+      try { localStorage.removeItem(PENDING_KEY); } catch {}
+    }
+    return data.role;
   }
 
   function saveSession(payload, user) {
@@ -253,18 +276,18 @@
   function cleanAuthUrl() {
     const url = new URL(location.href);
     url.hash = "";
+    url.searchParams.delete("auth");
     history.replaceState(null, "", `${url.pathname}${url.search}`);
   }
 
   function authMessage(message, error = false) {
     const apply = () => {
       const target = document.getElementById("signin-message") || document.getElementById("signup-message");
-      if (target) {
-        target.textContent = message;
-        if (error) target.setAttribute("data-error", "true");
-        return true;
-      }
-      return false;
+      if (!target) return false;
+      target.textContent = message;
+      if (error) target.setAttribute("data-error", "true");
+      else target.removeAttribute("data-error");
+      return true;
     };
     if (apply()) return;
     const observer = new MutationObserver(() => {
@@ -324,6 +347,7 @@
   }
 
   async function consumeAuthCallback() {
+    const queryType = new URLSearchParams(location.search).get("auth");
     const hash = new URLSearchParams(location.hash.replace(/^#/, ""));
     const error = hash.get("error_description") || hash.get("error");
     if (error) {
@@ -333,23 +357,20 @@
     }
     const accessToken = hash.get("access_token");
     if (!accessToken) {
-      if (new URLSearchParams(location.search).get("auth") === "recovery") {
-        authMessage("This recovery link is missing or has expired. Request a new link.", true);
-      }
+      if (queryType === "recovery") authMessage("This recovery link is missing or has expired. Request a new link.", true);
       return;
     }
     try {
+      const callbackType = hash.get("type") || queryType;
       const user = await api("/auth/v1/user", {}, accessToken);
       const session = saveSession(Object.fromEntries(hash.entries()), user);
-      await ensureRoleRecords(user, session.access_token);
-      const type = hash.get("type") || new URLSearchParams(location.search).get("auth");
+      const role = await ensureRoleRecords(user, session.access_token);
       cleanAuthUrl();
-      if (type === "recovery") {
+      if (callbackType === "recovery") {
         renderPasswordReset(session.access_token);
         return;
       }
       authMessage("Email confirmed. Opening your Pageant Index workspace…");
-      const role = normalizeRole(user.user_metadata?.account_type || pendingSignup(user.email)?.payload?.account_type || "");
       setTimeout(() => {
         location.href = role === "enthusiast" ? "https://app.pageantindex.com/" : "/dashboard/";
       }, 700);
