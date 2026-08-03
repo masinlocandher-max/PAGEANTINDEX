@@ -11,6 +11,11 @@
   audienceStyle.href = "/public/pageantindex-audience.css?v=20260803-3";
   document.head.appendChild(audienceStyle);
 
+  const organizerStyle = document.createElement("link");
+  organizerStyle.rel = "stylesheet";
+  organizerStyle.href = "/public/pageantindex-organizer.css?v=20260803";
+  document.head.appendChild(organizerStyle);
+
   const appendScript = (src, onload) => {
     const script = document.createElement("script");
     script.src = src;
