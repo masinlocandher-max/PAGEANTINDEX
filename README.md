@@ -170,6 +170,12 @@ to the live project as a shortcut.
 - Repository regression tests cover the five roles, migration history,
   protected grants, public feeds, admin RPC signatures, and responsive clients.
 
+## Current scope
+
+Infrastructure deployment is intentionally outside the current work. The branch
+is focused on the application, Supabase schema, trust controls, repository
+quality, and complete browser-ready workflows.
+
 ## Remaining operational checks
 
 Before a public launch:
