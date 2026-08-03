@@ -60,7 +60,7 @@
       name: "Pageant Index",
       logo: {
         "@type": "ImageObject",
-        url: `${origin}/public/images/pageant-icon.png"
+        url: `${origin}/public/images/pageant-icon.png`
       }
     },
     mainEntityOfPage: `${origin}${location.pathname}`
