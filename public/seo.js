@@ -29,7 +29,9 @@
       appendScript("/public/pageantindex-organizer-preflight.js?v=20260803", () => {
         appendScript("/public/pageantindex-organizer.js?v=20260803", () => {
           appendScript("/public/pageantindex-audience.js?v=20260803-2", () => {
-            appendScript("/public/pageantindex-ecosystem.js?v=20260803");
+            appendScript("/public/pageantindex-organizer-publishing.js?v=20260803", () => {
+              appendScript("/public/pageantindex-ecosystem.js?v=20260803");
+            });
           });
         });
       });
