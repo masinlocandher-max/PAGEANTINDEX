@@ -33,7 +33,9 @@
                   appendScript("/public/pageantindex-submission-controls.js?v=20260803", () => {
                     appendScript("/public/pageantindex-ecosystem.js?v=20260803", () => {
                       appendScript("/public/pageantindex-admin-moderation.js?v=20260803", () => {
-                        appendScript("/public/pageantindex-admin-results.js?v=20260803");
+                        appendScript("/public/pageantindex-admin-results.js?v=20260803", () => {
+                          appendScript("/public/pageantindex-session-controls.js?v=20260804");
+                        });
                       });
                     });
                   });
