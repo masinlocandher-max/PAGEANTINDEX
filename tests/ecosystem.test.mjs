@@ -79,8 +79,11 @@ test("mobile-first application uses real data and contains no prototype people o
 });
 
 test("mobile-first layout retains mobile and desktop optimization", async () => {
+  const html = await read("app/index.html");
   const css = await read("app/app.css");
-  assert.match(css, /viewport-fit=cover|safe-area-inset-bottom|safe-area-inset-top/);
+  assert.match(html, /viewport-fit=cover/);
+  assert.match(css, /safe-area-inset-bottom/);
+  assert.match(css, /safe-area-inset-top/);
   assert.match(css, /@media\(min-width:720px\)/);
   assert.match(css, /@media\(min-width:980px\)/);
   assert.match(css, /bottom-nav/);
