@@ -26,70 +26,45 @@
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const supplierCategories = [
-    "Pasarela / Runway Coach",
-    "Q&A Coach",
-    "Pageant Coach / Mentor",
-    "Hair and Makeup Artist (HMUA)",
-    "Fashion / Gown Designer",
-    "National Costume Designer",
-    "Photographer",
-    "Videographer",
-    "Pageant Camp / Training Center",
-    "Stylist / Image Consultant",
-    "Choreographer",
-    "Host / Emcee",
-    "Pageant Director / Organizer",
-    "Events and Production",
-    "Stage, Lights and Sound",
-    "Livestreaming / Media Production",
-    "Voting and Tabulation",
-    "Crown and Sash Supplier",
-    "Jewelry and Accessories",
-    "Beauty and Wellness",
-    "PR, Marketing and Digital Services",
-    "Talent Agency / Management",
-    "Sponsor / Brand Partner",
-    "Venue",
-    "Hotel / Accommodation",
-    "Flights / Airline / Travel Agency",
-    "Transportation / Tour Services",
-    "Other",
+    "Pasarela / Runway Coach", "Q&A Coach", "Pageant Coach / Mentor",
+    "Hair and Makeup Artist (HMUA)", "Fashion / Gown Designer",
+    "National Costume Designer", "Photographer", "Videographer",
+    "Pageant Camp / Training Center", "Stylist / Image Consultant",
+    "Choreographer", "Host / Emcee", "Pageant Director / Production Consultant",
+    "Events and Production", "Stage, Lights and Sound",
+    "Livestreaming / Media Production", "Voting and Tabulation",
+    "Crown and Sash Supplier", "Jewelry and Accessories", "Beauty and Wellness",
+    "PR, Marketing and Digital Services", "Talent Agency / Management",
+    "Sponsor / Brand Partner", "Venue", "Hotel / Accommodation",
+    "Flights / Airline / Travel Agency", "Transportation / Tour Services", "Other",
   ];
 
   const candidateStatuses = [
-    "Aspiring candidate",
-    "Current candidate",
-    "Titleholder",
+    "Aspiring candidate", "Current candidate", "Titleholder",
     "Former candidate or titleholder",
   ];
 
   const candidateGoals = [
-    "Find suppliers",
-    "Track my current and previous pageants",
-    "Find pageants",
-    "Build my candidate profile",
-    "Find flights or hotels",
+    "Find suppliers", "Track my current and previous pageants", "Find pageants",
+    "Build my candidate profile", "Find flights or hotels",
     "Find sponsors or opportunities",
   ];
 
   const mediaRoles = [
-    "Journalist / Writer",
-    "Editor / Publisher",
-    "Pageant Media Organization",
-    "News or Entertainment Platform",
-    "Content Creator / Correspondent",
-    "Broadcast / Livestream Media",
-    "Other",
+    "Journalist / Writer", "Editor / Publisher", "Pageant Media Organization",
+    "News or Entertainment Platform", "Content Creator / Correspondent",
+    "Broadcast / Livestream Media", "Other",
   ];
 
   const mediaTypes = [
-    "Digital publication",
-    "Print publication",
-    "Television / Broadcast",
-    "Radio / Podcast",
-    "Social media publication",
-    "Independent column",
-    "Other",
+    "Digital publication", "Print publication", "Television / Broadcast",
+    "Radio / Podcast", "Social media publication", "Independent column", "Other",
+  ];
+
+  const organizerTypes = [
+    "International pageant", "National pageant", "Regional pageant",
+    "Local pageant", "Tourism or festival pageant", "School or university pageant",
+    "Corporate or advocacy pageant", "Independent pageant organization", "Other",
   ];
 
   const publicMenu = [
@@ -118,12 +93,14 @@
       {value: "candidate", label: "Candidate"},
       {value: "supplier", label: "Supplier"},
       {value: "media", label: "Media"},
+      {value: "organizer", label: "Pageant Organization"},
     ]),
     audienceDescriptions: Object.freeze({
       enthusiast: "Follow pageants, save suppliers, and personalize the app. A public website account is not required to browse or use guest checkout.",
       candidate: "Find suppliers and keep a private record of current and previous pageants.",
       supplier: "Present services, receive qualified inquiries, and manage a reviewed professional profile.",
       media: "Build a media column, publish reviewed articles, and share stories to other platforms.",
+      organizer: "Manage an official pageant profile, editions, candidate rosters, announcements, results, voting, broadcasts, tickets, and approved partners.",
     }),
     publicMenu: Object.freeze(publicMenu),
     appMenu: Object.freeze(appMenu),
@@ -133,15 +110,13 @@
     candidateGoals: Object.freeze(candidateGoals),
     mediaRoles: Object.freeze(mediaRoles),
     mediaTypes: Object.freeze(mediaTypes),
+    organizerTypes: Object.freeze(organizerTypes),
     flagFromCode,
     travelDisclosure: "Pageant Index connects users with independent travel and accommodation providers. Availability, prices, bookings, refunds, and service terms are handled directly by each provider.",
     guestAccessDisclosure: "Browsing, merchandise checkout, pay-per-view access, and public voting do not require a Pageant Index account unless a specific organizer or payment provider legally requires identity verification. Account creation must never be used as an unnecessary barrier to purchase or participate.",
     sharedExperience: Object.freeze([
-      "Supplier directory",
-      "Official announcements",
-      "Clearly labeled featured advertising",
-      "Pageant calendar",
-      "Media articles",
+      "Supplier directory", "Official announcements",
+      "Clearly labeled featured advertising", "Pageant calendar", "Media articles",
     ]),
   });
 })();
