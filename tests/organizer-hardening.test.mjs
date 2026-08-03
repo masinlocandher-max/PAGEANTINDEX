@@ -26,7 +26,7 @@ test("organizer, public pageant, and result moderation scripts parse", async () 
   }
 });
 
-test("Supabase migration versions are unique and ordered", async () => {
+test("Supabase migration versions match the live ordered history", async () => {
   const files = (await readdir(join(root, "supabase/migrations")))
     .filter((name) => name.endsWith(".sql"))
     .sort();
@@ -34,49 +34,69 @@ test("Supabase migration versions are unique and ordered", async () => {
   assert.equal(new Set(versions).size, versions.length, `Duplicate migration version found: ${files.join(", ")}`);
   assert.deepEqual(versions, [...versions].sort());
   for (const required of [
-    "20260803171500_admin_moderation_extensions.sql",
-    "20260803171900_prepare_organizer_review_hardening.sql",
-    "20260803172000_harden_pageant_organizer_reviews.sql",
-    "20260803173000_fix_public_pageant_column_grants.sql",
-    "20260803174000_admin_rpc_compatibility.sql",
+    "20260803172117_pageantindex_foundation.sql",
+    "20260803172305_pageantindex_profiles.sql",
+    "20260803172436_pageantindex_media_content.sql",
+    "20260803172616_pageantindex_organization_core.sql",
+    "20260803172919_pageantindex_organization_operations.sql",
+    "20260803173041_pageantindex_admin_functions.sql",
+    "20260803173134_revoke_anonymous_admin_rpc_access.sql",
+    "20260803173310_isolate_admin_review_implementations.sql",
+    "20260803173435_optimize_pageantindex_rls_and_indexes.sql",
   ]) assert.ok(files.includes(required), `${required} is required`);
+
+  assert.ok(!files.some((name) => name.includes("global_candidate_supplier_ecosystem")), "Broken events dependency must not return");
+  const operations = await read("supabase/migrations/20260803172919_pageantindex_organization_operations.sql");
+  assert.match(operations, /references public\.pageant_edition_drafts\(id\)/);
+  assert.doesNotMatch(operations, /references public\.events\(id\)/);
 });
 
 test("organizer owners cannot write review or publication controls", async () => {
-  const sql = await read("supabase/migrations/20260803172000_harden_pageant_organizer_reviews.sql");
-  for (const table of [
-    "pageant_organization_drafts",
-    "pageant_edition_drafts",
-    "pageant_experience_requests",
-    "organizer_announcement_requests",
-    "pageant_result_drafts",
+  const core = await read("supabase/migrations/20260803172616_pageantindex_organization_core.sql");
+  const operations = await read("supabase/migrations/20260803172919_pageantindex_organization_operations.sql");
+  for (const [table, sql] of [
+    ["pageant_organization_drafts", core],
+    ["pageant_edition_drafts", core],
+    ["pageant_experience_requests", operations],
+    ["organizer_announcement_requests", operations],
+    ["pageant_result_drafts", operations],
   ]) {
     const columns = updateGrant(sql, table);
     assert.ok(columns, `Missing column-scoped update grant for ${table}`);
     assert.doesNotMatch(columns, /review_state|published_at|published_announcement_id|organizer_user_id/i);
   }
-  assert.doesNotMatch(sql, /grant select, insert, update, delete on public\.pageant_edition_drafts/i);
-  assert.match(sql, /Public reads approved pageant editions/);
-  assert.match(sql, /Public reads approved pageant experiences/);
-  assert.match(sql, /Public reads approved official results/);
+  assert.doesNotMatch(core + operations, /grant select, insert, update, delete on public\.pageant_edition_drafts/i);
+  assert.match(core, /Public reads approved pageant editions/);
+  assert.match(operations, /Public reads approved pageant experiences/);
+  assert.match(operations, /Public reads approved official results/);
 });
 
-test("organizer records must belong to the signed-in organizer and owned edition", async () => {
-  const sql = await read("supabase/migrations/20260803172000_harden_pageant_organizer_reviews.sql");
-  assert.match(sql, /pageantindex_is_organizer\(\(select auth\.uid\(\)\)\)/);
-  assert.match(sql, /edition\.organizer_user_id = \(select auth\.uid\(\)\)/);
-  assert.match(sql, /create roster drafts for their editions/i);
-  assert.match(sql, /experience requests for their editions/i);
-  assert.match(sql, /results for their editions/i);
+test("organizer records belong to the signed-in organizer and owned edition", async () => {
+  const core = await read("supabase/migrations/20260803172616_pageantindex_organization_core.sql");
+  const operations = await read("supabase/migrations/20260803172919_pageantindex_organization_operations.sql");
+  assert.match(core, /pageantindex_is_organizer\(\)/);
+  assert.match(core, /organizer_user_id = \(select auth\.uid\(\)\)/);
+  assert.match(operations, /edition\.organizer_user_id = \(select auth\.uid\(\)\)/);
+  assert.match(operations, /create roster drafts for their editions/i);
+  assert.match(operations, /experience requests for their editions/i);
+  assert.match(operations, /results for their editions/i);
 });
 
-test("admin RPC names match the PostgREST client payloads", async () => {
-  const compatibility = await read("supabase/migrations/20260803174000_admin_rpc_compatibility.sql");
+test("admin RPC names match clients and privileged logic is isolated", async () => {
+  const migration = await read("supabase/migrations/20260803173041_pageantindex_admin_functions.sql");
+  const revoke = await read("supabase/migrations/20260803173134_revoke_anonymous_admin_rpc_access.sql");
+  const isolation = await read("supabase/migrations/20260803173310_isolate_admin_review_implementations.sql");
   const admin = await read("public/pageantindex-admin-moderation.js");
   const results = await read("public/pageantindex-admin-results.js");
-  assert.match(compatibility, /admin_review_pageant_edition\(\s*edition_id uuid/);
-  assert.match(compatibility, /admin_review_pageant_experience\(\s*request_id uuid/);
-  assert.match(compatibility, /admin_review_organizer_announcement\(\s*request_id uuid/);
+  assert.match(migration, /admin_review_pageant_edition\(\s*edition_id uuid/);
+  assert.match(migration, /admin_review_pageant_experience\(\s*request_id uuid/);
+  assert.match(migration, /admin_review_organizer_announcement\(\s*request_id uuid/);
+  assert.match(migration, /private\.pageantindex_admin_review/);
+  assert.match(migration, /security definer/i);
+  assert.match(migration, /security invoker/i);
+  assert.match(migration, /submission_state = 'submitted'/);
+  assert.match(revoke, /from anon/);
+  assert.match(isolation, /not exposed through the public Data API/i);
   assert.match(admin, /edition_id: id/);
   assert.match(admin, /request_id: id/);
   assert.match(results, /result_record_id: button\.dataset\.resultId/);
@@ -113,10 +133,22 @@ test("public website and app only request approved pageant data", async () => {
   assert.match(await read("app/index.html"), /app\/pageant-data\.js/);
 });
 
-test("documentation describes the five-audience reviewed ecosystem", async () => {
+test("RLS optimization separates anonymous and authenticated public reads", async () => {
+  const sql = await read("supabase/migrations/20260803173435_optimize_pageantindex_rls_and_indexes.sql");
+  assert.match(sql, /for select to anon/);
+  assert.match(sql, /for select to authenticated/);
+  assert.match(sql, /Authenticated users read pageant editions/);
+  assert.match(sql, /Authenticated users read official results/);
+  assert.match(sql, /saved_pageant_events_event_idx/);
+  assert.match(sql, /saved_supplier_profiles_supplier_idx/);
+});
+
+test("documentation describes the live five-audience ecosystem", async () => {
   const readme = await read("README.md");
   assert.match(readme, /Five clear account types/);
   assert.match(readme, /Pageant Organization/);
   assert.match(readme, /official result/i);
   assert.match(readme, /Organizer owner/);
+  assert.match(readme, /20260803172117_pageantindex_foundation\.sql/);
+  assert.match(readme, /20260803173435_optimize_pageantindex_rls_and_indexes\.sql/);
 });
