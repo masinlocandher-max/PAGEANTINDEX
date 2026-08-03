@@ -8,10 +8,12 @@ import test from "node:test";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (path) => readFile(join(root, path), "utf8");
 
-test("shared authentication readiness script parses", async () => {
-  const path = join(root, "public/pageantindex-auth-readiness.js");
-  const result = spawnSync(process.execPath, ["--check", path], {encoding: "utf8"});
-  assert.equal(result.status, 0, result.stderr);
+test("shared authentication and session scripts parse", async () => {
+  for (const file of ["pageantindex-auth-readiness.js", "pageantindex-session-controls.js"]) {
+    const path = join(root, "public", file);
+    const result = spawnSync(process.execPath, ["--check", path], {encoding: "utf8"});
+    assert.equal(result.status, 0, `${file}\n${result.stderr}`);
+  }
 });
 
 test("signup and recovery requests have explicit approved redirect destinations", async () => {
@@ -58,19 +60,37 @@ test("password recovery consumes the session and updates the authenticated user"
   assert.match(auth, /Passwords do not match/);
 });
 
-test("auth readiness loads before website and app authentication", async () => {
+test("auth readiness loads before clients and session controls load after workspaces", async () => {
   const loader = await read("public/seo.js");
   const app = await read("app/index.html");
   const websiteAuth = loader.indexOf("pageantindex-auth-readiness.js");
   const websiteAudience = loader.indexOf("pageantindex-audience.js");
+  const websiteSession = loader.indexOf("pageantindex-session-controls.js");
   const appAuthReadiness = app.indexOf("pageantindex-auth-readiness.js");
   const appAuth = app.indexOf("/app/auth.js");
-  assert.ok(websiteAuth >= 0 && websiteAudience > websiteAuth);
+  const appWorkspace = app.indexOf("/app/pageant-data.js");
+  const appSession = app.indexOf("pageantindex-session-controls.js");
+  assert.ok(websiteAuth >= 0 && websiteAudience > websiteAuth && websiteSession > websiteAudience);
   assert.ok(appAuthReadiness >= 0 && appAuth > appAuthReadiness);
+  assert.ok(appSession > appWorkspace);
 });
 
-test("authentication client contains no privileged server credential", async () => {
-  const auth = await read("public/pageantindex-auth-readiness.js");
-  assert.doesNotMatch(auth, /service_role/i);
-  assert.doesNotMatch(auth, /SUPABASE_SERVICE/i);
+test("sign-out calls Supabase and clears every local session copy", async () => {
+  const controls = await read("public/pageantindex-session-controls.js");
+  assert.match(controls, /\/auth\/v1\/logout/);
+  assert.match(controls, /sessionStorage\.removeItem\(SESSION_KEY\)/);
+  assert.match(controls, /localStorage\.removeItem\(SESSION_KEY\)/);
+  assert.match(controls, /data-pi-sign-out|piSignOut/);
+  assert.match(controls, /finally/);
+});
+
+test("authentication clients contain no privileged server credential", async () => {
+  for (const path of [
+    "public/pageantindex-auth-readiness.js",
+    "public/pageantindex-session-controls.js",
+  ]) {
+    const source = await read(path);
+    assert.doesNotMatch(source, /service_role/i);
+    assert.doesNotMatch(source, /SUPABASE_SERVICE/i);
+  }
 });
