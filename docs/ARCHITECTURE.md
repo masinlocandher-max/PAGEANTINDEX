@@ -23,6 +23,10 @@ checkout, pay-per-view, livestream access, tickets, or public voting.
 - Controlled image storage and authorized media delivery
 - Error monitoring, database backups, audit logs, and rate limiting
 
+Infrastructure deployment is intentionally outside the current scope. The
+current branch focuses on the application, Supabase data model, security,
+moderation, responsive clients, and browser-ready workflows.
+
 ## Canonical application boundaries
 
 ### Shared public discovery
