@@ -1,6 +1,6 @@
 -- Pageant Index Philippines
--- Supabase/PostgreSQL production-ready starting schema
--- Run in a new Supabase project, then review policies against your exact operational roles.
+-- Future platform reference schema. This file is not the canonical live migration.
+-- Production changes must be made through supabase/migrations and tested before rollout.
 
 create extension if not exists pgcrypto;
 create extension if not exists citext;
@@ -535,24 +535,36 @@ end $$;
 
 -- Authorization helpers
 create or replace function public.current_role()
-returns public.app_role language sql stable security definer set search_path = public as $$
-  select coalesce((select role from public.users where id = auth.uid()), 'user'::public.app_role)
+returns public.app_role language sql stable security invoker set search_path = '' as $$
+  select case
+    when ((select auth.jwt()) -> 'app_metadata' ->> 'role') in
+      ('professional_owner','editor','verifier','moderator','admin','super_admin')
+    then (((select auth.jwt()) -> 'app_metadata' ->> 'role')::public.app_role)
+    else 'user'::public.app_role
+  end
 $$;
 
 create or replace function public.is_admin()
-returns boolean language sql stable security definer set search_path = public as $$
+returns boolean language sql stable security invoker set search_path = '' as $$
   select public.current_role() in ('admin','super_admin')
 $$;
 
 create or replace function public.can_moderate()
-returns boolean language sql stable security definer set search_path = public as $$
+returns boolean language sql stable security invoker set search_path = '' as $$
   select public.current_role() in ('moderator','admin','super_admin')
 $$;
 
 create or replace function public.owns_profile(profile_uuid uuid)
-returns boolean language sql stable security definer set search_path = public as $$
-  select exists(select 1 from public.profiles p where p.id = profile_uuid and p.owner_user_id = auth.uid())
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists(
+    select 1
+    from public.profiles p
+    where p.id = profile_uuid and p.owner_user_id = (select auth.uid())
+  )
 $$;
+
+revoke all on function public.owns_profile(uuid) from public;
+grant execute on function public.owns_profile(uuid) to anon, authenticated;
 
 -- Row-level security
 alter table public.users enable row level security;
@@ -576,27 +588,35 @@ alter table public.notifications enable row level security;
 alter table public.audit_logs enable row level security;
 alter table public.data_requests enable row level security;
 
-create policy users_self_select on public.users for select using (id = auth.uid() or public.is_admin());
-create policy users_self_update on public.users for update using (id = auth.uid() or public.is_admin()) with check (id = auth.uid() or public.is_admin());
+create policy users_self_select on public.users for select using (id = (select auth.uid()) or public.is_admin());
+create policy users_self_update on public.users for update using (id = (select auth.uid()) or public.is_admin()) with check (id = (select auth.uid()) or public.is_admin());
 
-create policy public_profiles_select on public.profiles for select using (status not in ('suspended','archived') or public.owns_profile(id) or public.is_admin());
+create policy public_profiles_select on public.profiles for select using (
+  (status in ('basic','verified','professional','featured','founding_member') and published_at is not null)
+  or public.owns_profile(id)
+  or public.is_admin()
+);
 create policy owner_profiles_update on public.profiles for update using (public.owns_profile(id) or public.is_admin()) with check (public.owns_profile(id) or public.is_admin());
 create policy admin_profiles_insert on public.profiles for insert with check (public.is_admin());
 
-create policy public_portfolio_select on public.portfolio_items for select using (exists(select 1 from public.profiles p where p.id=profile_id and p.status not in ('suspended','archived')) or public.owns_profile(profile_id) or public.is_admin());
+create policy public_portfolio_select on public.portfolio_items for select using (exists(select 1 from public.profiles p where p.id=profile_id and p.status in ('basic','verified','professional','featured','founding_member') and p.published_at is not null) or public.owns_profile(profile_id) or public.is_admin());
 create policy owner_portfolio_all on public.portfolio_items for all using (public.owns_profile(profile_id) or public.is_admin()) with check (public.owns_profile(profile_id) or public.is_admin());
-create policy public_services_select on public.services for select using (is_active or public.owns_profile(profile_id) or public.is_admin());
+create policy public_services_select on public.services for select using ((is_active and exists(select 1 from public.profiles p where p.id=profile_id and p.status in ('basic','verified','professional','featured','founding_member') and p.published_at is not null)) or public.owns_profile(profile_id) or public.is_admin());
 create policy owner_services_all on public.services for all using (public.owns_profile(profile_id) or public.is_admin()) with check (public.owns_profile(profile_id) or public.is_admin());
-create policy public_packages_select on public.packages for select using (is_active or public.owns_profile(profile_id) or public.is_admin());
+create policy public_packages_select on public.packages for select using ((is_active and exists(select 1 from public.profiles p where p.id=profile_id and p.status in ('basic','verified','professional','featured','founding_member') and p.published_at is not null)) or public.owns_profile(profile_id) or public.is_admin());
 create policy owner_packages_all on public.packages for all using (public.owns_profile(profile_id) or public.is_admin()) with check (public.owns_profile(profile_id) or public.is_admin());
 
 create policy claimant_claims_select on public.claims for select using (claimant_user_id=auth.uid() or public.is_admin());
 create policy claimant_claims_insert on public.claims for insert with check (claimant_user_id=auth.uid());
-create policy claimant_claims_update on public.claims for update using ((claimant_user_id=auth.uid() and status in ('draft','revision_requested')) or public.is_admin());
+create policy claimant_claims_update on public.claims for update
+using ((claimant_user_id=(select auth.uid()) and status in ('draft','revision_requested')) or public.is_admin())
+with check ((claimant_user_id=(select auth.uid()) and status in ('draft','submitted','revision_requested')) or public.is_admin());
 
 create policy verification_owner_select on public.verification_requests for select using (requested_by=auth.uid() or public.owns_profile(profile_id) or public.is_admin());
 create policy verification_owner_insert on public.verification_requests for insert with check (requested_by=auth.uid() and public.owns_profile(profile_id));
-create policy verification_admin_update on public.verification_requests for update using (public.owns_profile(profile_id) or public.is_admin());
+create policy verification_owner_or_admin_update on public.verification_requests for update
+using (((requested_by=(select auth.uid()) or public.owns_profile(profile_id)) and status in ('draft','revision_requested')) or public.is_admin())
+with check (((requested_by=(select auth.uid()) or public.owns_profile(profile_id)) and status in ('draft','submitted','revision_requested')) or public.is_admin());
 
 -- Private verification documents: no public policy. Owners see only their request/claim files; admins/verifiers see all.
 create policy verification_docs_owner_select on public.verification_documents for select using (
@@ -604,24 +624,53 @@ create policy verification_docs_owner_select on public.verification_documents fo
   exists(select 1 from public.verification_requests vr where vr.id=verification_request_id and (vr.requested_by=auth.uid() or public.owns_profile(vr.profile_id))) or
   exists(select 1 from public.claims c where c.id=claim_id and c.claimant_user_id=auth.uid())
 );
-create policy verification_docs_owner_insert on public.verification_documents for insert with check (uploaded_by=auth.uid());
+create policy verification_docs_owner_insert on public.verification_documents for insert with check (
+  uploaded_by=(select auth.uid())
+  and reviewed_by is null
+  and review_status='pending'
+  and rejection_reason is null
+  and (
+    exists(select 1 from public.verification_requests vr where vr.id=verification_request_id and (vr.requested_by=(select auth.uid()) or public.owns_profile(vr.profile_id)))
+    or exists(select 1 from public.claims c where c.id=claim_id and c.claimant_user_id=(select auth.uid()))
+  )
+);
 
 create policy subscriptions_owner_select on public.subscriptions for select using (public.owns_profile(profile_id) or public.is_admin());
-create policy payments_owner_select on public.payments for select using (profile_id is not null and public.owns_profile(profile_id) or public.is_admin());
+create policy payments_owner_select on public.payments for select using ((profile_id is not null and public.owns_profile(profile_id)) or public.is_admin());
 
 create policy inquiry_sender_insert on public.inquiries for insert with check (sender_user_id is null or sender_user_id=auth.uid());
 create policy inquiry_participants_select on public.inquiries for select using (sender_user_id=auth.uid() or public.owns_profile(profile_id) or public.is_admin());
 create policy inquiry_owner_update on public.inquiries for update using (public.owns_profile(profile_id) or public.is_admin());
 
 create policy public_reviews_select on public.reviews for select using (status='published' or reviewer_user_id=auth.uid() or public.owns_profile(profile_id) or public.can_moderate());
-create policy reviewer_reviews_insert on public.reviews for insert with check (reviewer_user_id=auth.uid());
-create policy moderator_reviews_update on public.reviews for update using (reviewer_user_id=auth.uid() or public.can_moderate());
+create policy reviewer_reviews_insert on public.reviews for insert with check (
+  reviewer_user_id=(select auth.uid())
+  and inquiry_id is not null
+  and status='pending'
+  and is_verified_transaction=false
+  and published_at is null
+  and exists(
+    select 1 from public.inquiries i
+    where i.id=inquiry_id
+      and i.profile_id=profile_id
+      and i.sender_user_id=(select auth.uid())
+      and i.status in ('replied','qualified','booked','closed')
+  )
+);
+create policy moderator_reviews_update on public.reviews for update using (public.can_moderate()) with check (public.can_moderate());
 create policy public_review_replies_select on public.review_replies for select using (status='published' or author_user_id=auth.uid() or public.can_moderate());
-create policy owner_review_replies_insert on public.review_replies for insert with check (author_user_id=auth.uid());
+create policy owner_review_replies_insert on public.review_replies for insert with check (
+  author_user_id=(select auth.uid())
+  and status='pending'
+  and published_at is null
+  and exists(select 1 from public.reviews r where r.id=review_id and public.owns_profile(r.profile_id))
+);
 
 create policy public_events_select on public.events for select using (status='published' or submitted_by=auth.uid() or public.is_admin());
 create policy user_events_insert on public.events for insert with check (submitted_by=auth.uid());
-create policy submitter_events_update on public.events for update using ((submitted_by=auth.uid() and status in ('draft','pending')) or public.is_admin());
+create policy submitter_events_update on public.events for update
+using ((submitted_by=(select auth.uid()) and status in ('draft','pending')) or public.is_admin())
+with check ((submitted_by=(select auth.uid()) and status in ('draft','pending')) or public.is_admin());
 create policy public_articles_select on public.articles for select using (status='published' or author_user_id=auth.uid() or public.current_role() in ('editor','admin','super_admin'));
 create policy editorial_articles_all on public.articles for all using (public.current_role() in ('editor','admin','super_admin')) with check (public.current_role() in ('editor','admin','super_admin'));
 
@@ -633,10 +682,30 @@ create policy user_complaints_insert on public.complaints for insert with check 
 create policy complaint_response_update on public.complaints for update using (public.owns_profile(profile_id) or public.can_moderate());
 
 create policy notification_self_select on public.notifications for select using (user_id=auth.uid());
-create policy notification_self_update on public.notifications for update using (user_id=auth.uid());
+create policy notification_self_update on public.notifications for update using (user_id=(select auth.uid())) with check (user_id=(select auth.uid()));
 create policy audit_admin_select on public.audit_logs for select using (public.is_admin());
 create policy data_request_self_select on public.data_requests for select using (user_id=auth.uid() or public.is_admin());
 create policy data_request_insert on public.data_requests for insert with check (user_id is null or user_id=auth.uid());
+
+-- Column privileges keep owner-editable data separate from trust and moderation fields.
+-- Administrative trust transitions must run through a reviewed server-side operation.
+revoke update on public.users from authenticated;
+grant update (full_name, mobile, avatar_url, consent_terms_at, consent_privacy_at) on public.users to authenticated;
+
+revoke update on public.profiles from authenticated;
+grant update (
+  primary_category_id, primary_location_id, slug, public_name, headline, biography,
+  logo_url, cover_url, email, mobile, website_url, social_links, business_hours,
+  years_experience, languages, starting_rate, price_range_min, price_range_max,
+  accepts_nationwide, available_for_travel, last_active_at, last_public_update_at
+) on public.profiles to authenticated;
+
+revoke update on public.verification_requests from authenticated;
+grant update (category_id, status, evidence_summary, submitted_at) on public.verification_requests to authenticated;
+
+revoke update on public.reviews from authenticated;
+revoke update on public.notifications from authenticated;
+grant update (read_at) on public.notifications to authenticated;
 
 -- Storage recommendations (configure in Supabase dashboard or migrations):
 -- public buckets: profile-logos, profile-portfolios, article-images, event-images

@@ -2834,6 +2834,10 @@ button {
 .admin-auth-message { min-height:20px; color:var(--danger); font-size:.68rem; text-align:center; }
 .admin-suppliers-layout { padding:0 30px 44px; }
 .admin-suppliers-layout .admin-primary { border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#fff; }
+.admin-queue-section { margin-top:22px; }
+.admin-queue-section .panel-title span { color:var(--muted); font-size:.68rem; }
+.admin-queue-section select { min-width:120px; border:1px solid var(--line); border-radius:7px; background:#fff; padding:8px; font-size:.68rem; }
+.admin-queue-error { margin:0 0 18px; }
 .admin-suppliers-layout .admin-toolbar { display:grid; grid-template-columns:minmax(220px,1fr) repeat(3,minmax(140px,.45fr)); padding:18px; margin:0; border-bottom:1px solid var(--line); }
 .admin-suppliers-layout .admin-toolbar input,
 .admin-suppliers-layout .admin-toolbar select { width:100%; border:1px solid var(--line); border-radius:8px; background:#fff; padding:11px 12px; font-size:.7rem; }

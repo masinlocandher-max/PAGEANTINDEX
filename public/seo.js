@@ -1,6 +1,53 @@
 "use strict";
 
 (() => {
+  const appendStyle = (href) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    document.head.appendChild(link);
+  };
+
+  appendStyle("/public/pageantindex-ecosystem.css?v=20260803");
+  appendStyle("/public/pageantindex-audience.css?v=20260803-3");
+  appendStyle("/public/pageantindex-organizer.css?v=20260803");
+  appendStyle("/public/pageantindex-submission-controls.css?v=20260803");
+  appendStyle("/public/pageantindex-admin-moderation.css?v=20260803");
+
+  const appendScript = (src, onload) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = false;
+    if (onload) script.onload = onload;
+    document.head.appendChild(script);
+  };
+
+  appendScript("/public/pageantindex-auth-readiness.js?v=20260804", () => {
+    appendScript("/public/pageantindex-config.js?v=20260803-3", () => {
+      appendScript("/public/pageantindex-preflight.js?v=20260803", () => {
+        appendScript("/public/pageantindex-organizer-preflight.js?v=20260803", () => {
+          appendScript("/public/pageantindex-organizer.js?v=20260803", () => {
+            appendScript("/public/pageantindex-audience.js?v=20260803-2", () => {
+              appendScript("/public/pageantindex-organizer-publishing.js?v=20260803", () => {
+                appendScript("/public/pageantindex-organizer-form-guards.js?v=20260803", () => {
+                  appendScript("/public/pageantindex-submission-controls.js?v=20260803", () => {
+                    appendScript("/public/pageantindex-ecosystem.js?v=20260803", () => {
+                      appendScript("/public/pageantindex-admin-moderation.js?v=20260803", () => {
+                        appendScript("/public/pageantindex-admin-results.js?v=20260803", () => {
+                          appendScript("/public/pageantindex-session-controls.js?v=20260804");
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+
   const origin = "https://www.pageantindex.com";
   const articleData = {
     "/articles/choose-pageant-photographer/": {
@@ -37,16 +84,13 @@
     description: item.description,
     image: `${origin}${item.image}`,
     datePublished: item.published,
-    dateModified: "2026-07-30",
-    inLanguage: "en-PH",
-    author: { "@type": "Organization", name: "Pageant Index Editorial" },
+    dateModified: "2026-08-03",
+    inLanguage: "en",
+    author: {"@type": "Organization", name: "Pageant Index Editorial"},
     publisher: {
       "@type": "Organization",
-      name: "Pageant Index Philippines",
-      logo: {
-        "@type": "ImageObject",
-        url: `${origin}/public/images/pageant-icon.png`
-      }
+      name: "Pageant Index",
+      logo: {"@type": "ImageObject", url: `${origin}/public/images/pageant-icon.png`}
     },
     mainEntityOfPage: `${origin}${location.pathname}`
   };
