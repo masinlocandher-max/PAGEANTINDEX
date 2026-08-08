@@ -214,13 +214,19 @@ function commercialIntake(records) {
   const ignore = new Set(["newsletter", "report"]);
   return records.filter((record) => !ignore.has(String(record.submission_type || "").toLowerCase()));
 }
-function renderOpportunities(records) {
+function renderFounderQueue(opportunities, escalations) {
   const list = document.getElementById("opportunity-list");
-  if (!records.length) {
-    list.innerHTML = `<div class="empty-state">No recent founder-level opportunities are waiting here.</div>`;
-    return;
-  }
-  list.innerHTML = records.slice(0, 8).map((record) => `
+  const escalationRows = escalations.map((record) => `
+    <article class="opportunity-row">
+      <span class="opportunity-type">${escapeHtml(`${record.escalation_type} · ${record.severity}`)}</span>
+      <div class="opportunity-contact">
+        <strong>${escapeHtml(record.title)}</strong>
+        <small>${escapeHtml(record.summary || "Founder decision or awareness required.")}</small>
+      </div>
+      <span class="opportunity-meta">${escapeHtml(record.status)}</span>
+      <time class="opportunity-date">${escapeHtml(compactDate(record.due_at || record.created_at))}</time>
+    </article>`);
+  const opportunityRows = opportunities.slice(0, 8).map((record) => `
     <article class="opportunity-row">
       <span class="opportunity-type">${escapeHtml(String(record.submission_type || "opportunity").replaceAll("_", " "))}</span>
       <div class="opportunity-contact">
@@ -229,23 +235,27 @@ function renderOpportunities(records) {
       </div>
       <span class="opportunity-meta">${escapeHtml(record.status || "new")}</span>
       <time class="opportunity-date">${escapeHtml(compactDate(record.created_at))}</time>
-    </article>`).join("");
+    </article>`);
+  const rows = [...escalationRows, ...opportunityRows];
+  list.innerHTML = rows.length
+    ? rows.join("")
+    : `<div class="empty-state">No founder-level opportunities or escalations are waiting here.</div>`;
 }
 async function loadOperations() {
   try {
-    const [intake, drafts] = await Promise.all([
+    const [intake, escalations] = await Promise.all([
       supabaseRequest("/rest/v1/intake_submissions?select=id,submission_type,contact_name,contact_email,contact_mobile,status,created_at&order=created_at.desc&limit=100"),
-      supabaseRequest("/rest/v1/professional_profile_drafts?select=user_id,review_state,submission_state,updated_at&order=updated_at.desc&limit=100"),
+      supabaseRequest("/rest/v1/founder_escalations?select=id,escalation_type,severity,title,summary,status,due_at,created_at&status=in.(open,acknowledged)&order=created_at.desc&limit=100"),
     ]);
     const opportunities = commercialIntake(intake || []);
-    const pendingReviews = (drafts || []).filter((row) => ["pending", "in_review", "submitted"].includes(String(row.review_state || row.submission_state)));
+    const founderEscalations = escalations || [];
     document.getElementById("metric-opportunities").textContent = String(opportunities.length);
-    document.getElementById("metric-reviews").textContent = String(pendingReviews.length);
-    renderOpportunities(opportunities);
+    document.getElementById("metric-reviews").textContent = String(founderEscalations.length);
+    renderFounderQueue(opportunities, founderEscalations);
   } catch (error) {
     document.getElementById("metric-opportunities").textContent = "—";
     document.getElementById("metric-reviews").textContent = "—";
-    document.getElementById("opportunity-list").innerHTML = `<div class="empty-state">Operations queue unavailable: ${escapeHtml(error.message)}</div>`;
+    document.getElementById("opportunity-list").innerHTML = `<div class="empty-state">Founder queue unavailable: ${escapeHtml(error.message)}</div>`;
   }
 }
 
