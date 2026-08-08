@@ -26,6 +26,7 @@ jobs:
           node --check public/launch-v2-ready.js
           node --check public/launch-signup-v2.js
           node --check public/launch-nav-v2.js
+          node --check public/launch-role-router-v2.js
           node --check public/claim-v2.js
           node --check public/dashboard-access-v2.js
           node --check platform/platform.js
