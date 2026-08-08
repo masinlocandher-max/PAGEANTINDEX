@@ -11,13 +11,35 @@ function extractOutputText(payload) {
   return parts.join("\n").trim();
 }
 
+function aiConnection() {
+  const gatewayToken = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN || "";
+  if (gatewayToken) {
+    return {
+      url: "https://ai-gateway.vercel.sh/v1/responses",
+      token: gatewayToken,
+      model: process.env.FOUNDER_AI_MODEL || "openai/gpt-5.4",
+      provider: "vercel-ai-gateway",
+    };
+  }
+  if (process.env.OPENAI_API_KEY) {
+    return {
+      url: "https://api.openai.com/v1/responses",
+      token: process.env.OPENAI_API_KEY,
+      model: process.env.OPENAI_MODEL || "gpt-5-mini",
+      provider: "openai",
+    };
+  }
+  return null;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") return sendJson(res, 405, {error: "Method not allowed."});
   const user = await requireFounder(req, res);
   if (!user) return;
 
-  if (!process.env.OPENAI_API_KEY) {
-    return sendJson(res, 503, {error: "OpenAI is not connected to the founder dashboard yet."});
+  const ai = aiConnection();
+  if (!ai) {
+    return sendJson(res, 503, {error: "Founder GPT is not connected yet."});
   }
 
   let body = req.body;
@@ -52,14 +74,14 @@ export default async function handler(req, res) {
     : message;
 
   try {
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch(ai.url, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${ai.token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || "gpt-5-mini",
+        model: ai.model,
         instructions,
         input,
         store: false,
@@ -67,9 +89,13 @@ export default async function handler(req, res) {
     });
     const payload = await response.json();
     if (!response.ok) {
-      return sendJson(res, response.status, {error: payload?.error?.message || "OpenAI request failed."});
+      return sendJson(res, response.status, {error: payload?.error?.message || "Founder GPT request failed."});
     }
-    return sendJson(res, 200, {text: extractOutputText(payload), model: payload?.model || process.env.OPENAI_MODEL || "gpt-5-mini"});
+    return sendJson(res, 200, {
+      text: extractOutputText(payload),
+      model: payload?.model || ai.model,
+      provider: ai.provider,
+    });
   } catch (error) {
     return sendJson(res, 500, {error: error.message});
   }
