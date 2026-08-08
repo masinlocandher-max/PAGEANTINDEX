@@ -3,3 +3,4 @@ Rerun after correcting homepage marker.
 Trigger rendered desktop and iPhone QA.
 Final rerun after mobile Organizer overlap fix.
 Robust rerun with active media paused.
+Organizer-only final screenshot verification.
