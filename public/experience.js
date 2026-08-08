@@ -1,0 +1,248 @@
+"use strict";
+
+(() => {
+  const root = document.getElementById("experience-app");
+  if (!root) return;
+  const mode = document.body.dataset.experience || "hub";
+
+  const candidates = [
+    {id:"01",name:"Candidate 01",representation:"Delegation 01"},
+    {id:"02",name:"Candidate 02",representation:"Delegation 02"},
+    {id:"03",name:"Candidate 03",representation:"Delegation 03"},
+    {id:"04",name:"Candidate 04",representation:"Delegation 04"},
+  ];
+  const criteria = [
+    {id:"interview",name:"Interview",weight:35},
+    {id:"gown",name:"Evening Gown",weight:25},
+    {id:"swimsuit",name:"Swimsuit",weight:20},
+    {id:"advocacy",name:"Advocacy",weight:20},
+  ];
+  const routes = [
+    ["Organizer","/platform/","Run applications, candidates, schedules, judging, voting, tickets and records."],
+    ["Candidate","/candidate/","Apply, submit requirements, follow schedules and build a permanent pageant profile."],
+    ["Judge","/judge/","Secure scoring flow from invitation through locked submission."],
+    ["Voter / Fan","/vote/","Candidate discovery, voting, confirmation and campaign-closed states."],
+    ["Ticket Buyer","/tickets/","Ticket selection, checkout, QR credential and sold-out states."],
+    ["Supplier","/supplier-workspace/","Receive event briefs, reply, quote and track organizer decisions."],
+    ["Tabulator / Admin","/tabulation/","Monitor judges, lock rounds, review anomalies, certify and publish."],
+    ["Public Event","/event/","The canonical edition page for candidates, schedule, voting, tickets and results."],
+  ];
+
+  const state = {
+    candidateTab:"home",
+    candidateSaved:false,
+    requirements:[
+      {id:"identity",name:"Identity & eligibility",status:"complete"},
+      {id:"headshot",name:"Official headshot",status:"complete"},
+      {id:"advocacy",name:"Advocacy materials",status:"needed"},
+      {id:"medical",name:"Medical / safety requirements",status:"needed"},
+      {id:"talent",name:"Talent / production files",status:"needed"},
+      {id:"wardrobe",name:"Wardrobe & measurements",status:"complete"},
+    ],
+    judgeEntered:false,
+    judgeCandidate:0,
+    judgeScores:{},
+    judgeSubmitted:false,
+    voteStage:"ballot",
+    voteCandidate:null,
+    voteQty:1,
+    voteClosed:false,
+    voteReceipt:null,
+    ticketStage:"browse",
+    ticketCart:{ga:0,vip:0,vvip:0},
+    ticketReceipt:null,
+    supplierFilter:"all",
+    supplierSelected:"INQ-001",
+    quoteSubmitted:false,
+    tabAllSubmitted:false,
+    tabLocked:false,
+    tabCertified:false,
+    tabPublished:false,
+    eventTab:"overview",
+    pendingConfirm:null,
+  };
+
+  const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[c]);
+  const status = (label,kind="neutral") => `<span class="status ${kind}">${escapeHtml(label)}</span>`;
+  const btn = (label,action,kind="x-action",extra="") => `<button class="${kind}" data-action="${action}" ${extra}>${label}</button>`;
+  const panelHead = (title,copy="",action="") => `<div class="panel-head"><div><h2>${title}</h2>${copy?`<p>${copy}</p>`:""}</div>${action}</div>`;
+  const notice = copy => `<div class="notice"><strong>Preview</strong><div>${copy}</div></div>`;
+
+  function topbar() {
+    return `<header class="x-top">
+      <a class="x-brand" href="/"><img src="/public/images/pageant-icon.png" alt=""><div><strong>PageantIndex</strong><span>The Global Network for Pageantry</span></div></a>
+      <div class="x-grow"></div>
+      <span class="preview-label">Front-end preview</span>
+      <a class="x-action" href="/experience/">All experiences</a>
+      ${mode !== "event" && mode !== "vote" && mode !== "tickets" ? '<a class="x-action" href="/event/">Public event</a>' : ''}
+    </header>`;
+  }
+
+  function shell(content) {
+    root.innerHTML = `<div class="x-shell">${topbar()}<div class="network" id="network-banner">You appear to be offline. Preview changes stay on this device only.</div><main class="x-main">${content}</main><div class="toast" id="x-toast" role="status" aria-live="polite"></div><div class="modal-backdrop" id="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><h2 id="modal-title">Confirm action</h2><p id="modal-copy"></p><div class="modal-actions"><button class="x-action" data-action="modal-cancel">Cancel</button><button class="x-primary" data-action="modal-confirm">Confirm</button></div></section></div></div>`;
+    syncNetwork();
+  }
+
+  function hero(title,copy,actions="") {
+    return `<section class="x-hero"><div><h1>${title}</h1><p>${copy}</p></div><div class="x-hero-side">${actions}</div></section>`;
+  }
+
+  function tabs(items,active,attribute="tab") {
+    return `<nav class="tabs" aria-label="Page sections">${items.map(([id,label]) => `<button data-${attribute}="${id}" class="${active===id?"active":""}">${label}</button>`).join("")}</nav>`;
+  }
+
+  function renderHub() {
+    shell(`${hero("Every PageantIndex journey.","The complete front-end map from discovery and application to judging, voting, attendance, official results and professional opportunity.",'<a class="x-primary" href="/platform/">Open Organizer OS</a>')}
+      ${notice("These experiences are intentionally disconnected from production transactions and competition records. They establish the complete UX contract before database integration.")}
+      <section class="hub-grid">${routes.map(([name,url,copy]) => `<a class="hub-card" href="${url}"><small>PageantIndex experience</small><h2>${name}</h2><p>${copy}</p><span>Open experience →</span></a>`).join("")}</section>`);
+  }
+
+  function candidateHome() {
+    const complete = state.requirements.filter(x => x.status === "complete").length;
+    const pct = Math.round((complete/state.requirements.length)*100);
+    return `<div class="grid four">
+      <article class="panel pad kpi"><small>Application</small><strong>Accepted</strong><span>Your preview application has moved into the candidate portal.</span></article>
+      <article class="panel pad kpi"><small>Requirements</small><strong>${complete}/${state.requirements.length}</strong><span>${pct}% preview completion.</span></article>
+      <article class="panel pad kpi"><small>Next call time</small><strong>09:00</strong><span>Orientation · Preview schedule</span></article>
+      <article class="panel pad kpi"><small>Public profile</small><strong>Private</strong><span>You decide when to submit it for review.</span></article>
+    </div>
+    <div class="grid two" style="margin-top:16px"><section class="panel pad-lg">${panelHead("What needs attention","Your portal prioritizes the next useful action.")}
+      <div class="list">${state.requirements.filter(x=>x.status!=="complete").map(x=>`<div class="row"><span class="dot pending"></span><div class="row-main"><strong>${x.name}</strong><span>Still needed for candidate readiness.</span></div>${btn("Open","candidate-requirements","x-soft")}</div>`).join("") || '<div class="empty"><h3>Everything is complete</h3><p>No outstanding candidate requirements.</p></div>'}</div></section>
+      <section class="panel pad-lg">${panelHead("Coming up","Pageant-week information stays in one place.")}<div class="timeline"><div class="timeline-item"><time>Preview · Day 1</time><strong>Orientation & fitting</strong><span>Call time 09:00 · Ballroom A</span></div><div class="timeline-item"><time>Preview · Day 2</time><strong>Official photoshoot</strong><span>Call time 08:00 · Studio holding area</span></div><div class="timeline-item"><time>Preview · Day 3</time><strong>Preliminary competition</strong><span>Call time 14:00 · Main venue</span></div></div></section></div>`;
+  }
+
+  function candidateApplication() {
+    return `<section class="panel pad-lg">${panelHead("Application record","Editable preview fields demonstrate save, validation and review states.",status("Accepted","ready"))}<form id="candidate-application" class="form-grid" novalidate>
+      <div class="field"><label>Display name</label><input name="display_name" value="Candidate 01" required></div><div class="field"><label>Representation</label><input name="representation" value="Delegation 01" required></div>
+      <div class="field"><label>Email</label><input name="email" type="email" value="candidate@example.com" required></div><div class="field"><label>Mobile number</label><input name="mobile" value="09XX XXX XXXX" required></div>
+      <div class="field full"><label>Advocacy summary</label><textarea name="advocacy" required>Preview advocacy statement. This will become a candidate-controlled record.</textarea></div>
+      <div class="field full"><span class="helper">No information on this preview form is sent to PageantIndex or stored in the production database.</span></div>
+      <div class="field full"><div style="display:flex;gap:9px;justify-content:flex-end">${btn(state.candidateSaved?"Saved locally":"Save preview","candidate-save","x-primary")}</div></div>
+    </form></section>`;
+  }
+
+  function candidateRequirements() {
+    return `<section class="panel pad-lg">${panelHead("Candidate requirements","Select a file to exercise the upload-ready front-end state. Files are not transmitted anywhere.")}
+      <div class="list">${state.requirements.map(req => `<div class="row"><span class="dot ${req.status==="complete"?"ready":"pending"}"></span><div class="row-main"><strong>${req.name}</strong><span>${req.status==="complete"?"Complete in preview":"Awaiting candidate submission"}</span></div>${req.status==="complete"?status("Complete","ready"):`<label class="x-soft" style="cursor:pointer">Choose file<input hidden type="file" data-requirement-file="${req.id}"></label>`}</div>`).join("")}</div>
+      <div class="helper" style="margin-top:14px">Production integration must validate file type, size, ownership, private storage, review state and deletion rules server-side.</div>
+    </section>`;
+  }
+
+  function candidateSchedule() {
+    return `<section class="panel pad-lg">${panelHead("My schedule","Only events relevant to this candidate should appear here.")}<div class="timeline">
+      ${[["Orientation & fitting","09:00","Ballroom A","Bring heels and neutral undergarments"],["Official photoshoot","08:00","Studio holding area","Hair and makeup call"],["Sponsor appearance","13:30","Partner venue","Wear official pageant shirt"],["Preliminary competition","14:00","Main venue","Full production call"]].map(([name,time,place,note],i)=>`<div class="timeline-item"><time>Preview day ${i+1} · ${time}</time><strong>${name}</strong><span>${place} · ${note}</span></div>`).join("")}
+    </div></section>`;
+  }
+
+  function candidateProfile() {
+    return `<div class="grid two"><section class="panel pad-lg">${panelHead("Candidate profile","Prepare the information that can later become part of your permanent PageantIndex history.")}<form class="form-grid"><div class="field"><label>Current title</label><input value="Preview title"></div><div class="field"><label>Country / territory</label><input value="Philippines"></div><div class="field full"><label>Public biography</label><textarea>Preview biography. Candidate-controlled public information will require review before publication.</textarea></div><div class="field full">${btn("Save profile preview","candidate-profile-save","x-primary")}</div></form></section>
+      <aside class="panel pad-lg">${panelHead("Public preview","Nothing publishes from this front-end prototype.")}<div class="candidate-face">01</div><h3 style="margin:14px 0 4px">Candidate 01</h3><p class="helper">Delegation 01 · Preview candidate profile</p><div style="margin-top:14px">${status("Not submitted for review","neutral")}</div></aside></div>`;
+  }
+
+  function renderCandidate() {
+    const items=[["home","Home"],["application","Application"],["requirements","Requirements"],["schedule","Schedule"],["profile","My PageantIndex Profile"]];
+    const content = state.candidateTab==="home"?candidateHome():state.candidateTab==="application"?candidateApplication():state.candidateTab==="requirements"?candidateRequirements():state.candidateTab==="schedule"?candidateSchedule():candidateProfile();
+    shell(`${hero("Candidate portal.","One private place to apply, complete requirements, follow pageant-week instructions and build a verified competition history.",'<a class="x-action" href="/event/">View public event</a>')}${notice("Candidate 01 and all dates shown here are interface placeholders. No real applicant record exists on this preview route.")}${tabs(items,state.candidateTab,"candidate-tab")}${content}`);
+  }
+
+  function judgeAccess() {
+    return `<section style="max-width:580px;margin:7vh auto" class="panel pad-lg">${panelHead("Judge invitation","A judge enters through a scoped invitation, not through the organizer dashboard.")}<div class="field"><label>Invitation code</label><input value="PREVIEW-JUDGE" readonly></div><p class="helper" style="margin:14px 0">Production access must verify the invitation server-side, bind it to one judge and one competition, expire securely, and never expose other judges' unpublished scores.</p>${btn("Enter judging room","judge-enter","x-primary")}</section>`;
+  }
+
+  function scoreFor(candidateId,criterionId) { return state.judgeScores[candidateId]?.[criterionId] ?? 0; }
+  function allScoresComplete() { return candidates.every(c => criteria.every(cr => scoreFor(c.id,cr.id)>0)); }
+  function judgeWorkspace() {
+    if (state.judgeSubmitted) return `<section class="receipt" style="max-width:720px;margin:8vh auto"><h2>Scores submitted and locked.</h2><p>Your front-end preview submission is now read-only. In production, this confirmation must only appear after the server accepts and signs the score submission.</p><span class="ref">PREVIEW-JUDGE-SUBMISSION</span><div style="margin-top:18px"><a class="x-action" href="/event/">Return to public event</a></div></section>`;
+    const candidate=candidates[state.judgeCandidate];
+    return `${hero("Judging room.","Score one candidate at a time. The interface keeps criteria, weighting and submission status obvious without exposing anyone else's ballot.",`${btn("Use preview scores","judge-fill","x-soft")}${btn("Review all scorecards","judge-review","x-primary")}`)}
+      ${notice("All calculations on this route are visual previews. Official calculations, revisions, locks and tie-break rules must run on the server and be auditable.")}
+      <div class="grid two"><section class="panel pad-lg">${panelHead(`${candidate.name} · ${candidate.representation}`,`Candidate ${state.judgeCandidate+1} of ${candidates.length}`,status("Draft","review"))}<div class="candidate-face">${candidate.id}</div><div class="score-form" style="margin-top:16px">${criteria.map(cr=>{const value=scoreFor(candidate.id,cr.id);return `<div class="score-row"><label><strong>${cr.name}</strong><span>${cr.weight}% of this round</span></label><input aria-label="${cr.name} score" type="range" min="0" max="100" step="1" value="${value}" data-judge-score="${candidate.id}:${cr.id}"><div class="score-value" id="score-${candidate.id}-${cr.id}">${value||"—"}</div></div>`}).join("")}</div>
+        <div style="display:flex;justify-content:space-between;gap:9px;margin-top:16px">${btn("Previous","judge-prev","x-action",state.judgeCandidate===0?"disabled":"")}${btn("Save & next","judge-next","x-primary")}</div></section>
+        <aside class="panel pad-lg">${panelHead("Scorecard status","Complete every candidate before final submission.")}<div class="list">${candidates.map((c,i)=>{const done=criteria.every(cr=>scoreFor(c.id,cr.id)>0);return `<button class="row" style="border-left:0;border-right:0;border-top:0;background:transparent;width:100%;text-align:left" data-judge-candidate="${i}"><span class="dot ${done?"ready":"pending"}"></span><div class="row-main"><strong>${c.name}</strong><span>${done?"Scorecard complete":"Scoring incomplete"}</span></div>${done?status("Ready","ready"):status("Draft","pending")}</button>`}).join("")}</div><div class="helper" style="margin-top:14px">Final submission becomes irreversible after server acceptance in production.</div></aside></div>`;
+  }
+  function renderJudge(){ shell(state.judgeEntered?judgeWorkspace():`${hero("Judge access.","A focused, private scoring experience designed to reduce mistakes and protect the independence of each judge.")}${notice("This is a front-end access simulation. It does not authenticate a real judge.")}${judgeAccess()}`); }
+
+  function voteBallot() {
+    return `<div class="grid two"><section><div class="card-grid">${candidates.map(c=>`<button class="choice-card candidate-card ${state.voteCandidate===c.id?"selected":""}" data-vote-candidate="${c.id}" ${state.voteClosed?"disabled":""}><div class="candidate-face">${c.id}</div><h3>${c.name}</h3><p>${c.representation}</p><span class="status ${state.voteCandidate===c.id?"review":"neutral"}" style="margin-top:10px">${state.voteCandidate===c.id?"Selected":"Choose candidate"}</span></button>`).join("")}</div></section>
+      <aside class="panel pad-lg summary">${panelHead("Your vote","Choose a candidate and number of votes.")} ${state.voteClosed?'<div class="empty"><h3>Voting is closed</h3><p>The campaign no longer accepts ballots. This state must be controlled by server time and campaign status in production.</p></div>':`<div class="row"><div class="row-main"><strong>${state.voteCandidate?candidates.find(c=>c.id===state.voteCandidate).name:"No candidate selected"}</strong><span>${state.voteCandidate?"Ready to continue":"Select one candidate first"}</span></div></div><div class="field" style="margin-top:14px"><label>Votes</label><div class="stepper"><button data-action="vote-minus">−</button><strong>${state.voteQty}</strong><button data-action="vote-plus">+</button></div></div><div class="total"><span>Preview amount</span><strong>${state.voteQty===1?"Free":"₱0"}</strong></div><button style="width:100%;margin-top:14px" class="x-primary" data-action="vote-checkout" ${!state.voteCandidate?"disabled":""}>Continue</button>`}<button style="width:100%;margin-top:9px" class="x-action" data-action="vote-toggle-closed">${state.voteClosed?"Preview open voting":"Preview closed state"}</button></aside></div>`;
+  }
+  function voteCheckout(){const c=candidates.find(x=>x.id===state.voteCandidate);return `<div class="grid two"><section class="panel pad-lg">${panelHead("Confirm your vote","No payment is processed on this preview route.")}<div class="row"><div class="candidate-face" style="width:72px;height:72px;flex:0 0 auto">${c.id}</div><div class="row-main"><strong>${c.name}</strong><span>${c.representation} · ${state.voteQty} vote${state.voteQty>1?"s":""}</span></div></div><form id="vote-checkout" class="form-grid" style="margin-top:16px"><div class="field full"><label>Email for confirmation</label><input name="email" type="email" placeholder="you@example.com" required></div><div class="field full"><label style="display:flex;gap:8px;align-items:flex-start;font-weight:500"><input style="width:auto;min-height:0" type="checkbox" required name="rules"> I understand this is a preview and agree that production voting rules, eligibility and payment terms will govern real ballots.</label></div><div class="field full" style="display:flex;gap:9px;justify-content:flex-end"><button type="button" class="x-action" data-action="vote-back">Back</button><button class="x-primary">Cast preview vote</button></div></form></section><aside class="panel pad-lg">${panelHead("Integrity by design","The real system needs more than a success screen.")}<div class="list">${["Server-side campaign status","Immutable vote ledger","Payment webhook verification","Duplicate and anomaly controls","Refund / reversal handling","Certified campaign close"].map(x=>`<div class="row"><span class="dot pending"></span><div class="row-main"><strong>${x}</strong><span>Database integration phase</span></div></div>`).join("")}</div></aside></div>`}
+  function voteReceipt(){return `<section class="receipt" style="max-width:720px;margin:5vh auto"><h2>Preview vote recorded locally.</h2><p>This receipt proves only that the front-end journey completed. No candidate's real vote total changed.</p><span class="ref">${state.voteReceipt}</span><div style="display:flex;gap:9px;margin-top:18px;flex-wrap:wrap"><button class="x-primary" data-action="vote-again">Vote again</button><a class="x-action" href="/event/">Back to event</a></div></section>`}
+  function renderVote(){const body=state.voteStage==="ballot"?voteBallot():state.voteStage==="checkout"?voteCheckout():voteReceipt();shell(`${hero("People's Choice.","A public, guest-friendly voting journey with clear rules, candidate selection, confirmation and campaign closure states.",'<a class="x-action" href="/event/">Event page</a>')}${notice("No votes or payments on this route are real. Production voting must use server-side validation and an auditable ledger.")}${body}`)}
+
+  const tiers={ga:{name:"General Admission",price:500,status:"available"},vip:{name:"VIP",price:1200,status:"available"},vvip:{name:"VVIP",price:2500,status:"soldout"}};
+  function cartCount(){return Object.values(state.ticketCart).reduce((a,b)=>a+b,0)}
+  function cartTotal(){return Object.entries(state.ticketCart).reduce((sum,[id,q])=>sum+(tiers[id].price*q),0)}
+  function ticketBrowse(){return `<div class="grid two"><section><div class="grid three">${Object.entries(tiers).map(([id,t])=>`<article class="panel pad-lg"><div style="display:flex;justify-content:space-between;gap:10px">${status(t.status==="soldout"?"Sold out":"Available",t.status==="soldout"?"blocked":"ready")}<strong style="font-size:13px">₱${t.price.toLocaleString()}</strong></div><h2 style="font-family:'Playfair Display',Georgia,serif;margin:18px 0 5px">${t.name}</h2><p class="helper">Preview ticket tier. Seating, inclusions, limits and refund terms will come from the event configuration.</p><div class="stepper" style="margin-top:16px"><button data-ticket-minus="${id}" ${state.ticketCart[id]===0?"disabled":""}>−</button><strong>${state.ticketCart[id]}</strong><button data-ticket-plus="${id}" ${t.status==="soldout"?"disabled":""}>+</button></div></article>`).join("")}</div></section><aside class="panel pad-lg summary">${panelHead("Order summary","Tickets are not reserved until the production backend confirms inventory.")}<div class="list">${Object.entries(state.ticketCart).filter(([,q])=>q>0).map(([id,q])=>`<div class="row"><div class="row-main"><strong>${tiers[id].name}</strong><span>${q} × ₱${tiers[id].price.toLocaleString()}</span></div><strong>₱${(q*tiers[id].price).toLocaleString()}</strong></div>`).join("")||'<div class="empty"><h3>Your cart is empty</h3><p>Add an available ticket tier to continue.</p></div>'}</div><div class="total"><span>Preview total</span><strong>₱${cartTotal().toLocaleString()}</strong></div><button class="x-primary" style="width:100%;margin-top:14px" data-action="ticket-checkout" ${cartCount()===0?"disabled":""}>Continue to checkout</button></aside></div>`}
+  function ticketCheckout(){return `<div class="grid two"><section class="panel pad-lg">${panelHead("Buyer details","Payment and inventory confirmation are deliberately not simulated as real.")}<form id="ticket-checkout" class="form-grid"><div class="field"><label>Full name</label><input name="name" required></div><div class="field"><label>Email</label><input name="email" type="email" required></div><div class="field"><label>Mobile</label><input name="mobile" required></div><div class="field"><label>Country</label><input name="country" value="Philippines" required></div><div class="field full"><label style="display:flex;gap:8px;font-weight:500"><input style="width:auto;min-height:0" type="checkbox" name="terms" required> I understand this is only a front-end checkout preview.</label></div><div class="field full" style="display:flex;gap:9px;justify-content:flex-end"><button type="button" class="x-action" data-action="ticket-back">Back</button><button class="x-primary">Complete preview checkout</button></div></form></section><aside class="panel pad-lg">${panelHead("Order","${cartCount()} preview ticket(s)")}<div class="list">${Object.entries(state.ticketCart).filter(([,q])=>q>0).map(([id,q])=>`<div class="row"><div class="row-main"><strong>${tiers[id].name}</strong><span>Quantity ${q}</span></div><strong>₱${(tiers[id].price*q).toLocaleString()}</strong></div>`).join("")}</div><div class="total"><span>Total</span><strong>₱${cartTotal().toLocaleString()}</strong></div></aside></div>`}
+  function qrSvg(){const cells=[[0,0],[1,0],[2,0],[0,1],[2,1],[0,2],[1,2],[2,2],[6,0],[7,0],[8,0],[6,1],[8,1],[6,2],[7,2],[8,2],[0,6],[1,6],[2,6],[0,7],[2,7],[0,8],[1,8],[2,8],[4,1],[4,2],[5,3],[3,4],[4,4],[6,4],[8,4],[3,5],[5,5],[7,5],[4,6],[6,6],[8,6],[3,7],[5,7],[7,7],[4,8],[6,8],[8,8]];return `<svg viewBox="0 0 9 9" role="img" aria-label="Preview QR pattern">${cells.map(([x,y])=>`<rect x="${x}" y="${y}" width="1" height="1" fill="#171116"/>`).join("")}</svg>`}
+  function ticketReceipt(){return `<section class="receipt" style="max-width:760px;margin:4vh auto;text-align:center"><h2>Preview ticket issued.</h2><p>This QR is deliberately non-scannable and does not grant venue entry. A production credential can only be issued after server-confirmed payment and inventory.</p><div class="qr">${qrSvg()}</div><span class="ref">${state.ticketReceipt}</span><div style="display:flex;justify-content:center;gap:9px;margin-top:18px;flex-wrap:wrap"><button class="x-action" data-action="ticket-wallet">Add-to-wallet preview</button><a class="x-primary" href="/event/">Return to event</a></div></section>`}
+  function renderTickets(){const body=state.ticketStage==="browse"?ticketBrowse():state.ticketStage==="checkout"?ticketCheckout():ticketReceipt();shell(`${hero("Tickets.","Choose a tier, complete buyer details and receive a mobile-first credential without forcing unnecessary account creation.",'<a class="x-action" href="/event/">Event page</a>')}${notice("No inventory is held, no money is charged and the preview QR cannot be used for entry.")}${body}`)}
+
+  const inquiries=[{id:"INQ-001",title:"Official photographer sourcing",pageant:"Untitled Pageant",status:"new",budget:"Requesting proposal"},{id:"INQ-002",title:"Coronation production support",pageant:"Untitled Pageant",status:"quoted",budget:"Budget shared privately"},{id:"INQ-003",title:"Gown partnership inquiry",pageant:"Untitled Pageant",status:"closed",budget:"Closed"}];
+  function renderSupplier(){const rows=inquiries.filter(x=>state.supplierFilter==="all"||x.status===state.supplierFilter);const selected=inquiries.find(x=>x.id===state.supplierSelected)||rows[0];shell(`${hero("Supplier workspace.","Qualified pageant opportunities arrive with enough context to decide, respond and quote without exposing private organizer information publicly.",'<a class="x-action" href="/directory/">Public profile</a>')}${notice("The inquiries below are interface placeholders. They are not real commercial opportunities.")}${tabs([["all","All"],["new","New"],["quoted","Quoted"],["closed","Closed"]],state.supplierFilter,"supplier-filter")}
+      <div class="grid two"><section class="panel pad-lg">${panelHead("Inquiries","Open a brief to respond.")}<div class="list">${rows.map(x=>`<button class="row" style="width:100%;background:transparent;border-left:0;border-right:0;border-top:0;text-align:left" data-supplier-inquiry="${x.id}"><span class="dot ${x.status==="new"?"pending":x.status==="quoted"?"ready":""}"></span><div class="row-main"><strong>${x.title}</strong><span>${x.pageant} · ${x.budget}</span></div>${status(x.status,x.status==="new"?"review":x.status==="quoted"?"ready":"neutral")}</button>`).join("")||'<div class="empty"><h3>No inquiries here</h3><p>Try another status filter.</p></div>'}</div></section>
+      <aside class="panel pad-lg">${selected?`${panelHead(selected.title,`${selected.pageant} · ${selected.id}`,status(selected.status,selected.status==="new"?"review":"neutral"))}<div class="list"><div class="row"><div class="row-main"><strong>Requested service</strong><span>Preview event brief and expected deliverables.</span></div></div><div class="row"><div class="row-main"><strong>Target date</strong><span>Shared only with invited suppliers.</span></div></div><div class="row"><div class="row-main"><strong>Budget</strong><span>${selected.budget}</span></div></div></div>${selected.status==="closed"?'<div class="empty" style="margin-top:14px"><h3>Opportunity closed</h3><p>The organizer is no longer accepting responses.</p></div>':state.quoteSubmitted?'<div class="receipt" style="margin-top:14px"><h2>Quote sent locally.</h2><p>The preview response moved to a submitted state.</p></div>':`<form id="supplier-quote" class="form-grid" style="margin-top:16px"><div class="field"><label>Quote amount</label><input name="amount" placeholder="₱" required></div><div class="field"><label>Validity</label><select name="validity"><option>7 days</option><option>14 days</option><option>30 days</option></select></div><div class="field full"><label>Proposal note</label><textarea name="note" required placeholder="Scope, inclusions, timing and important terms"></textarea></div><div class="field full"><button class="x-primary">Send preview quote</button></div></form>`}`:'<div class="empty"><h3>Select an inquiry</h3><p>Choose an opportunity to see the private event brief.</p></div>'}</aside></div>`)}
+
+  function renderTabulation(){const judgeRows=[{name:"Judge 01",submitted:true},{name:"Judge 02",submitted:state.tabAllSubmitted},{name:"Judge 03",submitted:state.tabAllSubmitted},{name:"Judge 04",submitted:true},{name:"Judge 05",submitted:state.tabAllSubmitted}];const submitted=judgeRows.filter(x=>x.submitted).length;const scores=[91.84,90.72,88.63,87.95];shell(`${hero("Tabulation control room.","A high-trust event-night surface for judge monitoring, round locks, anomalies, certification and controlled publication.",`${btn("Preview all submitted","tab-complete","x-soft",state.tabAllSubmitted?"disabled":"")}${btn("Lock round","tab-lock","x-primary",submitted<judgeRows.length||state.tabLocked?"disabled":"")}`)}${notice("The browser is not authoritative. Preview rankings below demonstrate presentation only; production calculations and certification require protected server-side records.")}
+      <div class="grid four"><article class="panel pad kpi"><small>Judges</small><strong>${submitted}/${judgeRows.length}</strong><span>Submitted in preview</span></article><article class="panel pad kpi"><small>Round</small><strong>${state.tabLocked?"Locked":"Open"}</strong><span>Server lock required in production</span></article><article class="panel pad kpi"><small>Anomalies</small><strong>0</strong><span>No preview flags</span></article><article class="panel pad kpi"><small>Certification</small><strong>${state.tabCertified?"Certified":"Pending"}</strong><span>${state.tabPublished?"Results published":"Publication controlled"}</span></article></div>
+      <div class="grid two" style="margin-top:16px"><section class="panel pad-lg">${panelHead("Judge submissions","Tabulators monitor state, not unpublished ballot content.")}<div class="list">${judgeRows.map(x=>`<div class="row"><span class="dot ${x.submitted?"ready":"pending"}"></span><div class="row-main"><strong>${x.name}</strong><span>${x.submitted?"Signed submission received":"Awaiting submission"}</span></div>${status(x.submitted?"Submitted":"Waiting",x.submitted?"ready":"pending")}</div>`).join("")}</div></section>
+      <section class="panel pad-lg">${panelHead("Preview result snapshot","Visible only to authorized control-room roles before publication.")}<div class="list">${candidates.map((c,i)=>`<div class="row"><strong style="width:28px">${i+1}</strong><div class="row-main"><strong>${c.name}</strong><span>${c.representation}</span></div><strong>${scores[i].toFixed(2)}</strong></div>`).join("")}</div><div style="display:flex;gap:9px;margin-top:16px;flex-wrap:wrap"><button class="x-primary" data-action="tab-certify" ${!state.tabLocked||state.tabCertified?"disabled":""}>Certify result</button><button class="x-soft" data-action="tab-publish" ${!state.tabCertified||state.tabPublished?"disabled":""}>Publish official result</button></div></section></div>
+      <section class="panel pad-lg" style="margin-top:16px">${panelHead("Audit trail","Production entries should be immutable and attributable.")}<div class="audit">PREVIEW · Round configured<br>PREVIEW · Judge access issued<br>${state.tabAllSubmitted?"PREVIEW · All judge submissions received<br>":""}${state.tabLocked?"PREVIEW · Round locked<br>":""}${state.tabCertified?"PREVIEW · Result certified<br>":""}${state.tabPublished?"PREVIEW · Publication action completed locally<br>":""}</div></section>`)}
+
+  function eventSection(){if(state.eventTab==="candidates")return `<section class="card-grid">${candidates.map(c=>`<article class="choice-card candidate-card"><div class="candidate-face">${c.id}</div><h3>${c.name}</h3><p>${c.representation}</p><a class="x-soft" style="margin-top:13px" href="/vote/">Vote</a></article>`).join("")}</section>`;if(state.eventTab==="schedule")return `<section class="panel pad-lg">${panelHead("Official schedule","Reviewed public event information belongs here.")}<div class="timeline">${[["Opening program","18:00"],["Preliminary competition","19:00"],["Finals & coronation","20:30"]].map(([n,t],i)=>`<div class="timeline-item"><time>Preview · ${t}</time><strong>${n}</strong><span>Event day ${i+1} · Venue information pending review</span></div>`).join("")}</div></section>`;if(state.eventTab==="vote")return `<section class="panel pad-lg">${panelHead("People's Choice","Guest-friendly voting without forcing account creation.")}<div class="empty"><h3>Voting experience ready</h3><p>The public page links into the dedicated ballot flow with campaign rules and closure states.</p><a class="x-primary" style="margin-top:14px" href="/vote/">Open voting</a></div></section>`;if(state.eventTab==="tickets")return `<section class="panel pad-lg">${panelHead("Attend the event","Ticket inventory and tiers come from the event configuration.")}<div class="empty"><h3>Ticket experience ready</h3><p>Buyers can continue as guests and receive a mobile credential after real payment confirmation.</p><a class="x-primary" style="margin-top:14px" href="/tickets/">View tickets</a></div></section>`;if(state.eventTab==="results")return `<section class="panel pad-lg">${panelHead("Official results","Only certified and authorized results should appear publicly.")}<div class="empty"><h3>Results not yet published</h3><p>This honest pre-coronation state prevents the public page from showing preview rankings or organizer drafts.</p></div></section>`;return `<div class="grid two"><section class="panel pad-lg">${panelHead("About this edition","Permanent PageantIndex Event ID will be created by the production data layer.")}<p class="helper" style="font-size:10px">This canonical page is designed to remain useful after coronation night. Candidates, results, judges, organizations, suppliers, sponsors and media can later resolve to verified PageantIndex records instead of disappearing into social posts.</p><div class="list" style="margin-top:14px"><div class="row"><div class="row-main"><strong>Organization</strong><span>Pending verified organization link</span></div></div><div class="row"><div class="row-main"><strong>Edition</strong><span>Current pageant edition</span></div></div><div class="row"><div class="row-main"><strong>Event ID</strong><span>Generated only after database integration</span></div></div></div></section><aside class="panel pad-lg">${panelHead("Event access","Everything the audience needs, from one source.")}<div class="list"><a class="row" href="/vote/" style="text-decoration:none"><div class="row-main"><strong>Vote</strong><span>People's Choice ballot</span></div><span>→</span></a><a class="row" href="/tickets/" style="text-decoration:none"><div class="row-main"><strong>Tickets</strong><span>Guest checkout and mobile entry</span></div><span>→</span></a></div></aside></div>`}
+  function renderEvent(){shell(`<section class="event-hero"><div class="event-hero-content"><img src="/public/images/pageant-icon.png" alt=""><h1>Untitled Pageant</h1><p>The canonical PageantIndex event experience for official information, candidates, voting, tickets, schedule and certified results.</p><div class="event-meta"><span>Preview edition</span><span>Venue to be confirmed</span><span>${status("Official record preview","review")}</span></div></div></section><div style="margin-top:18px">${notice("This public event page contains no invented real-world pageant claims. All displayed names and schedules are interface placeholders.")}${tabs([["overview","Overview"],["candidates","Candidates"],["schedule","Schedule"],["vote","Vote"],["tickets","Tickets"],["results","Results"]],state.eventTab,"event-tab")}${eventSection()}</div>`)}
+
+  function render(){ if(mode==="candidate")return renderCandidate();if(mode==="judge")return renderJudge();if(mode==="vote")return renderVote();if(mode==="tickets")return renderTickets();if(mode==="supplier")return renderSupplier();if(mode==="tabulation")return renderTabulation();if(mode==="event")return renderEvent();return renderHub(); }
+
+  function showToast(message){const el=document.getElementById("x-toast");if(!el)return;el.textContent=message;el.classList.add("show");clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>el.classList.remove("show"),2600)}
+  function confirmAction(action,title,copy){state.pendingConfirm=action;const backdrop=document.getElementById("modal-backdrop");if(!backdrop)return;backdrop.querySelector("#modal-title").textContent=title;backdrop.querySelector("#modal-copy").textContent=copy;backdrop.classList.add("show")}
+  function closeModal(){state.pendingConfirm=null;document.getElementById("modal-backdrop")?.classList.remove("show")}
+  function syncNetwork(){document.getElementById("network-banner")?.classList.toggle("show",!navigator.onLine)}
+  window.addEventListener("online",syncNetwork);window.addEventListener("offline",syncNetwork);
+
+  root.addEventListener("click",event=>{
+    const candidateTab=event.target.closest("[data-candidate-tab]");if(candidateTab){state.candidateTab=candidateTab.dataset.candidateTab;render();return}
+    const supplierFilter=event.target.closest("[data-supplier-filter]");if(supplierFilter){state.supplierFilter=supplierFilter.dataset.supplierFilter;render();return}
+    const eventTab=event.target.closest("[data-event-tab]");if(eventTab){state.eventTab=eventTab.dataset.eventTab;render();return}
+    const voteCandidate=event.target.closest("[data-vote-candidate]");if(voteCandidate){state.voteCandidate=voteCandidate.dataset.voteCandidate;render();return}
+    const judgeCandidate=event.target.closest("[data-judge-candidate]");if(judgeCandidate){state.judgeCandidate=Number(judgeCandidate.dataset.judgeCandidate);render();return}
+    const supplierInquiry=event.target.closest("[data-supplier-inquiry]");if(supplierInquiry){state.supplierSelected=supplierInquiry.dataset.supplierInquiry;state.quoteSubmitted=false;render();return}
+    const plus=event.target.closest("[data-ticket-plus]");if(plus){state.ticketCart[plus.dataset.ticketPlus]+=1;render();return}
+    const minus=event.target.closest("[data-ticket-minus]");if(minus){state.ticketCart[minus.dataset.ticketMinus]=Math.max(0,state.ticketCart[minus.dataset.ticketMinus]-1);render();return}
+    const action=event.target.closest("[data-action]")?.dataset.action;if(!action)return;
+    if(action==="candidate-requirements"){state.candidateTab="requirements";render();return}
+    if(action==="candidate-save"){const form=document.getElementById("candidate-application");if(form&&!form.reportValidity())return;state.candidateSaved=true;showToast("Preview application saved on this screen.");render();return}
+    if(action==="candidate-profile-save"){showToast("Profile preview saved locally.");return}
+    if(action==="judge-enter"){state.judgeEntered=true;render();return}
+    if(action==="judge-prev"){state.judgeCandidate=Math.max(0,state.judgeCandidate-1);render();return}
+    if(action==="judge-next"){const c=candidates[state.judgeCandidate];if(!criteria.every(cr=>scoreFor(c.id,cr.id)>0)){showToast("Complete every criterion before moving on.");return}state.judgeCandidate=Math.min(candidates.length-1,state.judgeCandidate+1);render();return}
+    if(action==="judge-fill"){candidates.forEach((c,ci)=>{state.judgeScores[c.id]={};criteria.forEach((cr,ri)=>state.judgeScores[c.id][cr.id]=86+((ci+ri)%8))});render();showToast("Preview scores filled for UX testing only.");return}
+    if(action==="judge-review"){if(!allScoresComplete()){showToast("Some scorecards are still incomplete.");return}confirmAction("judge-submit","Submit and lock scorecards?","In production, accepted submission becomes an auditable competition record and cannot be silently edited.");return}
+    if(action==="vote-minus"){state.voteQty=Math.max(1,state.voteQty-1);render();return}
+    if(action==="vote-plus"){state.voteQty=Math.min(100,state.voteQty+1);render();return}
+    if(action==="vote-checkout"){if(!state.voteCandidate)return;state.voteStage="checkout";render();return}
+    if(action==="vote-back"){state.voteStage="ballot";render();return}
+    if(action==="vote-toggle-closed"){state.voteClosed=!state.voteClosed;state.voteStage="ballot";render();return}
+    if(action==="vote-again"){state.voteStage="ballot";state.voteReceipt=null;render();return}
+    if(action==="ticket-checkout"){state.ticketStage="checkout";render();return}
+    if(action==="ticket-back"){state.ticketStage="browse";render();return}
+    if(action==="ticket-wallet"){showToast("Wallet handoff preview. No credential was installed.");return}
+    if(action==="tab-complete"){state.tabAllSubmitted=true;render();return}
+    if(action==="tab-lock"){confirmAction("tab-lock-confirm","Lock this round?","A production round lock should freeze the accepted score snapshot and require an authorized, audited process to reopen.");return}
+    if(action==="tab-certify"){confirmAction("tab-certify-confirm","Certify result?","Certification should attest that scoring, locks and required review checks are complete.");return}
+    if(action==="tab-publish"){confirmAction("tab-publish-confirm","Publish official result?","Only certified results should become public and permanent in the PageantIndex event record.");return}
+    if(action==="modal-cancel"){closeModal();return}
+    if(action==="modal-confirm"){const pending=state.pendingConfirm;closeModal();if(pending==="judge-submit"){state.judgeSubmitted=true;render()}if(pending==="tab-lock-confirm"){state.tabLocked=true;render()}if(pending==="tab-certify-confirm"){state.tabCertified=true;render()}if(pending==="tab-publish-confirm"){state.tabPublished=true;render()}return}
+  });
+
+  root.addEventListener("input",event=>{const slider=event.target.closest("[data-judge-score]");if(!slider)return;const [candidateId,criterionId]=slider.dataset.judgeScore.split(":");state.judgeScores[candidateId] ||= {};state.judgeScores[candidateId][criterionId]=Number(slider.value);const label=document.getElementById(`score-${candidateId}-${criterionId}`);if(label)label.textContent=slider.value});
+  root.addEventListener("change",event=>{const file=event.target.closest("[data-requirement-file]");if(!file||!file.files?.[0])return;const req=state.requirements.find(x=>x.id===file.dataset.requirementFile);if(req)req.status="complete";render();showToast(`${file.files[0].name} selected locally. Nothing was uploaded.`)});
+  root.addEventListener("submit",event=>{
+    if(event.target.id==="vote-checkout"){event.preventDefault();if(!event.target.reportValidity())return;state.voteReceipt=`PREVIEW-VOTE-${Date.now().toString().slice(-6)}`;state.voteStage="receipt";render();return}
+    if(event.target.id==="ticket-checkout"){event.preventDefault();if(!event.target.reportValidity())return;state.ticketReceipt=`PREVIEW-TICKET-${Date.now().toString().slice(-6)}`;state.ticketStage="receipt";render();return}
+    if(event.target.id==="supplier-quote"){event.preventDefault();if(!event.target.reportValidity())return;state.quoteSubmitted=true;render();return}
+  });
+
+  render();
+})();
