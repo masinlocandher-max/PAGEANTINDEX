@@ -49,22 +49,37 @@ jobs:
           const browser = await chromium.launch({headless:true});
           const results = [];
 
-          async function run(viewport, suffix) {
+          async function prepareContext(viewport) {
             const context = await browser.newContext({viewport});
+            await context.route('https://uwcqvsitjtknxsaypjxj.supabase.co/**', async route => {
+              const url = route.request().url();
+              const body = url.includes('/auth/v1/user') ? '{}' : '[]';
+              await route.fulfill({status:200,contentType:'application/json',body});
+            });
+            return context;
+          }
+
+          async function run(viewport, suffix) {
+            const context = await prepareContext(viewport);
             for (const target of targets) {
+              console.log(`Rendering ${target.name} ${suffix}`);
               const page = await context.newPage();
+              page.setDefaultTimeout(10000);
               const errors = [];
               page.on('pageerror', error => errors.push(`pageerror: ${error.message}`));
               page.on('console', message => {
                 if (message.type() === 'error') errors.push(`console: ${message.text()}`);
               });
-              const response = await page.goto(target.url, {waitUntil:'domcontentloaded', timeout:30000});
-              await page.waitForTimeout(900);
+              const response = await page.goto(target.url, {waitUntil:'domcontentloaded', timeout:20000});
+              await page.waitForTimeout(1200);
               const status = response?.status() || 0;
-              const text = await page.locator('body').innerText();
+              const text = await page.evaluate(() => document.body?.innerText || '');
               if (status !== 200) throw new Error(`${target.name} returned ${status}`);
-              if (!text.includes(target.marker)) throw new Error(`${target.name} missing marker: ${target.marker}`);
-              await page.screenshot({path:path.join(out,`${target.name}-${suffix}.png`),fullPage:true});
+              if (!text.includes(target.marker)) {
+                await page.screenshot({path:path.join(out,`${target.name}-${suffix}-failed.png`),fullPage:false});
+                throw new Error(`${target.name} missing marker: ${target.marker}; url=${page.url()}; body=${text.slice(0,500)}`);
+              }
+              await page.screenshot({path:path.join(out,`${target.name}-${suffix}.png`),fullPage:true,timeout:10000});
               results.push({name:target.name,viewport:suffix,status,errors});
               if (errors.length) throw new Error(`${target.name} ${suffix} browser errors: ${errors.join(' | ')}`);
               await page.close();
@@ -75,12 +90,12 @@ jobs:
           await run({width:1440,height:1000},'desktop');
           await run({width:390,height:844},'mobile');
 
-          const interactionContext = await browser.newContext({viewport:{width:390,height:844}});
+          const interactionContext = await prepareContext({width:390,height:844});
           const home = await interactionContext.newPage();
           await home.goto('http://127.0.0.1:4173/', {waitUntil:'domcontentloaded'});
           await home.locator('#pi-global-search input').fill('photographer');
           await Promise.all([
-            home.waitForURL(/directory\/\?q=photographer/),
+            home.waitForURL(/directory\/\?q=photographer/, {timeout:10000}),
             home.locator('#pi-global-search button').click(),
           ]);
           results.push({interaction:'home search',url:home.url()});
@@ -89,7 +104,7 @@ jobs:
           const candidate = await interactionContext.newPage();
           await candidate.goto('http://127.0.0.1:4173/candidate/', {waitUntil:'domcontentloaded'});
           await candidate.locator('[data-tab="invitations"]').click();
-          if (!(await candidate.locator('body').innerText()).includes('Personal supplier invitations')) {
+          if (!(await candidate.evaluate(() => document.body?.innerText || '')).includes('Personal supplier invitations')) {
             throw new Error('Candidate invitations interaction failed');
           }
           results.push({interaction:'candidate invitations',passed:true});
@@ -98,7 +113,7 @@ jobs:
           const organization = await interactionContext.newPage();
           await organization.goto('http://127.0.0.1:4173/organization/', {waitUntil:'domcontentloaded'});
           await organization.locator('[data-tab="invitations"]').click();
-          if (!(await organization.locator('body').innerText()).includes('Official supplier invitations')) {
+          if (!(await organization.evaluate(() => document.body?.innerText || '')).includes('Official supplier invitations')) {
             throw new Error('Organization invitations interaction failed');
           }
           results.push({interaction:'organization invitations',passed:true});
