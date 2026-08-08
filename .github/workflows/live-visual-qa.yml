@@ -1,0 +1,87 @@
+name: Live rendered production QA
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Render PageantIndex production on desktop and mobile
+        shell: bash
+        run: |
+          mkdir -p qa-artifacts
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const routes = [
+            ['home','/'],
+            ['organization','/organization/'],
+            ['platform','/platform/'],
+            ['experience','/experience/'],
+            ['candidate','/candidate/'],
+            ['judge','/judge/'],
+            ['vote','/vote/'],
+            ['tickets','/tickets/'],
+            ['supplier','/supplier-workspace/'],
+            ['tabulation','/tabulation/'],
+            ['event','/event/'],
+          ];
+          const base = 'https://www.pageantindex.com';
+          const report = [];
+          (async () => {
+            const browser = await chromium.launch({headless:true});
+            for (const mode of [
+              {name:'desktop', viewport:{width:1440,height:1000}, isMobile:false},
+              {name:'iphone', viewport:{width:390,height:844}, isMobile:true},
+            ]) {
+              const context = await browser.newContext({viewport:mode.viewport,isMobile:mode.isMobile,deviceScaleFactor:1});
+              for (const [name,path] of routes) {
+                const page = await context.newPage();
+                const errors = [];
+                page.on('pageerror', e => errors.push(`pageerror: ${e.message}`));
+                page.on('console', m => { if (m.type() === 'error') errors.push(`console: ${m.text()}`); });
+                let status = null;
+                try {
+                  const response = await page.goto(base + path, {waitUntil:'networkidle', timeout:45000});
+                  status = response ? response.status() : null;
+                  await page.screenshot({path:`qa-artifacts/${mode.name}-${name}.png`, fullPage:true});
+                  const title = await page.title();
+                  const bodyText = (await page.locator('body').innerText()).trim();
+                  report.push(`${mode.name} ${path} HTTP ${status} title=${JSON.stringify(title)} bodyChars=${bodyText.length} errors=${errors.length}`);
+                  for (const error of errors) report.push(`  ${error}`);
+                  if (!status || status >= 400 || bodyText.length < 20) process.exitCode = 1;
+                } catch (error) {
+                  report.push(`${mode.name} ${path} FAILED ${error.message}`);
+                  process.exitCode = 1;
+                }
+                await page.close();
+              }
+              await context.close();
+            }
+            await browser.close();
+            fs.writeFileSync('qa-artifacts/report.txt', report.join('\n') + '\n');
+            console.log(report.join('\n'));
+          })().catch(error => { console.error(error); process.exit(1); });
+          NODE
+      - name: Upload rendered QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pageantindex-live-rendered-qa
+          path: qa-artifacts
+          retention-days: 1
