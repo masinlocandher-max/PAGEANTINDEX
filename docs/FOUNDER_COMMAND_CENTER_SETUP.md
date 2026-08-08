@@ -27,11 +27,12 @@ Routine support, normal profile review, standard organizer operations, billing o
 - The GPT endpoint uses `store: false`.
 - The GPT assistant is instructed to recommend and draft only. It does not send mail, approve transactions, publish pageants, or change account state.
 
-## Required production migration
+## Required production migrations
 
-Apply:
+Apply, in order:
 
-`supabase/migrations/20260809030000_founder_integrations.sql`
+1. `supabase/migrations/20260809030000_founder_integrations.sql`
+2. `supabase/migrations/20260809031500_founder_integrations_deny_browser.sql`
 
 Do not expose the `founder_integrations` table to browser roles.
 
@@ -48,6 +49,12 @@ Configure these in the hosting project. Never commit their secret values.
 - `OPENAI_MODEL` — optional; defaults to `gpt-5-mini`
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
+
+## Founder auth bootstrap
+
+The live PageantIndex project must contain at least one Supabase Auth account whose protected `app_metadata.role` is `admin`. The Founder Command Center deliberately does not grant itself admin access from the browser.
+
+At the time this feature was added, the live PageantIndex Auth project had no registered users yet. Create the founder account through the normal PageantIndex Auth flow, then promote that exact account to the protected admin role using a trusted server-side/admin process. Do not use `user_metadata` for this authorization role.
 
 ## Google Cloud setup
 
@@ -85,18 +92,19 @@ All founder JSON endpoints except the OAuth callback validate the current Supaba
 
 ## Production checklist
 
-1. Apply the founder integration migration.
+1. Confirm both founder integration migrations are applied.
 2. Configure all required environment variables in the actual PageantIndex hosting project.
 3. Add the exact Google OAuth redirect URI.
-4. Deploy the current `main` branch.
-5. Sign into `/founder/` using the authorized admin account.
-6. Confirm OpenAI shows Connected.
-7. Click Connect Gmail, grant read-only access, and confirm the connected email address appears.
-8. Refresh the inbox and verify message metadata/snippets load.
-9. Ask GPT a request without email context and verify a response.
-10. Enable inbox context and ask which recent messages deserve a meeting.
-11. Confirm a non-admin account cannot open founder data or call founder endpoints.
-12. Confirm the service-role key, OpenAI key, Google client secret, encryption key, and Google refresh token never appear in browser source, network responses, logs, or the repository.
+4. Create the founder Supabase Auth account and assign the protected admin app-metadata role through a trusted admin process.
+5. Deploy the current `main` branch.
+6. Sign into `/founder/` using the authorized admin account.
+7. Confirm OpenAI shows Connected.
+8. Click Connect Gmail, grant read-only access, and confirm the connected email address appears.
+9. Refresh the inbox and verify message metadata/snippets load.
+10. Ask GPT a request without email context and verify a response.
+11. Enable inbox context and ask which recent messages deserve a meeting.
+12. Confirm a non-admin account cannot open founder data or call founder endpoints.
+13. Confirm the service-role key, OpenAI key, Google client secret, encryption key, and Google refresh token never appear in browser source, network responses, logs, or the repository.
 
 ## Next automation layer
 
