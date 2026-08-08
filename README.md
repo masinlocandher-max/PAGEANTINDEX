@@ -61,6 +61,8 @@ Every audience can see the same reviewed foundation:
   and editorial visibility
 - Responsive desktop, tablet, and mobile layouts
 - A separate mobile-first application using the same data model and policies
+- A private founder command center for high-value opportunities, important inbox
+  review, GPT-assisted prioritization, and true founder-level escalations
 - Canonical metadata, social metadata, `robots.txt`, `sitemap.xml`, manifest,
   security headers, and custom-domain configuration
 - Versioned Supabase migrations with row-level security and owner/admin boundaries
@@ -102,6 +104,7 @@ The mobile-first app is available at `http://localhost:4173/app/`.
 - `/sign-up/`
 - `/dashboard/`
 - `/admin/`
+- `/founder/`
 - `/app/`
 
 Commercial terms are confidential. The public interface describes profile and
@@ -134,6 +137,12 @@ The private `pageant-profile-drafts` storage bucket accepts JPEG, PNG, and WebP
 files up to 10 MB. Owners can access only files inside their own user folder;
 administrators may review them.
 
+Founder integration credentials use a server-only table denied to ordinary
+browser roles. The founder escalation queue is visible only to authenticated
+users whose protected `app_metadata.role` is `admin` and is reserved for
+strategic, legal, security, reputation, enterprise, financial, or comparable
+exceptions rather than routine operational work.
+
 ## Production migration history
 
 `supabase/migrations/` mirrors the migration versions recorded by the live
@@ -149,6 +158,9 @@ supplier-admin migrations:
 7. `20260803173134_revoke_anonymous_admin_rpc_access.sql`
 8. `20260803173310_isolate_admin_review_implementations.sql`
 9. `20260803173435_optimize_pageantindex_rls_and_indexes.sql`
+10. `20260809030000_founder_integrations.sql`
+11. `20260809031500_founder_integrations_deny_browser.sql`
+12. `20260809040000_founder_escalations.sql`
 
 The former draft migration chain was removed because it referenced a nonexistent
 `public.events` table. Saved pageants now correctly reference reviewed
@@ -159,37 +171,52 @@ to the live project as a shortcut.
 
 ## Verification completed
 
-- Supabase Security Advisor reports no findings.
 - Every public table has RLS enabled.
 - Anonymous execution of administrator RPCs is revoked.
 - Non-administrators are rejected by protected review functions.
 - Organizer owners cannot write review or publication columns.
 - Organizer owners can create editions only for their own organization.
 - Anonymous reads return approved, submitted, published records only.
+- Founder integration credentials are not readable by ordinary browser roles.
+- Founder escalations are protected by an admin-only RLS policy.
 - Foreign-key indexes and duplicate SELECT policies were optimized.
 - Repository regression tests cover the five roles, migration history,
   protected grants, public feeds, admin RPC signatures, and responsive clients.
 
-## Current scope
+Current Supabase Security Advisor status should be checked before each launch.
+As of August 9, 2026, the remaining Auth warning is that leaked-password
+protection is disabled. This does not change the founder dashboard's passwordless
+login design, but should be enabled as part of broader authentication hardening.
 
-Infrastructure deployment is intentionally outside the current work. The branch
-is focused on the application, Supabase schema, trust controls, repository
-quality, and complete browser-ready workflows.
+## Current production state
+
+The application, live Supabase schema, trust controls, founder command center,
+and owner-light operating model are in active implementation. Production
+hosting still needs its account-level configuration to match the repository.
+
+The Founder Command Center is designed to use passwordless founder access,
+Vercel AI Gateway OIDC where available, and read-only Gmail OAuth. It must not be
+called production-ready until the production host, Supabase Auth redirect URLs,
+and Google OAuth client are configured and verified end to end.
 
 ## Remaining operational checks
 
 Before a public launch:
 
-1. Configure Supabase Auth site URLs, recovery redirects, SMTP, and allowed
-   origins.
+1. Configure Supabase Auth site URLs, recovery redirects, SMTP, allowed origins,
+   and leaked-password protection. Include `https://www.pageantindex.com` and
+   `https://www.pageantindex.com/founder/` in the production Auth URL setup.
 2. Test registration, confirmation, sign-in, recovery, and sign-out for all five
-   account types.
+   public account types, plus founder passwordless sign-in.
 3. Test supplier portfolios, candidate history, media submission, organization
    editions, rosters, public experiences, announcements, and results with real
    accounts.
 4. Test administrator review and publication using an account whose protected
    `app_metadata.role` is `admin`.
-5. Test guest voting, livestream, pay-per-view, ticket, and merchandise entry
+5. Configure and verify Vercel AI Gateway/Secure Backend Access for founder GPT.
+6. Configure the Google OAuth Web client and verify read-only Gmail connection at
+   `https://www.pageantindex.com/api/integrations/google/callback`.
+7. Test guest voting, livestream, pay-per-view, ticket, and merchandise entry
    paths without forcing unnecessary registration.
-6. Run `npm test` and complete mobile, tablet, and desktop browser QA before
-   merging the launch branch.
+8. Run `npm test` and complete mobile, tablet, and desktop browser QA before
+   launch.
