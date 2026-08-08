@@ -19,9 +19,11 @@ const routes = [
   ["event/index.html", "event"],
 ];
 
-test("multi-user experience browser script parses", async () => {
-  const result = spawnSync(process.execPath, ["--check", join(root, "public/experience.js")], {encoding:"utf8"});
-  assert.equal(result.status, 0, result.stderr);
+test("multi-user experience browser scripts parse", async () => {
+  for (const path of ["public/experience.js", "public/organization-experience.js"]) {
+    const result = spawnSync(process.execPath, ["--check", join(root, path)], {encoding:"utf8"});
+    assert.equal(result.status, 0, `${path}\n${result.stderr}`);
+  }
 });
 
 test("all primary PageantIndex user journeys have dedicated routes", async () => {
@@ -32,6 +34,23 @@ test("all primary PageantIndex user journeys have dedicated routes", async () =>
     assert.match(html, /\/public\/experience\.js/);
     assert.match(html, /noindex,follow/);
   }
+});
+
+test("pageant organization has a dedicated account lifecycle route", async () => {
+  const html = await read("organization/index.html");
+  const js = await read("public/organization-experience.js");
+  assert.match(html, /\/public\/experience\.css/);
+  assert.match(html, /\/public\/organization-experience\.js/);
+  assert.match(html, /noindex,follow/);
+  for (const phrase of [
+    "Organization Profile",
+    "Team & Roles",
+    "Pageant Editions",
+    "Verification",
+    "Transfer organization ownership",
+    "Owner authority",
+  ]) assert.match(js, new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")));
+  assert.doesNotMatch(js, /SUPABASE_URL|supabase\.co|\/rest\/v1\/|fetch\s*\(/);
 });
 
 test("front-end preview does not connect competition or payment flows to production", async () => {
@@ -57,8 +76,11 @@ test("critical experience states are represented", async () => {
   ]) assert.match(js, new RegExp(phrase.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")));
 });
 
-test("Organizer OS links to the complete experience map", async () => {
-  const html = await read("platform/index.html");
-  assert.match(html, /href="\/experience\/"/);
-  assert.match(html, /View all user journeys/);
+test("Organizer OS and organization account are connected", async () => {
+  const platform = await read("platform/index.html");
+  const organizer = await read("app/organizer.js");
+  assert.match(platform, /href="\/experience\/"/);
+  assert.match(platform, /View all user journeys/);
+  assert.match(organizer, /\/organization\//);
+  assert.match(organizer, /Organization profile, team & verification/);
 });
