@@ -24,6 +24,7 @@ jobs:
         run: |
           node --check public/launch-v2.js
           node --check public/claim-v2.js
+          node --check public/dashboard-access-v2.js
           node --check platform/platform.js
           node --check public/experience.js
           node --check public/organization-experience.js
