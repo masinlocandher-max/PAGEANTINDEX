@@ -7,7 +7,7 @@ create table if not exists public.founder_integrations (
   provider text not null check (provider in ('google_gmail')),
   status text not null default 'not_connected'
     check (status in ('not_connected','connected','revoked','error')),
-  account_email citext,
+  account_email text,
   encrypted_refresh_token text,
   token_iv text,
   scope text,
