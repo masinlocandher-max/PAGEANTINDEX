@@ -44,57 +44,22 @@
       </header>
 
       <section class="status-strip" id="overview" aria-label="System status">
-        <article>
-          <span>GPT</span>
-          <strong id="metric-gpt">Checking…</strong>
-          <small id="metric-gpt-detail">Private assistant connection</small>
-        </article>
-        <article>
-          <span>Email</span>
-          <strong id="metric-email">Checking…</strong>
-          <small id="metric-email-detail">Gmail read-only connection</small>
-        </article>
-        <article>
-          <span>Opportunities</span>
-          <strong id="metric-opportunities">—</strong>
-          <small>Recent commercial or partnership intake</small>
-        </article>
-        <article>
-          <span>Reviews</span>
-          <strong id="metric-reviews">—</strong>
-          <small>Pending profile review queue</small>
-        </article>
+        <article><span>GPT</span><strong id="metric-gpt">Checking…</strong><small id="metric-gpt-detail">Private assistant connection</small></article>
+        <article><span>Email</span><strong id="metric-email">Checking…</strong><small id="metric-email-detail">Gmail read-only connection</small></article>
+        <article><span>Opportunities</span><strong id="metric-opportunities">—</strong><small>Recent commercial or partnership intake</small></article>
+        <article><span>Reviews</span><strong id="metric-reviews">—</strong><small>Pending profile review queue</small></article>
       </section>
 
       <section class="founder-grid">
         <article class="panel inbox-panel" id="inbox">
-          <div class="panel-head">
-            <div>
-              <span class="section-label">IMPORTANT INBOX</span>
-              <h2>Email that may deserve you</h2>
-            </div>
-            <div class="panel-actions">
-              <button class="quiet-button" id="refresh-inbox" type="button">Refresh</button>
-              <button class="primary-button" id="connect-gmail" type="button">Connect Gmail</button>
-            </div>
-          </div>
+          <div class="panel-head"><div><span class="section-label">IMPORTANT INBOX</span><h2>Email that may deserve you</h2></div><div class="panel-actions"><button class="quiet-button" id="refresh-inbox" type="button">Refresh</button><button class="primary-button" id="connect-gmail" type="button">Connect Gmail</button></div></div>
           <p class="panel-note" id="inbox-account">Connect Gmail to review recent non-promotional messages here.</p>
-          <div class="mail-list" id="mail-list">
-            <div class="empty-state">Your inbox will appear here after Gmail is connected.</div>
-          </div>
+          <div class="mail-list" id="mail-list"><div class="empty-state">Your inbox will appear here after Gmail is connected.</div></div>
         </article>
 
         <article class="panel assistant-panel" id="assistant">
-          <div class="panel-head">
-            <div>
-              <span class="section-label">FOUNDER GPT</span>
-              <h2>Ask what actually needs your attention</h2>
-            </div>
-            <span class="connection-pill" id="gpt-pill">Checking</span>
-          </div>
-          <div class="assistant-output" id="assistant-output">
-            <p>Ask me to prioritize opportunities, identify which emails deserve a meeting, prepare you for a negotiation, or separate founder work from tasks that should be delegated.</p>
-          </div>
+          <div class="panel-head"><div><span class="section-label">FOUNDER GPT</span><h2>Ask what actually needs your attention</h2></div><span class="connection-pill" id="gpt-pill">Checking</span></div>
+          <div class="assistant-output" id="assistant-output"><p>Ask me to prioritize opportunities, identify which emails deserve a meeting, prepare you for a negotiation, or separate founder work from tasks that should be delegated.</p></div>
           <div class="quick-prompts" aria-label="Suggested prompts">
             <button type="button" data-prompt="What needs my attention right now, and what should be delegated?">What needs me?</button>
             <button type="button" data-prompt="Review the inbox context and tell me which messages are worth a meeting. Explain why.">Meeting-worthy emails</button>
@@ -102,54 +67,22 @@
           </div>
           <form class="assistant-form" id="assistant-form">
             <textarea id="assistant-input" rows="4" maxlength="12000" placeholder="Ask your PageantIndex founder assistant…" required></textarea>
-            <div class="assistant-controls">
-              <label class="context-toggle">
-                <input type="checkbox" id="include-email-context" />
-                <span>Use recent inbox context for this request</span>
-              </label>
-              <button class="primary-button" type="submit">Ask GPT</button>
-            </div>
+            <div class="assistant-controls"><label class="context-toggle"><input type="checkbox" id="include-email-context" /><span>Use recent inbox context for this request</span></label><button class="primary-button" type="submit">Ask GPT</button></div>
           </form>
           <small class="privacy-note">Inbox context is sent to GPT only when you enable the switch above. The assistant can draft and recommend, but it cannot send mail or approve transactions.</small>
         </article>
       </section>
 
       <section class="panel opportunities-panel" id="opportunities">
-        <div class="panel-head">
-          <div>
-            <span class="section-label">FOUNDER QUEUE</span>
-            <h2>Recent opportunities and escalations</h2>
-          </div>
-          <a class="quiet-link" href="/admin/">See full operations</a>
-        </div>
-        <div class="opportunity-list" id="opportunity-list">
-          <div class="empty-state">Loading recent opportunities…</div>
-        </div>
+        <div class="panel-head"><div><span class="section-label">FOUNDER QUEUE</span><h2>Recent opportunities and escalations</h2></div><a class="quiet-link" href="/admin/">See full operations</a></div>
+        <div class="opportunity-list" id="opportunity-list"><div class="empty-state">Loading recent opportunities…</div></div>
       </section>
 
       <section class="connections" id="connections">
-        <div class="section-heading">
-          <span class="section-label">CONNECTIONS</span>
-          <h2>Your private system links</h2>
-          <p>Secrets stay server-side. This screen only shows whether each connection is ready.</p>
-        </div>
+        <div class="section-heading"><span class="section-label">CONNECTIONS</span><h2>Your private system links</h2><p>Secrets stay server-side. This screen only shows whether each connection is ready.</p></div>
         <div class="connection-grid">
-          <article class="connection-card">
-            <div class="connection-icon">AI</div>
-            <div>
-              <h3>OpenAI</h3>
-              <p>Private founder assistant through the OpenAI Responses API.</p>
-              <strong id="openai-connection-label">Checking connection…</strong>
-            </div>
-          </article>
-          <article class="connection-card">
-            <div class="connection-icon">@</div>
-            <div>
-              <h3>Gmail</h3>
-              <p>Read-only founder inbox connection using Google OAuth.</p>
-              <strong id="gmail-connection-label">Checking connection…</strong>
-            </div>
-          </article>
+          <article class="connection-card"><div class="connection-icon">AI</div><div><h3>OpenAI</h3><p>Private founder assistant through the OpenAI Responses API.</p><strong id="openai-connection-label">Checking connection…</strong></div></article>
+          <article class="connection-card"><div class="connection-icon">@</div><div><h3>Gmail</h3><p>Read-only founder inbox connection using Google OAuth.</p><strong id="gmail-connection-label">Checking connection…</strong></div></article>
         </div>
       </section>
     </main>
@@ -161,7 +94,8 @@
       <span>PAGEANTINDEX</span>
       <h1>Founder access only</h1>
       <p id="lock-message">Checking your secure PageantIndex session…</p>
-      <a class="primary-button" href="/sign-in/?next=/founder/">Sign in</a>
+      <a class="primary-button" href="/sign-in/">Sign in</a>
+      <a class="quiet-link" href="/sign-up/">Create an account first</a>
     </div>
   </main>
 
