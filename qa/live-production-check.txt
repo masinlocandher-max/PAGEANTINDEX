@@ -2,3 +2,4 @@ Temporary branch marker used to trigger PageantIndex production route smoke test
 Rerun after correcting homepage marker.
 Trigger rendered desktop and iPhone QA.
 Final rerun after mobile Organizer overlap fix.
+Robust rerun with active media paused.
