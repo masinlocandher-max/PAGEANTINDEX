@@ -35,7 +35,7 @@ jobs:
             }
           }
 
-          check "/" "PageantIndex"
+          check "/" "Pageant Index | The Global Network for Pageantry"
           check "/organization/" "Pageant Organization | PageantIndex"
           check "/platform/" "PageantIndex Organizer OS"
           check "/experience/" "PageantIndex User Experiences"
