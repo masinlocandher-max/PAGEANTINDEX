@@ -5,102 +5,114 @@
   if (!root) return;
 
   const roles = [
-    {id:"organization", icon:"O", name:"Pageant Organization", copy:"Create and operate pageant editions, teams, candidates, competition systems and official records."},
-    {id:"candidate", icon:"C", name:"Candidate / Titleholder", copy:"Discover opportunities, apply, complete requirements, compete and build a permanent verified history."},
-    {id:"professional", icon:"P", name:"Pageant Professional", copy:"Build professional identity, receive event opportunities and become discoverable across the industry."},
-    {id:"judge", icon:"J", name:"Judge / Tabulator", copy:"Enter secure competition workflows for scoring, monitoring, certification and official results."},
-    {id:"fan", icon:"F", name:"Fan / Voter", copy:"Discover candidates, follow official events and participate in transparent voting experiences."},
-    {id:"attendee", icon:"T", name:"Ticket Buyer / Attendee", copy:"Find events, choose access, receive tickets and move smoothly from checkout to venue entry."},
-    {id:"brand", icon:"B", name:"Brand / Sponsor", copy:"Discover events, professionals and partnership opportunities across the pageant economy."},
-    {id:"media", icon:"M", name:"Media / Researcher", copy:"Use official event records, historical results and structured pageant information as a trusted reference."},
+    {
+      id:"supplier",
+      icon:"S",
+      name:"Supplier / Professional",
+      copy:"Create a professional identity, show your work, connect your pageant credits and become discoverable globally.",
+    },
+    {
+      id:"candidate",
+      icon:"C",
+      name:"Candidate / Titleholder",
+      copy:"Build a public pageant profile, connect your history and confirm the professionals who worked directly with you.",
+    },
+    {
+      id:"organization",
+      icon:"O",
+      name:"Pageant Organization",
+      copy:"Claim your organization, manage editions and admins, add candidates and confirm official pageant-level suppliers.",
+    },
   ];
 
   const goals = {
-    organization:[
-      ["create","Create or manage a pageant","Set up organization identity, editions, staff, applications and candidate operations."],
-      ["eventnight","Run competition night","Open judging, tabulation, voting, tickets and event-night control."],
-      ["record","Publish the official record","Preserve candidates, placements, results, suppliers, sponsors and history."],
+    supplier:[
+      ["create","Create or claim my profile","Start with a free PageantIndex professional identity and build a polished public pageant résumé."],
+      ["credits","Add my pageant credits","Connect Pageant Name + Year/Edition + Candidate + Role. Self-added credits remain unconfirmed until approved."],
+      ["identity","Manage verification and confirmations","See identity verification separately from candidate-confirmed and organization-confirmed work relationships."],
     ],
     candidate:[
-      ["discover","Find pageants to join","Move from discovery into an application-ready event journey."],
-      ["compete","Manage my competition journey","Track application, requirements, schedules and pageant-week activity."],
-      ["career","Build my pageant profile","Turn participation and titles into a durable PageantIndex professional record."],
+      ["profile","Create or claim my candidate profile","Build a public pageant identity with titles, history, official links and professional relationships."],
+      ["suppliers","Invite or confirm my personal suppliers","Confirm people who worked directly with you without turning them into official pageant suppliers."],
+      ["history","Manage my pageant history","Connect editions, placements and candidate-specific professional credits into one structured record."],
     ],
-    professional:[
-      ["profile","Build my professional profile","Create a discoverable portfolio and pageant-industry identity."],
-      ["work","Find or receive opportunities","Move from discovery and organizer inquiry into an event-specific work relationship."],
-      ["credits","Build verified credits","Connect your role to pageant editions, organizations and candidates accurately."],
-    ],
-    judge:[
-      ["score","Score a competition","Use a secure judge-only scoring journey with clear criteria and submission state."],
-      ["tabulate","Manage tabulation","Monitor judge status, lock rounds, investigate anomalies and certify outcomes."],
-      ["results","Confirm official results","Move approved competition output into the permanent event record."],
-    ],
-    fan:[
-      ["follow","Follow a pageant","Open the canonical event page for candidates, schedule, voting and results."],
-      ["vote","Vote for a candidate","Enter the transparent ballot and confirmation journey."],
-      ["history","Explore results and history","Move from a live event into PageantIndex's permanent pageant records."],
-    ],
-    attendee:[
-      ["tickets","Buy event tickets","Choose ticket access and move through checkout to a QR credential."],
-      ["event","View event details","See schedule, candidates, venue information, voting and official updates."],
-      ["checkin","Access my event","Use the ticket journey as the bridge from purchase to venue entry."],
-    ],
-    brand:[
-      ["discover","Discover pageants and partners","Explore organizations, editions, candidates and professional suppliers."],
-      ["sponsor","Find sponsorship opportunities","Use structured event and organization records to identify relevant partnerships."],
-      ["intelligence","Understand the industry","Move toward PageantIndex Intelligence as structured market data grows."],
-    ],
-    media:[
-      ["records","Find official pageant records","Use permanent edition pages rather than scattered social posts."],
-      ["people","Research people and credits","Trace candidates, titleholders, organizations and professional relationships."],
-      ["intelligence","Explore industry intelligence","Use structured historical data for patterns, context and future research."],
+    organization:[
+      ["claim","Claim my organization profile","Establish the official organization identity and add authorized admins."],
+      ["editions","Manage pageant editions and candidates","Create the edition structure that connects the organization, year, candidates and pageant relationships."],
+      ["official","Invite or confirm official suppliers","Confirm pageant-level official roles separately from candidate-specific supplier relationships."],
     ],
   };
 
   const routes = {
-    organization:{create:["Organization setup","/organization/","Create or manage your organization identity, team authority, editions and verification before entering operations."],eventnight:["Organizer OS","/platform/","Run the pageant from one operating surface: applications, candidates, schedules, judging, voting, tickets and records."],record:["Official event record","/event/","Review how an edition becomes a permanent PageantIndex record after the competition."]},
-    candidate:{discover:["Public event discovery","/event/","Start from an official edition page, then move into the application journey when applications are open."],compete:["Candidate portal","/candidate/","Use one private place for application status, requirements, schedule and competition readiness."],career:["Candidate PageantIndex profile","/candidate/","Build the profile that can later preserve verified titles, placements and professional pageant history."]},
-    professional:{profile:["Professional network","/directory/","Start with discovery and professional identity inside the global PageantIndex network."],work:["Supplier workspace","/supplier-workspace/","Receive event briefs, respond to organizers and track opportunity status."],credits:["Professional credits","/supplier-workspace/","Prepare event-specific relationships that can later connect organization, edition, candidate and role."]},
-    judge:{score:["Judge scoring","/judge/","Enter the isolated judge journey for criteria, candidate-by-candidate scoring, review and locked submission."],tabulate:["Tabulation control room","/tabulation/","Monitor judge completion, lock rounds, certify results and preserve an audit trail."],results:["Official event record","/event/","See the public destination where certified results ultimately belong."]},
-    fan:{follow:["Official event","/event/","Follow one canonical edition page instead of chasing fragmented posts across platforms."],vote:["People's Choice voting","/vote/","Choose a candidate, review the ballot and receive confirmation through the dedicated voter flow."],history:["Official event record","/event/","Continue from the live competition into the permanent historical record."]},
-    attendee:{tickets:["PageantIndex Tickets","/tickets/","Choose access, move through ticket selection and reach the QR credential experience."],event:["Official event","/event/","See the event, candidates, schedule, voting, tickets and results in one public destination."],checkin:["Ticket access","/tickets/","Use the ticket journey as the future bridge to secure event check-in."]},
-    brand:{discover:["Global pageant network","/directory/","Explore the people and organizations that make up the pageant economy."],sponsor:["Official event ecosystem","/event/","See where sponsors, organizations, candidates and event activity connect around one edition."],intelligence:["PageantIndex Intelligence","/platform/#intelligence","Preview the future intelligence layer built from structured pageant data."]},
-    media:{records:["Official event record","/event/","Use a canonical edition page as the trusted starting point for results and context."],people:["PageantIndex directory","/directory/","Research candidates, professionals and organizations through structured profiles and credits."],intelligence:["PageantIndex Intelligence","/platform/#intelligence","Preview how historical records can become useful industry intelligence."]},
+    supplier:{
+      create:["Create your free professional profile","/sign-up/","Build your PageantIndex identity first. Your public profile becomes the shareable professional page people and search systems can understand."],
+      credits:["Manage your professional credits","/dashboard/","Add structured work history using Pageant Name + Year/Edition + Candidate + Role, with confirmation status kept visible."],
+      identity:["Manage your profile trust layer","/dashboard/","Identity Verified, Candidate Confirmed and Organization Confirmed stay separate so the profile shows exactly what was verified and by whom."],
+    },
+    candidate:{
+      profile:["Create your candidate profile","/sign-up/","Start with a free public identity that can later connect pageant history, placements and candidate-specific professional relationships."],
+      suppliers:["Manage candidate relationships","/dashboard/","Invite personal suppliers or confirm supplier-submitted credits that accurately describe work done directly for you."],
+      history:["Manage your pageant record","/dashboard/","Keep pageant editions, placements and candidate-level credits structured inside one professional identity."],
+    },
+    organization:{
+      claim:["Claim your organization","/organization/","Create or claim the organization identity, establish authority and add the people allowed to manage it."],
+      editions:["Manage editions and candidates","/organization/","Build the organization’s structured pageant history before adding official supplier relationships."],
+      official:["Manage official supplier relationships","/organization/","Invite professionals through PageantIndex and confirm only the official pageant-level roles your organization actually recognizes."],
+    },
   };
 
   let selectedRole = null;
   let selectedGoal = null;
 
   function brand(){return `<a class="brand" href="/"><img src="/public/images/pageant-icon.png" alt=""><div><strong>PageantIndex</strong><span>The Global Network for Pageantry</span></div></a>`;}
-  function lifecycle(){return `<div class="lifecycle">${[["01","Discover"],["02","Join"],["03","Operate"],["04","Compete"],["05","Engage"],["06","Crown"],["07","Record"],["08","Grow"]].map(([n,label])=>`<div class="life"><small>${n}</small><strong>${label}</strong></div>`).join("")}</div>`;}
+
+  function lifecycle(){return `<div class="lifecycle launch-life">${[
+    ["01","Discover"],["02","Create / Claim"],["03","Build Profile"],["04","Connect Credits"],["05","Confirm Relationships"],["06","Get Discovered"]
+  ].map(([n,label])=>`<div class="life"><small>${n}</small><strong>${label}</strong></div>`).join("")}</div>`;}
 
   function resultHTML(){
     if(!selectedRole || !selectedGoal) return "";
     const [title,url,copy] = routes[selectedRole][selectedGoal];
-    return `<section class="result" aria-live="polite"><div><small>Your next PageantIndex destination</small><h3>${title}</h3><p>${copy}</p></div><div class="result-actions"><a class="secondary" href="/event/">See public event</a><a class="primary" href="${url}">Continue journey →</a></div></section>`;
+    return `<section class="result" aria-live="polite"><div><small>Your next PageantIndex step</small><h3>${title}</h3><p>${copy}</p></div><div class="result-actions"><a class="secondary" href="/directory/">Search the index</a><a class="primary" href="${url}">Continue →</a></div></section>`;
   }
 
   function renderGoals(){
     const wrap=document.getElementById("goal-wrap");
     if(!wrap) return;
     if(!selectedRole){wrap.innerHTML="";return;}
-    wrap.innerHTML=`<div class="goal-wrap"><div class="step-head"><div><small>Step 2</small><h2>What are you here to do?</h2><p>PageantIndex should route you by intent, not force you to understand its entire product architecture first.</p></div></div><div class="goal-grid">${goals[selectedRole].map(([id,name,copy])=>`<button class="goal ${selectedGoal===id?"selected":""}" data-goal="${id}"><strong>${name}</strong><span>${copy}</span></button>`).join("")}</div>${resultHTML()}</div>`;
+    wrap.innerHTML=`<div class="goal-wrap"><div class="step-head"><div><small>Step 2</small><h2>What do you need to do now?</h2><p>The launch experience stays focused on identity, profiles, credits, invitations, confirmations and verification.</p></div></div><div class="goal-grid">${goals[selectedRole].map(([id,name,copy])=>`<button class="goal ${selectedGoal===id?"selected":""}" data-goal="${id}"><strong>${name}</strong><span>${copy}</span></button>`).join("")}</div>${resultHTML()}</div>`;
     bindGoals();
   }
 
   function render(){
-    root.innerHTML=`<div class="shell"><header class="topbar">${brand()}<div class="grow"></div><a class="toplink" href="/directory/">Explore network</a><a class="toplink" href="/sign-in/">Sign in</a></header><main class="main">
-      <section class="hero"><div><h1>One pageant industry. One connected journey.</h1><p>PageantIndex follows the real life of pageantry from discovery and professional identity to pageant operations, competition, audience participation, official results and long-term industry intelligence.</p></div><aside class="hero-side"><strong>Start with who you are.</strong><p>You should never need to know which PageantIndex product name to open. Tell us your place in pageantry and what you need to accomplish. The platform takes you to the right experience.</p></aside></section>
+    root.innerHTML=`<div class="shell"><header class="topbar">${brand()}<div class="grow"></div><a class="toplink" href="/directory/">Search the index</a><a class="toplink" href="/sign-in/">Sign in</a></header><main class="main">
+      <section class="hero"><div><h1>Build your professional identity in pageantry.</h1><p>PageantIndex is building the global professional identity and relationship infrastructure for pageantry, starting with public profiles, verified professional history and a connected industry network.</p></div><aside class="hero-side"><strong>Global from day one.</strong><p>The Philippines is the first market we actively populate and operationalize. PageantIndex remains one platform, one brand, one database and one set of standards worldwide.</p></aside></section>
       ${lifecycle()}
-      <section class="panel journey"><div class="step-head"><div><small>Step 1</small><h2>Where do you belong in pageantry?</h2><p>The same event can involve organizations, candidates, professionals, judges, fans, buyers, brands and media. Their journeys connect, but their interfaces should not be identical.</p></div><button class="reset" id="reset">Reset journey</button></div><div class="role-grid">${roles.map(r=>`<button class="role ${selectedRole===r.id?"selected":""}" data-role="${r.id}"><span class="icon">${r.icon}</span><strong>${r.name}</strong><span>${r.copy}</span></button>`).join("")}</div><div id="goal-wrap"></div></section>
-      <section class="blueprint"><h2>The blueprint behind the journey</h2><p>PageantIndex is designed as one connected industry system. Public discovery brings people in. Operational tools help pageants run. Transactions and participation create activity. Official records preserve what happened. Structured relationships and history create the intelligence layer.</p><div class="rails">
-        <article class="panel rail"><small>Network</small><h3>Identity & discovery</h3><p>Profiles and permanent records make people, pageants and professional relationships searchable and credible.</p><ul><li>Candidates and titleholders</li><li>Pageant organizations and editions</li><li>Professionals and suppliers</li><li>Verification and credits</li></ul><a href="/directory/">Explore the network →</a></article>
-        <article class="panel rail"><small>Operations</small><h3>Run the pageant</h3><p>The Organizer OS turns PageantIndex from a directory into infrastructure that pageant organizations can operate on.</p><ul><li>Applications and requirements</li><li>Candidate and schedule management</li><li>Judging and tabulation</li><li>Voting, tickets and event control</li></ul><a href="/platform/">Open Organizer OS →</a></article>
-        <article class="panel rail"><small>Permanent value</small><h3>Record, reputation & intelligence</h3><p>When the event ends, its relationships and verified results remain useful instead of disappearing into social feeds.</p><ul><li>Official event record</li><li>Titles, placements and credits</li><li>Supplier and organization relationships</li><li>Future PageantIndex Intelligence</li></ul><a href="/event/">View event record →</a></article>
+      <section class="panel journey"><div class="step-head"><div><small>Step 1</small><h2>Who are you in pageantry?</h2><p>At launch, PageantIndex is intentionally simple. Suppliers, candidates and organizations create or claim free profiles, manage structured credits and relationships, and publish polished public identities.</p></div><button class="reset" id="reset">Reset</button></div><div class="role-grid launch-role-grid">${roles.map(r=>`<button class="role ${selectedRole===r.id?"selected":""}" data-role="${r.id}"><span class="icon">${r.icon}</span><strong>${r.name}</strong><span>${r.copy}</span></button>`).join("")}</div><div id="goal-wrap"></div></section>
+
+      <section class="blueprint"><h2>The launch product</h2><p>The visible PageantIndex product is deliberately narrow. The value comes from making each profile useful, trustworthy and connected, not from exposing every future module at once.</p><div class="rails launch-rails">
+        <article class="panel rail"><small>01</small><h3>Landing Page</h3><p>Discover PageantIndex, search the index, understand the platform and create or claim a free profile.</p><ul><li>Global discovery</li><li>Searchable index</li><li>Create or claim profile</li><li>Clear platform explanation</li></ul><a href="/">Open PageantIndex →</a></article>
+        <article class="panel rail"><small>02</small><h3>Dashboard / Profile Creation</h3><p>Manage identity, portfolio, credits, invitations, confirmations and verification from one private workspace.</p><ul><li>Profile and portfolio</li><li>Credits and relationships</li><li>Invitations and confirmations</li><li>Identity verification</li></ul><a href="/dashboard/">Open dashboard →</a></article>
+        <article class="panel rail"><small>03</small><h3>Public Profile</h3><p>A polished, shareable professional page anyone can open without logging in.</p><ul><li>Identity and category</li><li>Bio, services and portfolio</li><li>Pageant credits and confirmations</li><li>Official links and contact options</li></ul><a href="/directory/">Search public profiles →</a></article>
       </div></section>
-      <div class="footer-note">Front-end journey only. Database-backed identity, transactions, votes, scores, ticket issuance, verification and official-result certification remain separate production integrations.</div>
-    </main><div class="toast" id="toast"></div></div>`;
+
+      <section class="blueprint graph-section"><h2>The relationship graph is the moat</h2><p>PageantIndex does not flatten every pageant relationship into a generic credit. The platform records exactly who worked with whom, where, when and in what role.</p><div class="graph-line"><strong>Pageant Name</strong><span>+</span><strong>Year / Edition</strong><span>+</span><strong>Candidate</strong><span>+</span><strong>Supplier</strong><span>+</span><strong>Role</strong></div><div class="rails launch-rails">
+        <article class="panel rail"><small>Candidate relationship</small><h3>Personal supplier</h3><p>A supplier who worked directly with a candidate is shown as candidate-specific.</p><ul><li>Photographer for Candidate X · Miss Pageant 2026</li><li>Candidate can confirm the relationship</li><li>Not automatically an official pageant supplier</li></ul></article>
+        <article class="panel rail"><small>Organization relationship</small><h3>Official supplier</h3><p>Only the organization can confirm an official pageant-level role.</p><ul><li>Official Photographer · Miss Pageant 2026</li><li>Organization confirms the role</li><li>Separate from personal candidate suppliers</li></ul></article>
+        <article class="panel rail"><small>Self-added history</small><h3>Unconfirmed until approved</h3><p>Suppliers may add previous credits themselves, but PageantIndex keeps the confirmation state explicit.</p><ul><li>Self-added does not equal verified</li><li>Candidate or organization can confirm</li><li>History grows without overstating trust</li></ul></article>
+      </div></section>
+
+      <section class="blueprint"><h2>Three separate trust layers</h2><p>PageantIndex confirms identity and records relationship confirmations without pretending to decide who is “best.”</p><div class="rails launch-rails trust-rails">
+        <article class="panel rail"><small>Identity Verified</small><h3>Who you are</h3><p>PageantIndex confirms the person using identity evidence and selfie/liveness checks.</p></article>
+        <article class="panel rail"><small>Candidate Confirmed</small><h3>Worked directly with this candidate</h3><p>The candidate confirms that the supplier worked directly with her in the stated role.</p></article>
+        <article class="panel rail"><small>Organization Confirmed</small><h3>Official pageant-level role</h3><p>The organization confirms that the professional held the stated official role for that pageant edition.</p></article>
+      </div></section>
+
+      <section class="future"><div><small>Later, not launch-facing</small><h2>The broader ecosystem stays in the architecture.</h2><p>PageantIndex Privileges, hotels, airlines, tourism, ticketing, voting, tabulation, analytics, advertising, booking and business tools remain part of the long-term platform. They do not appear publicly until they are ready.</p></div><div class="future-note"><strong>Growth strategy</strong><p>Benefits first: secure useful hotel and airline privileges, then invite organizations to claim free profiles and bring candidates, teams and suppliers into the network.</p></div></section>
+
+      <section class="network-loop"><h2>Partners → organizations → candidates → suppliers → credits → stronger network.</h2><p>Basic profiles remain free because completeness of the index is itself the asset. PageantIndex monetizes around the network, not simply by charging people to exist.</p></section>
+      <div class="footer-note">Launch blueprint: one global platform, one brand, one database and one set of standards. Country partners are a commercial expansion layer, not separate PageantIndex products.</div>
+    </main></div>`;
     document.querySelectorAll("[data-role]").forEach(btn=>btn.addEventListener("click",()=>{selectedRole=btn.dataset.role;selectedGoal=null;document.querySelectorAll("[data-role]").forEach(x=>x.classList.toggle("selected",x===btn));renderGoals();document.getElementById("goal-wrap")?.scrollIntoView({behavior:"smooth",block:"nearest"});}));
     document.getElementById("reset")?.addEventListener("click",()=>{selectedRole=null;selectedGoal=null;render();});
     renderGoals();
