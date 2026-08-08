@@ -13,5 +13,12 @@
 <body>
   <div id="platform-app"></div>
   <script src="/platform/platform.js" defer></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      const moduleId = location.hash.replace(/^#/, "");
+      if (!moduleId) return;
+      document.querySelector(`[data-module="${CSS.escape(moduleId)}"]`)?.click();
+    });
+  </script>
 </body>
 </html>
