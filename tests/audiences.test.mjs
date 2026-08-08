@@ -196,9 +196,11 @@ test("mobile-first app keeps five universal tabs and responsive layouts", async 
   assert.match(html, /app\/pageant-data\.js/);
 });
 
-test("sitemap includes audience and public experience routes", async () => {
+test("launch sitemap stays focused on public discovery surfaces", async () => {
   const sitemap = await read("sitemap.xml");
-  for (const path of ["candidates", "media", "announcements", "experiences"]) {
-    assert.match(sitemap, new RegExp(`pageantindex\\.com/${path}/`));
+  assert.match(sitemap, /pageantindex\.com\/<\/loc>/);
+  assert.match(sitemap, /pageantindex\.com\/directory\//);
+  for (const path of ["candidates", "media", "announcements", "experiences", "rankings", "advertise"]) {
+    assert.doesNotMatch(sitemap, new RegExp(`pageantindex\\.com/${path}/`));
   }
 });
