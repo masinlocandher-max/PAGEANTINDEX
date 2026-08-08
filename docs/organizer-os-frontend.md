@@ -1,156 +1,185 @@
-# PageantIndex Organizer OS — Front-End Structure
+# PageantIndex Front-End Experience Contract
 
 Branch: `agent/pageantindex-frontend-os`
 
-This branch adds the front-end operating system for pageant organizations without changing the production data model yet.
+This branch completes the front-end structure for the PageantIndex ecosystem before production database, payments, voting, scoring, ticket issuance, and event-history records are connected.
 
 ## Product rule
 
-The Organizer OS must never imply that preview scores, votes, ticket sales, analytics, or financial values are live. Until production tables and server-side controls are connected, every transactional or competition-sensitive surface stays explicitly preview-only.
+The front end must never imply that preview scores, votes, ticket sales, analytics, financial values, applications, inquiries, or official results are live. Transactional and competition-sensitive surfaces stay explicitly preview-only until protected production services exist.
 
-## Modules
+## Complete experience map
 
-1. **Overview** — pageant command center and readiness map.
-2. **Applications** — submission, screening, changes requested, acceptance, and roster conversion.
-3. **Candidates** — roster, requirements, readiness, media, travel, wardrobe, and pageant-week operations.
-4. **Schedule** — candidate, production, judging, sponsor, and media timelines.
-5. **Judging & Tabulation** — criteria, weights, judge access, competition rounds, score display, locks, certification state, and result publication controls.
-6. **Voting** — campaign setup, ballot preview, free/paid/hybrid models, vote-ledger readiness, fraud-control readiness, and certification state.
-7. **Tickets** — ticket tiers, checkout, QR admission, check-in, settlement, refunds, and inventory readiness.
-8. **Official Event Record** — permanent PageantIndex edition identity linking the organization, candidates, judges, results, suppliers, sponsors, media, voting, and tickets.
-9. **Marketplace** — organizer sourcing flow from discovery through shortlist, invite, quote, hire, and review.
-10. **Intelligence** — zero-data analytics surfaces for real future edition, marketplace, transaction, and historical data.
+- `/platform/` — Organizer OS and command center.
+- `/candidate/` — candidate application record, requirements, schedule, and profile history.
+- `/judge/` — scoped judge invitation, candidate-by-candidate scoring, validation, final review, submission, and locked state.
+- `/vote/` — guest-friendly public ballot, candidate selection, quantity, confirmation, receipt, and campaign-closed state.
+- `/tickets/` — public ticket tiers, sold-out state, cart, guest checkout, confirmation, and non-scannable preview QR state.
+- `/supplier-workspace/` — qualified organizer inquiries, event brief, quote response, status filters, and closed-opportunity state.
+- `/tabulation/` — judge submission monitoring, round lock, result snapshot, certification, controlled publication, and audit trail.
+- `/event/` — canonical public edition page for candidates, schedule, voting, tickets, and certified results.
+- `/experience/` — role map connecting all user journeys.
 
-## Front-end route
+## Organizer modules
 
-- `/platform/`
+1. Overview and coronation readiness.
+2. Applications and screening.
+3. Candidate roster, requirements, readiness, media, travel, wardrobe, and pageant-week operations.
+4. Master schedule.
+5. Judging and tabulation configuration.
+6. Voting campaign configuration.
+7. Ticket configuration.
+8. Official event record.
+9. Marketplace sourcing.
+10. Intelligence and honest zero-data analytics.
 
-The existing organizer app links to this command center from `app/organizer.js`.
+## Candidate journey
 
-## Intended data contracts
+`Discover pageant → Apply → Save application → Submit evidence → Screening → Acceptance → Candidate portal → Requirements → Schedule → Competition → Result/history → Public profile review`
 
-### Applications
-
-Future primary records should expose at minimum:
-
-- application id
-- edition id
-- applicant user/profile id when available
-- display name
-- representation
-- contact and eligibility fields
+Minimum future data contract:
+- application ID and edition ID
+- applicant identity/profile reference
+- contact and eligibility data
 - application answers
-- requirement/document manifest
-- completion state
-- screening state
-- organizer notes
-- submitted / reviewed / accepted timestamps
-- audit history
+- private document manifest
+- completion and screening state
+- organizer review notes
+- accepted/declined timestamps
+- candidate roster link after acceptance
+- per-candidate requirement state
+- attendance/call times
+- production, wardrobe, talent, advocacy, sponsor, travel, and accommodation information
+- candidate-controlled public biography/history
 
-### Candidates
+## Judge journey
 
-Future roster records should expose:
+`Invitation → Secure access → Criteria briefing → Candidate scoring → Validation → Review all scorecards → Submit → Server acceptance → Locked confirmation`
 
-- edition id
-- candidate id
-- candidate number
-- representation
-- participation status
-- requirement checklist
-- attendance / call-time state
-- measurements and production details where appropriate
-- advocacy / talent / media assets
-- sponsor obligations
-- travel / accommodation state
-- readiness percentage derived from source records
-
-### Judging & Tabulation
-
-This must be treated as competition-critical infrastructure. The backend should separate configuration from submitted scores.
-
-Recommended entities:
-
+Competition-critical entities should be separate:
 - competition rounds
-- criteria
-- criterion weights
-- judge assignments
-- judge access/session state
+- criteria and weights
+- judge assignments and scoped access
 - candidate eligibility per round
 - signed score submissions
-- score revisions with reason
+- revisions with reason and authorization
 - score locks
 - calculation snapshots
-- tie-break rules
-- advancement rules
+- tie-break and advancement rules
 - certification records
 - audit events
 
-The browser must never be the authoritative calculator for official results.
+The browser must never be the authoritative official-result calculator. Judges must never be able to inspect other judges' unpublished scores.
 
-### Voting
+## Voting journey
 
-Recommended entities:
+`Event → Candidate → Ballot → Quantity/package → Rules → Payment when applicable → Server-confirmed vote → Receipt → Campaign close`
 
-- voting campaign
+Required future entities:
+- campaign and campaign status
 - eligible candidates
-- vote packages / pricing rules
-- ballot configuration
-- voter / session / payment reference as permitted by policy
+- voting rules/packages
+- voter/session reference as permitted by policy
+- payment reference where applicable
 - immutable vote ledger
-- fraud / anomaly flags
-- refunds / reversals when applicable
-- campaign closure
-- certified result snapshot
+- fraud/anomaly flags
+- reversals/refunds
+- closure and certified result snapshot
 
-### Tickets
+Campaign status and closing time must be server-controlled. Browser success screens cannot determine paid or counted state.
 
-Recommended entities:
+## Ticket buyer journey
 
-- event ticket tier
-- inventory / capacity
-- order
-- buyer record
+`Event → Tier → Quantity/seat → Cart → Guest checkout → Payment → Inventory confirmation → Ticket issuance → Mobile credential → Venue check-in → Refund/cancellation when applicable`
+
+Required future entities:
+- tier and inventory/capacity
+- order and buyer record
 - payment reference
 - issued ticket
-- QR credential
-- check-in event
-- refund / cancellation
-- settlement and payout state
+- unique QR credential
+- scan/check-in event
+- cancellation/refund
+- settlement/payout state
 
-### Official Event Record
+Ticket issuance follows server-confirmed payment and inventory only.
 
-The permanent record should connect reviewed entities instead of copying free-form text whenever possible:
+## Supplier journey
+
+`Organizer sourcing → Qualified inquiry → Private event brief → Supplier response → Quote → Shortlist → Hire/decline → Delivery → Review/verified transaction`
+
+Required future entities:
+- sourcing request
+- invited supplier/profile IDs
+- event/edition relationship
+- private brief and permissions
+- messages/responses
+- quote and validity
+- organizer decision status
+- contract/payment relationship when later supported
+- delivery/review state
+
+## Tabulator / administrator journey
+
+`Configure round → Issue judge access → Monitor submissions → Review anomalies → Receive all signed submissions → Lock round → Calculate protected snapshot → Certify → Publish authorized official result → Preserve audit trail`
+
+Emergency unlocks, score corrections, judge replacements, and publication reversals must require explicit authorization and audit reasons.
+
+## Public event journey
+
+`Discover event → Official edition information → Candidates → Schedule → Vote → Tickets/watch → Certified results → Permanent historical record`
+
+The public PageantIndex Event ID must be created by the production data layer and connect reviewed entities rather than copying free-form text:
 
 `Organization → Edition → Candidates → Judges → Competition → Results → Sponsors → Suppliers → Media → Voting → Tickets`
 
-A public PageantIndex Event ID should be created only by the production data layer, not by the front end.
+Before coronation, the results surface must honestly say results are not yet published. Preview or organizer-only rankings must never leak to the public edition page.
 
-## Security / integrity gates for the integration phase
+## Cross-experience UX states
 
-- Organizer ownership and staff permissions must be server-enforced.
-- Judges must not be able to inspect other judges' unpublished scores.
-- Official score calculations and locks must be server-side and auditable.
-- Voting must use server-side validation and an immutable ledger.
-- Payment webhooks, not browser success screens, must determine paid state.
-- Ticket issuance must follow confirmed payment and unique credential creation.
-- Official results require certification / authorization before public publication.
-- Analytics must reconcile to source records and show honest zero-data states.
+The front-end structure now explicitly represents:
+- loading/readiness architecture
+- honest empty states
+- validation failures
+- local save success
+- confirmation dialogs for irreversible actions
+- disabled actions when prerequisites are incomplete
+- offline banner
+- voting-closed state
+- sold-out ticket state
+- locked judge submission state
+- closed supplier opportunity
+- unpublished-result state
+- non-scannable preview ticket QR
+- success receipts that clearly distinguish preview completion from production acceptance
+
+## Security and integrity gates for integration
+
+- Organizer/staff ownership and permissions are server-enforced.
+- Candidate private files remain private and owner-scoped.
+- Judges have scoped, expiring access and cannot inspect other ballots.
+- Official calculation, locking, tie-break, advancement, and certification are server-side and auditable.
+- Voting uses server-side validation and an immutable ledger.
+- Payment webhooks determine paid state.
+- Ticket issuance follows confirmed payment and unique credential creation.
+- Official results require certification/authorization before publication.
+- Analytics reconcile to source records and show zero rather than fabricated activity.
 
 ## Existing live data that can be reused
 
-The repository already contains reviewed organization editions, candidate roster drafts, result drafts, public experience requests, candidate profiles/history, suppliers, media, announcements, authentication, row-level security, and administrator review concepts. The Organizer OS should bind to these where they are sufficient and add new migrations only for missing operational entities.
+The repository already contains reviewed organization editions, candidate roster drafts, result drafts, public experience requests, candidate profiles/history, suppliers, media, announcements, authentication, row-level security, and administrator review concepts. Reuse those where sufficient and add new migrations only for missing operational entities.
 
-## Next implementation phase
-
-Connect the front-end modules to production-safe data in this order:
+## Recommended integration order
 
 1. organization + edition context
-2. applications
-3. candidate requirements and schedules
-4. judging configuration and judge assignments
-5. signed score submission + server tabulation
-6. voting campaigns + ledger + payments
-7. official results certification
-8. ticket orders + issuance + check-in
-9. marketplace sourcing pipeline
-10. intelligence and historical reporting
+2. candidate applications
+3. candidate requirements + schedules
+4. organizer/staff permissions
+5. judge assignments + scoring configuration
+6. signed score submissions + protected tabulation
+7. result locking + certification
+8. voting campaigns + immutable ledger + payments
+9. ticket inventory + orders + payment + credential issuance + check-in
+10. marketplace sourcing pipeline
+11. public event permanent record
+12. intelligence and historical reporting
