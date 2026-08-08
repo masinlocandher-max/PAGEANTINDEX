@@ -1,6 +1,22 @@
 "use strict";
 (() => {
   const root = document.getElementById("app");
-  if (!root || !root.querySelector(".admin-auth-shell")) return;
-  root.innerHTML = `<div class="pi-workspace"><header class="pi-workspace-head"><div class="inner"><a class="pi-wordmark" href="/"><img src="/public/images/pageant-icon.png" alt=""><div><strong>PageantIndex</strong><span>The Global Network for Pageantry</span></div></a><div class="spacer"></div><a class="pi-button secondary" href="/directory/">Search the Index</a></div></header><main class="pi-workspace-body"><section style="max-width:640px;margin:7vh auto" class="pi-panel"><div class="pi-panel-head"><div><h2>Sign in to your profile dashboard</h2><p>Your PageantIndex workspace is private. Sign in with the account that owns or manages this profile.</p></div><span class="pi-status">Private</span></div><div style="display:grid;gap:9px"><a class="pi-button primary" href="/sign-in/?next=/dashboard/">Sign in securely</a><a class="pi-button secondary" href="/sign-up/">Create a free profile</a><a style="margin-top:8px;text-align:center;font-size:.68rem;color:var(--pi-pink);font-weight:700" href="/claim-profile/">Claim an existing profile instead →</a></div></section></main></div>`;
+  if (!root) return;
+  let done = false;
+  let observer;
+
+  function apply() {
+    if (done) return true;
+    const gate = root.querySelector(".admin-auth-shell");
+    if (!gate) return false;
+    done = true;
+    root.innerHTML = `<div class="pi-workspace"><header class="pi-workspace-head"><div class="inner"><a class="pi-wordmark" href="/"><img src="/public/images/pageant-icon.png" alt=""><div><strong>PageantIndex</strong><span>The Global Network for Pageantry</span></div></a><div class="spacer"></div><a class="pi-button secondary" href="/directory/">Search the Index</a></div></header><main class="pi-workspace-body"><section style="max-width:640px;margin:7vh auto" class="pi-panel"><div class="pi-panel-head"><div><h2>Sign in to your profile dashboard</h2><p>Your PageantIndex workspace is private. Sign in with the account that owns or manages this profile.</p></div><span class="pi-status">Private</span></div><div style="display:grid;gap:9px"><a class="pi-button primary" href="/sign-in/?next=/dashboard/">Sign in securely</a><a class="pi-button secondary" href="/sign-up/">Create a free profile</a><a style="margin-top:8px;text-align:center;font-size:.68rem;color:var(--pi-pink);font-weight:700" href="/claim-profile/">Claim an existing profile instead →</a></div></section></main></div>`;
+    observer?.disconnect();
+    return true;
+  }
+
+  if (apply()) return;
+  observer = new MutationObserver(() => apply());
+  observer.observe(root, {childList:true,subtree:true});
+  setTimeout(() => observer?.disconnect(), 12000);
 })();
