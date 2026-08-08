@@ -13,10 +13,16 @@ export default async function handler(req, res) {
       gmail = {status: "storage_unavailable", error: error.message};
     }
 
+    const gatewayConnected = Boolean(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN);
+    const openaiConnected = Boolean(process.env.OPENAI_API_KEY);
+
     return sendJson(res, 200, {
       openai: {
-        connected: Boolean(process.env.OPENAI_API_KEY),
-        model: process.env.OPENAI_MODEL || "gpt-5-mini",
+        connected: gatewayConnected || openaiConnected,
+        model: gatewayConnected
+          ? (process.env.FOUNDER_AI_MODEL || "openai/gpt-5.4")
+          : (process.env.OPENAI_MODEL || "gpt-5-mini"),
+        provider: gatewayConnected ? "vercel-ai-gateway" : (openaiConnected ? "openai" : null),
       },
       gmail: {
         connected: gmail?.status === "connected",
