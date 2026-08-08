@@ -1,0 +1,27 @@
+.founder-login-form {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0 18px;
+}
+
+.founder-login-email {
+  padding: 13px 14px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 12px;
+  background: rgba(255,255,255,.035);
+  color: #fffafc;
+  font-size: 13px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.founder-login-form .primary-button {
+  width: 100%;
+  min-height: 44px;
+}
+
+.founder-login-form small {
+  color: #8f7e88;
+  line-height: 1.5;
+  font-size: 11px;
+}
