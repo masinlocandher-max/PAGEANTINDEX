@@ -3,6 +3,8 @@
 const SUPABASE_URL = "https://uwcqvsitjtknxsaypjxj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_qsC-udp3YoJQFuE-lHPivg_wa8gYMeg";
 const SESSION_KEY = "pi_supabase_session";
+const FOUNDER_EMAIL = "info.senz.pr@gmail.com";
+const FOUNDER_REDIRECT = "https://www.pageantindex.com/founder/";
 let session = null;
 let inboxMessages = [];
 
@@ -43,6 +45,22 @@ async function authRequest(path, options = {}, accessToken = null) {
   if (!response.ok) throw new Error(payload?.message || payload?.error_description || `Request failed (${response.status}).`);
   return payload;
 }
+function consumeAuthFragment() {
+  const hash = new URLSearchParams(location.hash.replace(/^#/, ""));
+  const accessToken = hash.get("access_token");
+  const refreshToken = hash.get("refresh_token");
+  if (!accessToken || !refreshToken) return false;
+  const expiresIn = Number(hash.get("expires_in") || 3600);
+  saveSession({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    expires_in: expiresIn,
+    expires_at: Math.floor(Date.now() / 1000) + expiresIn,
+    token_type: hash.get("token_type") || "bearer",
+  }, true);
+  history.replaceState({}, "", `${location.pathname}${location.search}`);
+  return true;
+}
 async function validateSession() {
   let stored = readStoredSession();
   if (!stored?.access_token) return null;
@@ -81,7 +99,7 @@ async function supabaseRequest(path) {
   return payload;
 }
 function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"]/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[char]));
+  return String(value ?? "").replace(/[&<>\"]/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[char]));
 }
 function compactDate(value) {
   const date = new Date(value);
@@ -96,32 +114,25 @@ function showFounderLogin(message) {
     <img src="/public/images/pageant-icon.png" alt="" />
     <span>PAGEANTINDEX</span>
     <h1>Founder access only</h1>
-    <p>${escapeHtml(message)}</p>
-    <form id="founder-login-form" class="founder-login-form">
-      <input name="email" type="email" autocomplete="email" placeholder="Admin email" required />
-      <input name="password" type="password" autocomplete="current-password" placeholder="Password" required />
-      <label><input name="remember" type="checkbox" /> Keep me signed in</label>
-      <button class="primary-button" type="submit">Open Command Center</button>
-    </form>
+    <p id="founder-login-message">${escapeHtml(message)}</p>
+    <div class="founder-login-form">
+      <div class="founder-login-email">${escapeHtml(FOUNDER_EMAIL)}</div>
+      <button class="primary-button" id="founder-magic-link" type="button">Email secure sign-in link</button>
+      <small>No password is stored in this dashboard. The one-time link expires and founder access is still checked against the protected admin role.</small>
+    </div>
     <a class="quiet-link" href="/">Return to public site</a>`;
-  const form = document.getElementById("founder-login-form");
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const button = form.querySelector("button");
+
+  document.getElementById("founder-magic-link").addEventListener("click", async (event) => {
+    const button = event.currentTarget;
     button.disabled = true;
     try {
-      const data = Object.fromEntries(new FormData(form));
-      const signedIn = await authRequest("/auth/v1/token?grant_type=password", {
+      await authRequest(`/auth/v1/otp?redirect_to=${encodeURIComponent(FOUNDER_REDIRECT)}`, {
         method: "POST",
-        body: JSON.stringify({email: data.email, password: data.password}),
+        body: JSON.stringify({email: FOUNDER_EMAIL, create_user: false}),
       });
-      const user = await authRequest("/auth/v1/user", {method: "GET"}, signedIn.access_token);
-      if (user?.app_metadata?.role !== "admin") {
-        clearSession();
-        throw new Error("This account does not have founder dashboard access.");
-      }
-      saveSession({...signedIn, user}, data.remember === "on");
-      location.reload();
+      document.getElementById("founder-login-message").textContent = `Secure sign-in link sent to ${FOUNDER_EMAIL}. Open the newest PageantIndex email and tap the link.`;
+      button.textContent = "Link sent";
+      toast("Founder sign-in link sent.");
     } catch (error) {
       toast(error.message, "error");
       button.disabled = false;
@@ -141,7 +152,7 @@ async function loadStatus() {
   const gmailButton = document.getElementById("connect-gmail");
 
   gptMetric.textContent = status.openai.connected ? "Connected" : "Needs setup";
-  gptDetail.textContent = status.openai.connected ? status.openai.model : "Add server-side OpenAI credentials";
+  gptDetail.textContent = status.openai.connected ? status.openai.model : "AI Gateway or OpenAI connection required";
   gptPill.textContent = status.openai.connected ? "Connected" : "Not connected";
   gptPill.className = `connection-pill ${status.openai.connected ? "connected" : "error"}`;
   openaiLabel.textContent = status.openai.connected ? `Connected • ${status.openai.model}` : "Not connected";
@@ -279,9 +290,11 @@ function initNavigation() {
 }
 
 async function bootstrap() {
+  consumeAuthFragment();
   session = await validateSession();
   if (!session?.user || session.user.app_metadata?.role !== "admin") {
-    showFounderLogin(session?.user ? "This account does not have founder dashboard access." : "Sign in with your authorized PageantIndex admin account.");
+    if (session?.user) clearSession();
+    showFounderLogin(session?.user ? "This account does not have founder dashboard access." : "Use the private founder email to receive a one-time sign-in link.");
     return;
   }
 
