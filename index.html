@@ -3,29 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Pageant Index | The Global Network for Pageantry</title>
-    <meta
-      name="description"
-      content="Discover pageant candidates, photographers, videographers, coaches, HMUAs, designers, hotels, flights, travel providers, and verified suppliers worldwide."
-    />
-    <meta property="og:title" content="Pageant Index | The Global Network for Pageantry" />
-    <meta
-      property="og:description"
-      content="Connect with candidates, suppliers, pageant organizations, travel providers, hotels, and opportunities worldwide."
-    />
+    <title>PageantIndex | Global Professional Identity for Pageantry</title>
+    <meta name="description" content="PageantIndex is building the global professional identity and relationship infrastructure for pageantry, starting with public profiles, verified professional history, and a connected industry network." />
+    <meta property="og:title" content="PageantIndex | Global Professional Identity for Pageantry" />
+    <meta property="og:description" content="Create or claim a free PageantIndex profile and build a structured, shareable pageant-industry identity." />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Pageant Index" />
+    <meta property="og:site_name" content="PageantIndex" />
     <meta property="og:locale" content="en_US" />
-    <meta
-      property="og:image"
-      content="https://www.pageantindex.com/public/images/hero-backstage-v2.jpg"
-    />
+    <meta property="og:image" content="https://www.pageantindex.com/public/images/hero-backstage-v2.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="theme-color" content="#ff1478" />
+    <meta name="theme-color" content="#0e0c0e" />
     <link rel="canonical" href="https://www.pageantindex.com/" />
     <link rel="alternate" hreflang="en" href="https://www.pageantindex.com/" />
     <link rel="alternate" hreflang="x-default" href="https://www.pageantindex.com/" />
     <link rel="stylesheet" href="/public/style.css" />
+    <link rel="stylesheet" href="/public/launch-v2.css" />
     <link rel="icon" href="/public/images/pageant-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <script type="application/ld+json">
@@ -35,43 +27,29 @@
           {
             "@type": "Organization",
             "@id": "https://www.pageantindex.com/#organization",
-            "name": "Pageant Index",
+            "name": "PageantIndex",
             "slogan": "The Global Network for Pageantry",
             "url": "https://www.pageantindex.com/",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://www.pageantindex.com/public/images/pageant-icon.png",
-              "width": 512,
-              "height": 512
-            },
+            "logo": {"@type":"ImageObject","url":"https://www.pageantindex.com/public/images/pageant-icon.png","width":512,"height":512},
             "areaServed": "Worldwide"
           },
           {
             "@type": "WebSite",
             "@id": "https://www.pageantindex.com/#website",
             "url": "https://www.pageantindex.com/",
-            "name": "Pageant Index",
-            "publisher": {
-              "@id": "https://www.pageantindex.com/#organization"
-            },
+            "name": "PageantIndex",
+            "publisher": {"@id":"https://www.pageantindex.com/#organization"},
             "inLanguage": "en",
-            "potentialAction": {
-              "@type": "SearchAction",
-              "target": {
-                "@type": "EntryPoint",
-                "urlTemplate": "https://www.pageantindex.com/directory/?q={search_term_string}"
-              },
-              "query-input": "required name=search_term_string"
-            }
+            "potentialAction": {"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://www.pageantindex.com/directory/?q={search_term_string}"},"query-input":"required name=search_term_string"}
           }
         ]
       }
     </script>
   </head>
-  <body data-page="home">
+  <body data-page="home" class="pi-v2">
     <div id="app"></div>
     <script src="/public/seo.js" defer></script>
     <script src="/public/app.js" defer></script>
-    <script src="/public/private-package-gate.js" defer></script>
+    <script src="/public/launch-v2.js" defer></script>
   </body>
 </html>
