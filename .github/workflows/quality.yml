@@ -23,6 +23,8 @@ jobs:
       - name: Check PageantIndex browser JavaScript syntax
         run: |
           node --check public/launch-v2.js
+          node --check public/launch-v2-ready.js
+          node --check public/launch-signup-v2.js
           node --check public/claim-v2.js
           node --check public/dashboard-access-v2.js
           node --check platform/platform.js
