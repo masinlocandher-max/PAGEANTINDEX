@@ -1,0 +1,105 @@
+name: Launch visual QA
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Playwright for QA
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Serve static branch
+        run: |
+          python3 -m http.server 4173 > /tmp/pageantindex-server.log 2>&1 &
+          echo $! > /tmp/pageantindex-server.pid
+          sleep 2
+      - name: Render launch surfaces and interactions
+        run: |
+          cat > /tmp/pageantindex-launch-qa.cjs <<'EOF'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          const out = '/tmp/pageantindex-launch-qa';
+          fs.mkdirSync(out, { recursive: true });
+          const targets = [
+            {name:'home',url:'http://127.0.0.1:4173/',marker:'The professional index of pageantry.'},
+            {name:'directory',url:'http://127.0.0.1:4173/directory/',marker:'Search the global pageant industry.'},
+            {name:'signup',url:'http://127.0.0.1:4173/sign-up/',marker:'Create your PageantIndex profile'},
+            {name:'dashboard',url:'http://127.0.0.1:4173/dashboard/',marker:'Sign in to your profile dashboard'},
+            {name:'candidate',url:'http://127.0.0.1:4173/candidate/',marker:'Candidate / Titleholder Profile'},
+            {name:'organization',url:'http://127.0.0.1:4173/organization/',marker:'Pageant Organization Profile'},
+            {name:'claim',url:'http://127.0.0.1:4173/claim-profile/',marker:'Claim a PageantIndex profile.'},
+            {name:'profile-empty',url:'http://127.0.0.1:4173/profile/',marker:'Profile not specified'},
+          ];
+          const browser = await chromium.launch({headless:true});
+          const results = [];
+          async function run(viewport, suffix) {
+            const context = await browser.newContext({viewport});
+            for (const t of targets) {
+              const page = await context.newPage();
+              const errors = [];
+              page.on('pageerror', e => errors.push(`pageerror: ${e.message}`));
+              page.on('console', msg => { if (msg.type() === 'error') errors.push(`console: ${msg.text()}`); });
+              const response = await page.goto(t.url, {waitUntil:'domcontentloaded', timeout:30000});
+              await page.waitForTimeout(900);
+              const status = response?.status() || 0;
+              const text = await page.locator('body').innerText();
+              if (status !== 200) throw new Error(`${t.name} returned ${status}`);
+              if (!text.includes(t.marker)) throw new Error(`${t.name} missing marker: ${t.marker}`);
+              await page.screenshot({path:path.join(out,`${t.name}-${suffix}.png`),fullPage:true});
+              results.push({name:t.name,viewport:suffix,status,errors});
+              if (errors.length) throw new Error(`${t.name} ${suffix} browser errors: ${errors.join(' | ')}`);
+              await page.close();
+            }
+            await context.close();
+          }
+          await run({width:1440,height:1000},'desktop');
+          await run({width:390,height:844},'mobile');
+
+          const interactionContext = await browser.newContext({viewport:{width:390,height:844}});
+          const home = await interactionContext.newPage();
+          await home.goto('http://127.0.0.1:4173/', {waitUntil:'domcontentloaded'});
+          await home.locator('#pi-global-search input').fill('photographer');
+          await Promise.all([home.waitForURL(/directory\/\?q=photographer/), home.locator('#pi-global-search button').click()]);
+          results.push({interaction:'home search',url:home.url()});
+          await home.close();
+
+          const candidate = await interactionContext.newPage();
+          await candidate.goto('http://127.0.0.1:4173/candidate/', {waitUntil:'domcontentloaded'});
+          await candidate.locator('[data-tab="invitations"]').click();
+          if (!(await candidate.locator('body').innerText()).includes('Personal supplier invitations')) throw new Error('Candidate invitations interaction failed');
+          results.push({interaction:'candidate invitations',passed:true});
+          await candidate.close();
+
+          const organization = await interactionContext.newPage();
+          await organization.goto('http://127.0.0.1:4173/organization/', {waitUntil:'domcontentloaded'});
+          await organization.locator('[data-tab="invitations"]').click();
+          if (!(await organization.locator('body').innerText()).includes('Official supplier invitations')) throw new Error('Organization invitations interaction failed');
+          results.push({interaction:'organization invitations',passed:true});
+          await organization.close();
+          await interactionContext.close();
+          await browser.close();
+          fs.writeFileSync(path.join(out,'results.json'), JSON.stringify(results,null,2));
+          console.log(JSON.stringify(results,null,2));
+          EOF
+          node /tmp/pageantindex-launch-qa.cjs
+      - name: Upload QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pageantindex-launch-visual-qa
+          path: /tmp/pageantindex-launch-qa
+          if-no-files-found: error
