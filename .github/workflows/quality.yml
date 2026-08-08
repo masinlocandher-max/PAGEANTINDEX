@@ -24,6 +24,7 @@ jobs:
         run: |
           node --check platform/platform.js
           node --check public/experience.js
+          node --check public/organization-experience.js
           node --check app/organizer.js
       - name: Run repository checks
         run: npm test
