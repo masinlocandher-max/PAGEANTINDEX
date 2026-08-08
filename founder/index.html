@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#160912" />
   <link rel="icon" href="/public/images/pageant-icon.png" />
   <link rel="stylesheet" href="/public/founder.css" />
+  <link rel="stylesheet" href="/public/founder-auth.css" />
 </head>
 <body>
   <div class="founder-shell" id="founder-shell" hidden>
@@ -81,7 +82,7 @@
       <section class="connections" id="connections">
         <div class="section-heading"><span class="section-label">CONNECTIONS</span><h2>Your private system links</h2><p>Secrets stay server-side. This screen only shows whether each connection is ready.</p></div>
         <div class="connection-grid">
-          <article class="connection-card"><div class="connection-icon">AI</div><div><h3>OpenAI</h3><p>Private founder assistant through the OpenAI Responses API.</p><strong id="openai-connection-label">Checking connection…</strong></div></article>
+          <article class="connection-card"><div class="connection-icon">AI</div><div><h3>GPT</h3><p>Private founder assistant through Vercel AI Gateway, with OpenAI API fallback if needed.</p><strong id="openai-connection-label">Checking connection…</strong></div></article>
           <article class="connection-card"><div class="connection-icon">@</div><div><h3>Gmail</h3><p>Read-only founder inbox connection using Google OAuth.</p><strong id="gmail-connection-label">Checking connection…</strong></div></article>
         </div>
       </section>
@@ -94,8 +95,6 @@
       <span>PAGEANTINDEX</span>
       <h1>Founder access only</h1>
       <p id="lock-message">Checking your secure PageantIndex session…</p>
-      <a class="primary-button" href="/sign-in/">Sign in</a>
-      <a class="quiet-link" href="/sign-up/">Create an account first</a>
     </div>
   </main>
 
