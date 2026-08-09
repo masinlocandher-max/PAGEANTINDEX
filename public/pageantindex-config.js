@@ -74,7 +74,7 @@
     {label: "Pageants", href: "/pageant-calendar/"},
     {label: "Media", href: "/media/"},
     {label: "Announcements", href: "/announcements/"},
-    {label: "Experiences", href: "/experiences/"},
+    {label: "Experiences", href: "/experience/"},
   ];
 
   const appMenu = [
@@ -86,7 +86,7 @@
   ];
 
   window.PageantIndexConfig = Object.freeze({
-    brandName: "Pageant Index",
+    brandName: "PageantIndex",
     tagline: "The Global Network for Pageantry",
     accountTypes: Object.freeze([
       {value: "enthusiast", label: "Enthusiast"},
@@ -98,9 +98,9 @@
     audienceDescriptions: Object.freeze({
       enthusiast: "Follow pageants, save suppliers, and personalize the app. A public website account is not required to browse or use guest checkout.",
       candidate: "Find suppliers and keep a private record of current and previous pageants.",
-      supplier: "Present services, receive qualified inquiries, and manage a reviewed professional profile.",
-      media: "Build a media column, publish reviewed articles, and share stories to other platforms.",
-      organizer: "Manage an official pageant profile, editions, candidate rosters, announcements, results, voting, broadcasts, tickets, and approved partners.",
+      supplier: "Build a verified professional identity, connect pageant credits, present your portfolio, and respond to qualified opportunities.",
+      media: "Build a verified media identity, manage your column, submit reviewed stories, share stories to other platforms, and connect coverage to pageant records.",
+      organizer: "Own the official pageant profile and organization record, manage editions, candidates, staff permissions, official suppliers, invitations, and public experiences.",
     }),
     publicMenu: Object.freeze(publicMenu),
     appMenu: Object.freeze(appMenu),
