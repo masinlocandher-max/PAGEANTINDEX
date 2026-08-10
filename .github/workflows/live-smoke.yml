@@ -42,6 +42,8 @@ jobs:
           check "/judge/" "Judge Scoring | PageantIndex"
           check "/vote/" "People's Choice Voting | PageantIndex"
           check "/tickets/" "Official Pageant Tickets | PageantIndex"
+          check "/livestream/" "Official Pageant Livestream & PPV | PageantIndex"
+          check "/merchandise/" "Official Pageant Merchandise | PageantIndex"
           check "/supplier-workspace/" "Supplier Workspace | PageantIndex"
           check "/tabulation/" "Tabulation Control Room | PageantIndex"
           check "/event/" "Official Pageant Events | PageantIndex"
