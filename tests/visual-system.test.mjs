@@ -49,6 +49,13 @@ test("live competition and commerce routes preserve their production scripts", a
   }
 });
 
+test("the Trust Center keeps confirmation types distinct", async () => {
+  const html = await read("trust/index.html");
+  for (const label of ["Identity verified", "Organization confirmed", "Candidate confirmed", "Professional credit confirmed"]) {
+    assert.match(html, new RegExp(label, "i"));
+  }
+});
+
 test("founder console excludes routine support and exposes strategic sections", async () => {
   const html = await read("founder/index.html");
   assert.match(html, /Confirmed revenue/);
