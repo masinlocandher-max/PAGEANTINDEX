@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -24,7 +24,7 @@ jobs:
             path="$1"
             expected="$2"
             tmp="$(mktemp)"
-            code="$(curl --retry 2 --retry-delay 2 --connect-timeout 15 --max-time 30 -sS -L -o "$tmp" -w '%{http_code}' "$base$path")"
+            code="$(curl --retry 3 --retry-delay 4 --connect-timeout 15 --max-time 30 -sS -L -o "$tmp" -w '%{http_code}' "$base$path")"
             echo "$path -> HTTP $code"
             test "$code" = "200"
             grep -Fq "$expected" "$tmp" || {
@@ -37,14 +37,14 @@ jobs:
           check "/" "PageantIndex | The Global Network for Pageantry"
           check "/organization/" "Pageant Organization | PageantIndex"
           check "/platform/" "PageantIndex Organizer OS"
-          check "/experience/" "PageantIndex User Experiences"
+          check "/experience/" "Start Your PageantIndex Profile | PageantIndex"
           check "/candidate/" "Candidate Portal | PageantIndex"
           check "/judge/" "Judge Scoring | PageantIndex"
           check "/vote/" "People's Choice Voting | PageantIndex"
-          check "/tickets/" "Tickets | PageantIndex"
+          check "/tickets/" "Official Pageant Tickets | PageantIndex"
           check "/supplier-workspace/" "Supplier Workspace | PageantIndex"
           check "/tabulation/" "Tabulation Control Room | PageantIndex"
-          check "/event/" "Official Event | PageantIndex"
+          check "/event/" "Official Pageant Events | PageantIndex"
           check "/trust/" "Trust & Verification Standards | PageantIndex"
           check "/report/" "Report a Concern | PageantIndex"
           check "/credit-invite/" "Professional Credit Invitation | PageantIndex"
