@@ -8,7 +8,7 @@ const root=resolve(dirname(fileURLToPath(import.meta.url)),"..");
 const read=(path)=>readFile(join(root,path),"utf8");
 
 test("competition-critical routes no longer load the prototype experience bundle",async()=>{
-  for(const path of ["vote/index.html","tickets/index.html","judge/index.html","tabulation/index.html","event/index.html"]){
+  for(const path of ["vote/index.html","tickets/index.html","livestream/index.html","merchandise/index.html","judge/index.html","tabulation/index.html","event/index.html"]){
     const html=await read(path);
     assert.doesNotMatch(html,/public\/experience\.js/,`${path} still loads prototype experience.js`);
     assert.doesNotMatch(html,/Front-end .*journey|preview/i,`${path} still advertises a preview state`);
