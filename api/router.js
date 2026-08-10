@@ -13,6 +13,7 @@ import ordersStatus from "./orders/_status.js";
 import organizationsAcceptInvite from "./organizations/_acceptInvite.js";
 import organizationsActivateFeature from "./organizations/_activateFeature.js";
 import organizationsFounderCreate from "./organizations/_founderCreate.js";
+import organizationsFounderWorkspace from "./organizations/_founderWorkspace.js";
 import organizationsInspectInvite from "./organizations/_inspectInvite.js";
 import organizationsInviteAdmin from "./organizations/_inviteAdmin.js";
 import organizationsWorkspace from "./organizations/_workspace.js";
@@ -40,6 +41,7 @@ const ROUTES = Object.freeze({
   "organizations/accept-invite": organizationsAcceptInvite,
   "organizations/activate-feature": organizationsActivateFeature,
   "organizations/founder-create": organizationsFounderCreate,
+  "organizations/founder-workspace": organizationsFounderWorkspace,
   "organizations/inspect-invite": organizationsInspectInvite,
   "organizations/invite-admin": organizationsInviteAdmin,
   "organizations/workspace": organizationsWorkspace,
