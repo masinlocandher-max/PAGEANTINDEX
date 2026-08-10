@@ -151,14 +151,14 @@ async function loadStatus() {
   const gmailLabel = document.getElementById("gmail-connection-label");
   const gmailButton = document.getElementById("connect-gmail");
 
-  gptMetric.textContent = status.openai.connected ? "Connected" : "Needs setup";
-  gptDetail.textContent = status.openai.connected ? status.openai.model : "AI Gateway or OpenAI connection required";
+  if (gptMetric) gptMetric.textContent = status.openai.connected ? "Connected" : "Needs setup";
+  if (gptDetail) gptDetail.textContent = status.openai.connected ? status.openai.model : "AI Gateway or OpenAI connection required";
   gptPill.textContent = status.openai.connected ? "Connected" : "Not connected";
   gptPill.className = `connection-pill ${status.openai.connected ? "connected" : "error"}`;
   openaiLabel.textContent = status.openai.connected ? `Connected • ${status.openai.model}` : "Not connected";
 
-  emailMetric.textContent = status.gmail.connected ? "Connected" : "Not connected";
-  emailDetail.textContent = status.gmail.accountEmail || "Connect a Gmail account";
+  if (emailMetric) emailMetric.textContent = status.gmail.connected ? "Connected" : "Not connected";
+  if (emailDetail) emailDetail.textContent = status.gmail.accountEmail || "Connect a Gmail account";
   gmailLabel.textContent = status.gmail.connected ? `Connected • ${status.gmail.accountEmail}` : "Not connected";
   gmailButton.textContent = status.gmail.connected ? "Reconnect Gmail" : "Connect Gmail";
   if (status.gmail.connected) await loadInbox();
@@ -214,32 +214,39 @@ function commercialIntake(records) {
   const ignore = new Set(["newsletter", "report"]);
   return records.filter((record) => !ignore.has(String(record.submission_type || "").toLowerCase()));
 }
-function renderFounderQueue(opportunities, escalations) {
-  const list = document.getElementById("opportunity-list");
-  const escalationRows = escalations.map((record) => `
-    <article class="opportunity-row">
-      <span class="opportunity-type">${escapeHtml(`${record.escalation_type} · ${record.severity}`)}</span>
-      <div class="opportunity-contact">
-        <strong>${escapeHtml(record.title)}</strong>
-        <small>${escapeHtml(record.summary || "Founder decision or awareness required.")}</small>
-      </div>
-      <span class="opportunity-meta">${escapeHtml(record.status)}</span>
-      <time class="opportunity-date">${escapeHtml(compactDate(record.due_at || record.created_at))}</time>
-    </article>`);
-  const opportunityRows = opportunities.slice(0, 8).map((record) => `
-    <article class="opportunity-row">
-      <span class="opportunity-type">${escapeHtml(String(record.submission_type || "opportunity").replaceAll("_", " "))}</span>
-      <div class="opportunity-contact">
-        <strong>${escapeHtml(record.contact_name || "Unnamed contact")}</strong>
-        <small>${escapeHtml(record.contact_email || record.contact_mobile || "No contact shown")}</small>
-      </div>
-      <span class="opportunity-meta">${escapeHtml(record.status || "new")}</span>
-      <time class="opportunity-date">${escapeHtml(compactDate(record.created_at))}</time>
-    </article>`);
-  const rows = [...escalationRows, ...opportunityRows];
-  list.innerHTML = rows.length
-    ? rows.join("")
-    : `<div class="empty-state">No founder-level opportunities or escalations are waiting here.</div>`;
+function renderFounderStrategy(opportunities, escalations) {
+  const territoryTypes = new Set(["territory", "franchise", "operator", "country_operator", "territory_operator"]);
+  const territories = opportunities.filter((record) => territoryTypes.has(String(record.submission_type || "").toLowerCase()));
+  const strategic = opportunities.filter((record) => !territoryTypes.has(String(record.submission_type || "").toLowerCase()));
+  const strategicList = document.getElementById("strategic-pipeline-list");
+  const territoryList = document.getElementById("territory-pipeline-list");
+  const escalationList = document.getElementById("critical-escalation-list");
+
+  strategicList.innerHTML = strategic.length ? strategic.slice(0, 12).map((record) => `
+    <article class="strategy-table-row five">
+      <span><strong>${escapeHtml(record.contact_name || "Unnamed contact")}</strong><small>${escapeHtml(record.contact_email || record.contact_mobile || "No contact published")}</small></span>
+      <span>Not provided</span>
+      <span>${escapeHtml(String(record.submission_type || "opportunity").replaceAll("_", " "))}</span>
+      <span>${escapeHtml(record.status || "new")}</span>
+      <span>Not recorded</span>
+    </article>`).join("") : `<div class="strategy-empty">No founder-level commercial opportunities are waiting.</div>`;
+
+  territoryList.innerHTML = territories.length ? territories.slice(0, 12).map((record) => `
+    <article class="strategy-table-row">
+      <span>Not provided</span>
+      <span><strong>${escapeHtml(record.contact_name || "Unnamed operator")}</strong><small>${escapeHtml(record.contact_email || record.contact_mobile || "No contact published")}</small></span>
+      <span>${escapeHtml(record.status || "new")}</span>
+      <span>Not recorded</span>
+    </article>`).join("") : `<div class="strategy-empty">No territory or franchise opportunities are waiting.</div>`;
+
+  escalationList.innerHTML = escalations.length ? escalations.slice(0, 12).map((record) => `
+    <article class="strategy-table-row five">
+      <span>${escapeHtml(String(record.escalation_type || "exception").replaceAll("_", " "))}</span>
+      <span class="severity-${escapeHtml(record.severity || "unspecified")}">${escapeHtml(record.severity || "Not specified")}</span>
+      <span><strong>${escapeHtml(record.title || "Untitled escalation")}</strong><small>${escapeHtml(record.summary || "Founder decision or awareness required.")}</small></span>
+      <span>${escapeHtml(record.status || "open")}</span>
+      <time>${escapeHtml(compactDate(record.due_at || record.created_at))}</time>
+    </article>`).join("") : `<div class="strategy-empty">No critical founder-level escalations are open.</div>`;
 }
 async function loadOperations() {
   try {
@@ -249,13 +256,12 @@ async function loadOperations() {
     ]);
     const opportunities = commercialIntake(intake || []);
     const founderEscalations = escalations || [];
-    document.getElementById("metric-opportunities").textContent = String(opportunities.length);
-    document.getElementById("metric-reviews").textContent = String(founderEscalations.length);
-    renderFounderQueue(opportunities, founderEscalations);
+    renderFounderStrategy(opportunities, founderEscalations);
   } catch (error) {
-    document.getElementById("metric-opportunities").textContent = "—";
-    document.getElementById("metric-reviews").textContent = "—";
-    document.getElementById("opportunity-list").innerHTML = `<div class="empty-state">Founder queue unavailable: ${escapeHtml(error.message)}</div>`;
+    for (const id of ["strategic-pipeline-list", "territory-pipeline-list", "critical-escalation-list"]) {
+      const node = document.getElementById(id);
+      if (node) node.innerHTML = `<div class="strategy-empty">Strategic data unavailable: ${escapeHtml(error.message)}</div>`;
+    }
   }
 }
 

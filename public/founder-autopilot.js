@@ -36,9 +36,18 @@
   };
 
   function formatMoney(minor, currency = "PHP") {
-    const amount = Number(minor || 0) / 100;
+    const amount = Number(minor) / 100;
     try { return new Intl.NumberFormat("en-PH", {style: "currency", currency, maximumFractionDigits: 0}).format(amount); }
     catch { return `${currency} ${amount.toLocaleString("en-PH")}`; }
+  }
+
+  function firstDefined(source, keys) {
+    for (const key of keys) if (source?.[key] !== undefined && source?.[key] !== null) return source[key];
+    return undefined;
+  }
+
+  function setMoney(id, value, currency, detail) {
+    set(id, value === undefined ? "—" : formatMoney(value, currency), value === undefined ? "Not exposed by the current scorecard" : detail);
   }
 
   async function load() {
@@ -51,14 +60,32 @@
     ]);
     const system = systemRows?.[0] || {};
     const revenue = revenueRows || [];
-    const primaryRevenue = revenue.find((row) => row.currency === "PHP") || revenue[0] || {currency: "PHP", revenue_30d_minor: 0};
-    set("metric-active-accounts", String(system.active_subscriptions ?? 0), "Active paying subscriptions");
-    set("metric-revenue", formatMoney(primaryRevenue.revenue_30d_minor, primaryRevenue.currency), "Confirmed revenue, last 30 days");
-    set("metric-renewals", String(system.renewals_at_risk ?? 0), "Past due, grace, or due within 14 days", Number(system.renewals_at_risk || 0) > 0);
-    set("metric-voting", String(system.open_voting_events ?? 0), "Voting events currently open");
-    set("metric-tabulation", String(system.live_tabulation_events ?? 0), "Tabulation events currently live");
-    set("metric-support-risk", String(system.high_support_cases ?? 0), "High or critical routine cases", Number(system.high_support_cases || 0) > 0);
-    set("metric-platform-health", health?.status === "ok" ? "Healthy" : "Check", health?.status === "ok" ? "Production health endpoint responding" : "Health endpoint needs attention", health?.status !== "ok");
+    const primaryRevenue = revenue.find((row) => row.currency === "PHP") || revenue[0];
+    const currency = primaryRevenue?.currency || "PHP";
+    const confirmedRevenue = firstDefined(primaryRevenue, ["revenue_30d_minor", "confirmed_revenue_30d_minor", "confirmed_transactions_30d_minor"]);
+    const recurringRevenue = firstDefined(primaryRevenue, ["recurring_revenue_minor", "subscription_revenue_30d_minor", "mrr_minor"]);
+    const votingRevenue = firstDefined(primaryRevenue, ["voting_revenue_30d_minor", "voting_revenue_minor"]);
+    let ticketRevenue = firstDefined(primaryRevenue, ["ticket_ppv_revenue_30d_minor", "ticket_revenue_30d_minor"]);
+    const ppvRevenue = firstDefined(primaryRevenue, ["ppv_revenue_30d_minor", "livestream_revenue_30d_minor"]);
+    if (ticketRevenue !== undefined && ppvRevenue !== undefined && primaryRevenue?.ticket_ppv_revenue_30d_minor === undefined) ticketRevenue = Number(ticketRevenue) + Number(ppvRevenue);
+    else if (ticketRevenue === undefined) ticketRevenue = ppvRevenue;
+
+    const activeAccounts = firstDefined(system, ["active_subscriptions", "active_paid_accounts"]);
+    const activeEvents = firstDefined(system, ["active_events", "events_active", "unique_active_events"]);
+    const renewals = firstDefined(system, ["renewals_at_risk"]);
+    const healthLabel = health?.status === "ok" ? "Healthy" : "Check";
+    const healthDetail = health?.status === "ok" ? "Production health endpoint responding" : "Health endpoint needs attention";
+
+    set("metric-paid-accounts", activeAccounts === undefined ? "—" : String(activeAccounts), activeAccounts === undefined ? "Not exposed by the current scorecard" : "Active paying subscriptions");
+    set("metric-events-active", activeEvents === undefined ? "—" : String(activeEvents), activeEvents === undefined ? "Unique active event count not exposed" : "Unique active events");
+    set("metric-renewals", renewals === undefined ? "—" : String(renewals), renewals === undefined ? "Not exposed by the current scorecard" : "Past due, grace, or due within 14 days", Number(renewals || 0) > 0);
+    set("metric-platform-health-top", healthLabel, healthDetail, health?.status !== "ok");
+    set("metric-confirmed-revenue", confirmedRevenue === undefined ? "—" : formatMoney(confirmedRevenue, currency), confirmedRevenue === undefined ? "Not exposed by the current scorecard" : "Confirmed revenue, last 30 days");
+    set("metric-recurring-revenue", recurringRevenue === undefined ? "—" : formatMoney(recurringRevenue, currency), recurringRevenue === undefined ? "Not exposed by the current scorecard" : "Recorded recurring revenue");
+    setMoney("metric-revenue", confirmedRevenue, currency, "Confirmed revenue, last 30 days");
+    setMoney("metric-subscription-revenue", recurringRevenue, currency, "Recorded subscription revenue");
+    setMoney("metric-voting-revenue", votingRevenue, currency, "Recorded voting revenue");
+    setMoney("metric-ticket-revenue", ticketRevenue, currency, "Recorded ticket and PPV revenue");
     return true;
   }
 

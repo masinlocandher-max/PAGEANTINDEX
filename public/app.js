@@ -691,10 +691,46 @@ function render() {
   let content = "";
   switch (page) {
     case "home":
-      content = homePage();
+      content = PageantIndexGlobal.home();
       break;
     case "directory":
-      content = directoryPage();
+      content = PageantIndexGlobal.directory();
+      break;
+    case "candidates":
+      content = PageantIndexGlobal.candidates();
+      break;
+    case "candidate":
+      content = PageantIndexGlobal.candidateProfile();
+      break;
+    case "organizations":
+      content = PageantIndexGlobal.organizations();
+      break;
+    case "organization":
+      content = PageantIndexGlobal.organizationProfile();
+      break;
+    case "events":
+      content = PageantIndexGlobal.events();
+      break;
+    case "edition":
+      content = PageantIndexGlobal.edition();
+      break;
+    case "voting":
+    case "tickets":
+    case "livestream":
+    case "merchandise":
+      content = PageantIndexGlobal.commerce(page);
+      break;
+    case "judge":
+      content = PageantIndexGlobal.judge();
+      break;
+    case "tabulation":
+      content = PageantIndexGlobal.tabulation();
+      break;
+    case "trust":
+      content = PageantIndexGlobal.trust();
+      break;
+    case "report":
+      content = PageantIndexGlobal.report();
       break;
     case "categories":
       content = categoriesPage();
@@ -730,13 +766,13 @@ function render() {
       content = aboutPage();
       break;
     case "signin":
-      content = signInPage();
+      content = PageantIndexGlobal.account("signin");
       break;
     case "signup":
-      content = signInPage();
+      content = PageantIndexGlobal.account("signup");
       break;
     case "profile":
-      content = databaseProfilePage();
+      content = PageantIndexGlobal.professionalProfile();
       break;
     case "claim":
       content = claimPage();
@@ -755,16 +791,17 @@ function render() {
       init();
       return;
     default:
-      content = homePage();
+      content = PageantIndexGlobal.home();
   }
-  if (page === "signin" || page === "signup") {
+  if (["signin", "signup", "judge", "tabulation"].includes(page)) {
     document.getElementById("app").innerHTML =
-      announcementBar() + content + modalHtml() + toastHtml();
-    initSignIn();
+      content + modalHtml() + toastHtml();
+    if (page === "signin" || page === "signup") initSignIn();
+    PageantIndexGlobal.init();
     return;
   }
   document.getElementById("app").innerHTML =
-    announcementBar() + header() + content + footer() + modalHtml() + toastHtml();
+    PageantIndexGlobal.header() + content + PageantIndexGlobal.footer() + modalHtml() + toastHtml();
   init();
 }
 
@@ -1003,6 +1040,7 @@ function init() {
   if (page === "calendar") initCalendar();
   if (page === "admin") initAdmin();
   if (page === "dashboard") initDashboard();
+  PageantIndexGlobal.init();
 }
 function initDirectory() {
   const q = new URLSearchParams(window.__APP_SEARCH ?? location.search);
@@ -1183,7 +1221,7 @@ function initSignIn() {
         body:JSON.stringify({
           email:data.email,
           password:data.password,
-          data:{full_name:data.name,business_name:data.business,category:data.category},
+          data:{full_name:data.name,business_name:data.business,category:data.category,account_role:data.role || "professional"},
         }),
       });
       if (response?.access_token) saveSession(response, false);
@@ -1604,4 +1642,17 @@ async function bootstrap() {
   }
   render();
 }
-bootstrap();
+function loadGlobalExperience() {
+  const style = document.createElement("link");
+  style.rel = "stylesheet";
+  style.href = "/public/global-system.css?v=20260810";
+  document.head.appendChild(style);
+  const script = document.createElement("script");
+  script.src = "/public/global-pages.js?v=20260810";
+  script.onload = bootstrap;
+  script.onerror = () => {
+    document.getElementById("app").innerHTML = '<main class="admin-auth-shell"><section class="admin-auth-card"><h1>PageantIndex</h1><p>The global interface could not be loaded. Please refresh this page.</p></section></main>';
+  };
+  document.head.appendChild(script);
+}
+loadGlobalExperience();

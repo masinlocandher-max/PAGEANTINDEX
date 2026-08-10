@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/public/founder.css" />
   <link rel="stylesheet" href="/public/founder-auth.css" />
   <link rel="stylesheet" href="/public/founder-autopilot.css?v=20260810" />
+  <link rel="stylesheet" href="/public/founder-strategy.css?v=20260810" />
 </head>
 <body>
   <div class="founder-shell" id="founder-shell" hidden>
@@ -21,9 +22,13 @@
       </a>
       <nav class="founder-nav" aria-label="Founder navigation">
         <button class="active" data-scroll="overview">Overview</button>
+        <button data-scroll="revenue">Revenue</button>
+        <button data-scroll="renewals">Renewals</button>
+        <button data-scroll="pipeline">Strategic pipeline</button>
+        <button data-scroll="territories">Territories</button>
+        <button data-scroll="escalations">Escalations</button>
         <button data-scroll="inbox">Inbox</button>
         <button data-scroll="assistant">GPT Assistant</button>
-        <button data-scroll="opportunities">Opportunities</button>
         <button data-scroll="connections">Connections</button>
       </nav>
       <div class="founder-rule">
@@ -36,9 +41,9 @@
     <main class="founder-main">
       <header class="founder-topbar">
         <div>
-          <p class="eyeline">PRIVATE FOUNDER WORKSPACE</p>
-          <h1>Command Center</h1>
-          <p>Meetings, money, major opportunities, and true exceptions. Everything else stays out of your way.</p>
+          <p class="eyeline">PRIVATE EXECUTIVE CONSOLE</p>
+          <h1>Founder Command Center</h1>
+          <p>PageantIndex health, confirmed revenue, strategic relationships, territory opportunities, and true founder-level exceptions.</p>
         </div>
         <div class="founder-identity">
           <span class="live-dot"></span>
@@ -46,21 +51,42 @@
         </div>
       </header>
 
-      <section class="status-strip" id="overview" aria-label="Private connection status">
-        <article><span>GPT</span><strong id="metric-gpt">Checking…</strong><small id="metric-gpt-detail">Private assistant connection</small></article>
-        <article><span>Email</span><strong id="metric-email">Checking…</strong><small id="metric-email-detail">Gmail read-only connection</small></article>
-        <article><span>Opportunities</span><strong id="metric-opportunities">—</strong><small>Recent commercial or partnership intake</small></article>
-        <article><span>Escalations</span><strong id="metric-reviews">—</strong><small>Only founder-level exceptions</small></article>
+      <section class="status-strip executive-strip" id="overview" aria-label="PageantIndex executive status">
+        <article><span>PageantIndex health</span><strong id="metric-platform-health-top">Checking…</strong><small>Production application health</small></article>
+        <article><span>Confirmed revenue</span><strong id="metric-confirmed-revenue">—</strong><small>Recorded revenue, last 30 days</small></article>
+        <article><span>Recurring revenue</span><strong id="metric-recurring-revenue">—</strong><small>Only shown when exposed by the scorecard</small></article>
+        <article><span>Active paid accounts</span><strong id="metric-paid-accounts">—</strong><small>Active paying subscriptions</small></article>
+        <article><span>Events active</span><strong id="metric-events-active">—</strong><small>Unique active events, when available</small></article>
       </section>
 
-      <section class="autopilot-strip" aria-label="Owner-light operating scorecard">
-        <article><span>Paying accounts</span><strong id="metric-active-accounts">—</strong><small>Active paying subscriptions</small></article>
-        <article><span>Revenue 30d</span><strong id="metric-revenue">—</strong><small>Confirmed platform revenue</small></article>
-        <article><span>Renewals at risk</span><strong id="metric-renewals">—</strong><small>Past due, grace, or due soon</small></article>
-        <article><span>Voting live</span><strong id="metric-voting">—</strong><small>Open voting events</small></article>
-        <article><span>Tabulation live</span><strong id="metric-tabulation">—</strong><small>Live scoring events</small></article>
-        <article><span>Support risk</span><strong id="metric-support-risk">—</strong><small>High or critical routine cases</small></article>
-        <article><span>System</span><strong id="metric-platform-health">Checking…</strong><small>Production application health</small></article>
+      <section class="strategy-section" id="revenue">
+        <header><div><span class="section-label">REVENUE</span><h2>Confirmed commercial performance</h2></div><p>Recorded transactions only. No projections or invented forecasts.</p></header>
+        <div class="strategy-ledger revenue-ledger">
+          <div><span>Confirmed revenue</span><strong id="metric-revenue">—</strong><small>Last 30 days</small></div>
+          <div><span>Subscription revenue</span><strong id="metric-subscription-revenue">—</strong><small>When separately exposed</small></div>
+          <div><span>Voting revenue</span><strong id="metric-voting-revenue">—</strong><small>When separately exposed</small></div>
+          <div><span>Ticket / PPV revenue</span><strong id="metric-ticket-revenue">—</strong><small>When separately exposed</small></div>
+        </div>
+      </section>
+
+      <section class="strategy-section" id="renewals">
+        <header><div><span class="section-label">RENEWALS AT RISK</span><h2>Accounts requiring founder awareness</h2></div><div class="strategy-count"><strong id="metric-renewals">—</strong><span>aggregate risk</span></div></header>
+        <div class="strategy-table" role="region" aria-label="Renewals at risk" tabindex="0"><div class="strategy-table-head"><b>Account</b><b>Value</b><b>Renewal date</b><b>Risk reason</b></div><div id="renewal-list" class="strategy-empty">Account-level renewal detail is not exposed by the current scorecard.</div></div>
+      </section>
+
+      <section class="strategy-section" id="pipeline">
+        <header><div><span class="section-label">STRATEGIC PIPELINE</span><h2>Major organization and partnership opportunities</h2></div><p>Only commercial intake that may require founder authority or relationship capital.</p></header>
+        <div class="strategy-table" role="region" aria-label="Strategic pipeline" tabindex="0"><div class="strategy-table-head five"><b>Organization / Contact</b><b>Country</b><b>Opportunity</b><b>Stage</b><b>Next action</b></div><div id="strategic-pipeline-list" class="strategy-empty">Loading approved commercial intake…</div></div>
+      </section>
+
+      <section class="strategy-section" id="territories">
+        <header><div><span class="section-label">TERRITORY / FRANCHISE PIPELINE</span><h2>Potential country and operator relationships</h2></div><p>Projected commercial models remain blank until formally recorded.</p></header>
+        <div class="strategy-table" role="region" aria-label="Territory and franchise pipeline" tabindex="0"><div class="strategy-table-head"><b>Country</b><b>Potential operator</b><b>Status</b><b>Commercial model</b></div><div id="territory-pipeline-list" class="strategy-empty">Loading approved territory intake…</div></div>
+      </section>
+
+      <section class="strategy-section critical-section" id="escalations">
+        <header><div><span class="section-label">CRITICAL ESCALATIONS</span><h2>Legal, reputation, security, enterprise, and trust</h2></div><p>Routine support never appears in this queue.</p></header>
+        <div class="strategy-table" role="region" aria-label="Critical escalations" tabindex="0"><div class="strategy-table-head five"><b>Type</b><b>Severity</b><b>Issue</b><b>Status</b><b>Due</b></div><div id="critical-escalation-list" class="strategy-empty">Loading founder-level escalations…</div></div>
       </section>
 
       <section class="founder-grid">
@@ -84,11 +110,6 @@
           </form>
           <small class="privacy-note">Inbox context is sent to GPT only when you enable the switch above. The assistant can draft and recommend, but it cannot send mail or approve transactions.</small>
         </article>
-      </section>
-
-      <section class="panel opportunities-panel" id="opportunities">
-        <div class="panel-head"><div><span class="section-label">FOUNDER QUEUE</span><h2>Recent opportunities and escalations</h2></div><a class="quiet-link" href="/admin/">See full operations</a></div>
-        <div class="opportunity-list" id="opportunity-list"><div class="empty-state">Loading recent opportunities…</div></div>
       </section>
 
       <section class="connections" id="connections">
