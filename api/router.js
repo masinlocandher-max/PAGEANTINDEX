@@ -10,6 +10,12 @@ import judgesScore from "./judges/_score.js";
 import judgesWorkspace from "./judges/_workspace.js";
 import ordersRead from "./orders/_read.js";
 import ordersStatus from "./orders/_status.js";
+import organizationsAcceptInvite from "./organizations/_acceptInvite.js";
+import organizationsActivateFeature from "./organizations/_activateFeature.js";
+import organizationsFounderCreate from "./organizations/_founderCreate.js";
+import organizationsInspectInvite from "./organizations/_inspectInvite.js";
+import organizationsInviteAdmin from "./organizations/_inviteAdmin.js";
+import organizationsWorkspace from "./organizations/_workspace.js";
 import tabulationConfigure from "./tabulation/_configure.js";
 import tabulationFinalize from "./tabulation/_finalize.js";
 import tabulationWorkspace from "./tabulation/_workspace.js";
@@ -31,6 +37,12 @@ const ROUTES = Object.freeze({
   "judges/workspace": judgesWorkspace,
   "orders/read": ordersRead,
   "orders/status": ordersStatus,
+  "organizations/accept-invite": organizationsAcceptInvite,
+  "organizations/activate-feature": organizationsActivateFeature,
+  "organizations/founder-create": organizationsFounderCreate,
+  "organizations/inspect-invite": organizationsInspectInvite,
+  "organizations/invite-admin": organizationsInviteAdmin,
+  "organizations/workspace": organizationsWorkspace,
   "tabulation/configure": tabulationConfigure,
   "tabulation/finalize": tabulationFinalize,
   "tabulation/workspace": tabulationWorkspace,
