@@ -1,6 +1,6 @@
 import {cleanText, isHttpsUrl, sendJson, serviceRequest} from "../_lib/server.js";
 
-const REPORT_TYPES = new Set(["impersonation","copyright","harassment","fraud","safety","privacy","minor_safety","other"]);
+const REPORT_TYPES = new Set(["impersonation","copyright","harassment","fraud","safety","privacy","privacy_rights","minor_safety","other"]);
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return sendJson(res, 405, {error: "Method not allowed."});
