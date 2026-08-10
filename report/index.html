@@ -4,48 +4,47 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Report a Concern | PageantIndex</title>
-  <meta name="description" content="Report impersonation, copyright, harassment, fraud, privacy, or safety concerns to PageantIndex and receive an operational case reference." />
+  <meta name="description" content="Report impersonation, copyright, harassment, fraud, privacy, safety, or exercise a privacy right through the PageantIndex Trust Desk." />
   <meta name="robots" content="index,follow" />
   <link rel="canonical" href="https://www.pageantindex.com/report/" />
   <link rel="icon" href="/public/images/pageant-icon.png" />
-  <link rel="stylesheet" href="/public/pageantindex-trust.css?v=20260810" />
-  <link rel="stylesheet" href="/public/operational-system.css?v=20260810" />
+  <link rel="stylesheet" href="/public/pageantindex-trust.css?v=20260811" />
+  <link rel="stylesheet" href="/public/operational-system.css?v=20260811" />
 </head>
 <body data-pi-surface="report">
 <header class="pi-context-header"><div class="pi-context-inner"><a class="pi-context-brand" href="/" aria-label="PageantIndex home"><span>Pageant<span>Index</span></span><small>The Global Network for Pageantry</small></a><nav aria-label="Primary navigation"><a href="/directory/">Explore</a><a href="/candidates/">Candidates</a><a href="/organizations/">Organizations</a><a href="/event/">Events</a></nav><div><a href="/sign-in/">Sign in</a><a class="pi-context-cta" href="/sign-up/">Create profile</a></div></div></header>
 <main class="pi-policy-shell">
   <section class="pi-policy-hero"><div class="pi-policy-inner">
-    
     <p class="pi-policy-kicker" style="margin-top:48px">Trust desk</p>
-    <h1>Report a concern.</h1>
-    <p>Use this form for impersonation, copyright, harassment, fraud, privacy, safety, or other integrity concerns. Do not include passwords, government ID numbers, payment-card data, or unnecessary sensitive information.</p>
+    <h1>Report a concern or exercise a privacy right.</h1>
+    <p>Use this form for impersonation, copyright, harassment, fraud, privacy, privacy-rights requests, safety, or other integrity concerns. Do not include passwords, full government ID numbers, payment-card data, or unnecessary sensitive information.</p>
   </div></section>
   <section class="pi-policy-body"><div class="pi-policy-inner pi-policy-grid two">
     <article class="pi-policy-card">
-      <h2>Submit a report</h2>
+      <h2>Submit a report or request</h2>
       <form id="pi-trust-report" class="pi-report-form">
-        <label>Type of concern<select name="reportType" required><option value="">Choose one</option><option value="impersonation">Impersonation</option><option value="copyright">Copyright or content ownership</option><option value="harassment">Harassment</option><option value="fraud">Fraud or deceptive activity</option><option value="safety">Safety</option><option value="privacy">Privacy</option><option value="minor_safety">Minor safety</option><option value="other">Other integrity concern</option></select></label>
-        <label>What does this concern relate to?<input name="subjectType" maxlength="80" placeholder="Profile, organization, pageant, image, article, transaction…" /></label>
+        <label>Type of concern or request<select name="reportType" required><option value="">Choose one</option><option value="impersonation">Impersonation</option><option value="copyright">Copyright or content ownership</option><option value="harassment">Harassment</option><option value="fraud">Fraud or deceptive activity</option><option value="safety">Safety</option><option value="privacy">Privacy incident or concern</option><option value="privacy_rights">Privacy rights request</option><option value="minor_safety">Minor safety</option><option value="other">Other integrity concern</option></select></label>
+        <label>What does this concern relate to?<input name="subjectType" maxlength="80" placeholder="Profile, account, organization, pageant, image, article, transaction…" /></label>
         <label>Your email, if you want a follow-up<input name="contactEmail" type="email" maxlength="320" autocomplete="email" /></label>
-        <label>What happened?<textarea name="summary" minlength="10" maxlength="6000" required placeholder="Give enough factual detail for the review team to understand and investigate the concern."></textarea></label>
+        <label>What happened, or what right do you want to exercise?<textarea name="summary" minlength="10" maxlength="6000" required placeholder="For a privacy-rights request, tell us whether you want access, correction, deletion or blocking, portability, objection, restriction, or another applicable right. Do not include passwords or full ID numbers."></textarea></label>
         <label>Evidence links, up to 5<textarea name="evidenceUrls" maxlength="5000" placeholder="One HTTPS link per line. Do not upload private identity documents here."></textarea></label>
         <label style="position:absolute;left:-9999px" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
-        <button type="submit">Submit report</button>
+        <button type="submit">Submit securely</button>
       </form>
       <div id="pi-report-status" class="pi-report-status" hidden role="status" aria-live="polite"></div>
     </article>
     <article class="pi-policy-card">
       <h2>What happens next</h2>
-      <p>Accepted reports receive a PageantIndex case reference. The trust desk triages the report, may request additional evidence, and records the resolution internally.</p>
+      <p>Accepted reports and requests receive a PageantIndex case reference. The trust desk triages the submission, may request reasonable information to verify identity or authority, and records the resolution internally.</p>
+      <h3>Privacy rights</h3><p>Choose <strong>Privacy rights request</strong> for access, correction, deletion or blocking, portability, objection, restriction, or another data-subject request. PageantIndex may need to verify that the request concerns your own information before acting.</p>
       <h3>Urgent safety</h3><p>If someone is in immediate physical danger, contact the appropriate local emergency authority. This PageantIndex form is an operational reporting channel, not an emergency service.</p>
       <h3>Copyright</h3><p>Identify the work, where it appears on PageantIndex, your relationship to the work, and a source that helps establish ownership or authorization.</p>
       <h3>Impersonation</h3><p>Identify the profile or account, the person or organization being impersonated, and evidence that helps establish the authentic identity or authorized representative.</p>
-      <p><a href="/trust/">Read the PageantIndex trust and verification standards</a>.</p>
+      <p><a href="/privacy/">Read the Member Privacy Policy</a> or <a href="/trust/">PageantIndex trust and verification standards</a>.</p>
     </article>
   </div></section>
 </main>
 <script src="/public/pageantindex-report.js" defer></script>
-<footer class="pi-context-footer"><div class="pi-context-inner"><div><strong>Pageant<span>Index</span></strong><p>The Global Network for Pageantry</p></div><nav><a href="/trust/">Trust</a><a href="/report/">Report concern</a><a href="/about/">Terms & privacy</a></nav></div></footer>
+<footer class="pi-context-footer"><div class="pi-context-inner"><div><strong>Pageant<span>Index</span></strong><p>The Global Network for Pageantry</p></div><nav><a href="/trust/">Trust</a><a href="/privacy/">Privacy</a><a href="/report/">Privacy & safety requests</a></nav></div></footer>
 </body>
 </html>
-
