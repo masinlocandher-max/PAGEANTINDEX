@@ -5,6 +5,22 @@
   const SUPABASE_KEY = "sb_publishable_qsC-udp3YoJQFuE-lHPivg_wa8gYMeg";
   const SESSION_KEY = "pi_supabase_session";
 
+  function loadAutopilotModules() {
+    if (!document.querySelector('link[href^="/public/pageantindex-trust.css"]')) {
+      const style = document.createElement("link");
+      style.rel = "stylesheet";
+      style.href = "/public/pageantindex-trust.css?v=20260810";
+      document.head.appendChild(style);
+    }
+    for (const src of ["/public/pageantindex-analytics.js?v=20260810", "/public/pageantindex-trust-links.js?v=20260810"]) {
+      if (document.querySelector(`script[src="${src}"]`)) continue;
+      const script = document.createElement("script");
+      script.src = src;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  }
+
   function readSession() {
     for (const storage of [sessionStorage, localStorage]) {
       try {
@@ -26,10 +42,7 @@
       if (session?.access_token) {
         await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
           method: "POST",
-          headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${session.access_token}`,
-          },
+          headers: {apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}`},
         });
       }
     } finally {
@@ -51,24 +64,16 @@
   function enhanceWebsiteNavigation() {
     const session = readSession();
     if (!session) return;
-
     const actions = document.querySelector(".nav-actions");
     if (actions && !actions.querySelector("[data-pi-sign-out]")) {
       const accountLink = actions.querySelector('a[href="/sign-in/"]');
-      if (accountLink) {
-        accountLink.href = "/dashboard/";
-        accountLink.textContent = "Account";
-      }
+      if (accountLink) { accountLink.href = "/dashboard/"; accountLink.textContent = "Account"; }
       actions.appendChild(button("btn btn-secondary"));
     }
-
     const mobile = document.querySelector(".mobile-nav");
     if (mobile && !mobile.querySelector("[data-pi-sign-out]")) {
       const signIn = mobile.querySelector('a[href="/sign-in/"]');
-      if (signIn) {
-        signIn.href = "/dashboard/";
-        signIn.textContent = "Account";
-      }
+      if (signIn) { signIn.href = "/dashboard/"; signIn.textContent = "Account"; }
       mobile.appendChild(button("mobile-nav-signout"));
     }
   }
@@ -91,12 +96,11 @@
       const control = button();
       control.innerHTML = "Sign out<b>›</b>";
       list.appendChild(control);
-    } else {
-      account.appendChild(button("primary"));
-    }
+    } else account.appendChild(button("primary"));
   }
 
   function enhance() {
+    loadAutopilotModules();
     enhanceWebsiteNavigation();
     enhanceWorkspace();
     enhanceAppAccount();
@@ -108,20 +112,14 @@
     event.preventDefault();
     control.disabled = true;
     control.textContent = "Signing out…";
-    signOut().catch(() => {
-      clearSession();
-      location.href = "/sign-in/";
-    });
+    signOut().catch(() => { clearSession(); location.href = "/sign-in/"; });
   });
 
   let queued = false;
   const queue = () => {
     if (queued) return;
     queued = true;
-    queueMicrotask(() => {
-      queued = false;
-      enhance();
-    });
+    queueMicrotask(() => { queued = false; enhance(); });
   };
 
   new MutationObserver(queue).observe(document.documentElement, {childList: true, subtree: true});

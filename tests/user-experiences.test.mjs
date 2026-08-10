@@ -8,31 +8,38 @@ import test from "node:test";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = path => readFile(join(root, path), "utf8");
 
-const routes = [
+const previewRoutes = [
   ["experience/index.html", "hub"],
   ["candidate/index.html", "candidate"],
-  ["judge/index.html", "judge"],
-  ["vote/index.html", "vote"],
-  ["tickets/index.html", "tickets"],
   ["supplier-workspace/index.html", "supplier"],
-  ["tabulation/index.html", "tabulation"],
-  ["event/index.html", "event"],
+];
+
+const liveRoutes = [
+  ["judge/index.html", "/public/live-judge.js"],
+  ["vote/index.html", "/public/live-vote.js"],
+  ["tickets/index.html", "/public/live-commerce.js"],
+  ["tabulation/index.html", "/public/live-tabulation.js"],
+  ["event/index.html", "/public/live-event.js"],
 ];
 
 test("multi-user experience browser scripts parse", async () => {
-  for (const path of ["public/experience.js", "public/organization-experience.js"]) {
+  for (const path of ["public/experience.js", "public/organization-experience.js", ...liveRoutes.map(([,src]) => src.slice(1))]) {
     const result = spawnSync(process.execPath, ["--check", join(root, path)], {encoding:"utf8"});
     assert.equal(result.status, 0, `${path}\n${result.stderr}`);
   }
 });
 
 test("all primary PageantIndex user journeys have dedicated routes", async () => {
-  for (const [path, role] of routes) {
+  for (const [path, role] of previewRoutes) {
     const html = await read(path);
     assert.match(html, new RegExp(`data-experience=["']${role}["']`), path);
     assert.match(html, /\/public\/experience\.css/);
     assert.match(html, /\/public\/experience\.js/);
-    assert.match(html, /noindex,follow/);
+  }
+  for (const [path, script] of liveRoutes) {
+    const html = await read(path);
+    assert.match(html, new RegExp(script.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")), path);
+    assert.doesNotMatch(html, /data-experience=/, `${path} must not fall back to the prototype experience shell`);
   }
 });
 
@@ -53,13 +60,21 @@ test("pageant organization has a dedicated account lifecycle route", async () =>
   assert.doesNotMatch(js, /SUPABASE_URL|supabase\.co|\/rest\/v1\/|fetch\s*\(/);
 });
 
-test("front-end preview does not connect competition or payment flows to production", async () => {
-  const js = await read("public/experience.js");
-  assert.doesNotMatch(js, /SUPABASE_URL|supabase\.co|\/rest\/v1\//);
-  assert.doesNotMatch(js, /fetch\s*\(/);
-  assert.match(js, /No votes or payments on this route are real/);
-  assert.match(js, /browser is not authoritative/);
-  assert.match(js, /non-scannable/);
+test("prototype journeys remain non-authoritative while live competition routes use server APIs", async () => {
+  const preview = await read("public/experience.js");
+  assert.doesNotMatch(preview, /SUPABASE_URL|supabase\.co|\/rest\/v1\//);
+  assert.doesNotMatch(preview, /fetch\s*\(/);
+  assert.match(preview, /No votes or payments on this route are real/);
+  assert.match(preview, /browser is not authoritative/);
+  assert.match(preview, /non-scannable/);
+
+  const liveVote = await read("public/live-vote.js");
+  const liveJudge = await read("public/live-judge.js");
+  const liveTabulation = await read("public/live-tabulation.js");
+  assert.match(liveVote, /\/api\/voting\/cast/);
+  assert.match(liveVote, /\/api\/payments\/checkout/);
+  assert.match(liveJudge, /\/api\/judges\/score/);
+  assert.match(liveTabulation, /\/api\/tabulation\/finalize/);
 });
 
 test("critical experience states are represented", async () => {

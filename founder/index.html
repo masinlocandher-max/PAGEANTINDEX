@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="robots" content="noindex,nofollow" />
   <title>Founder Command Center | PageantIndex</title>
-  <meta name="description" content="Private PageantIndex founder command center for strategic opportunities, integrations, and founder-level escalations." />
+  <meta name="description" content="Private PageantIndex founder command center for strategic opportunities, integrations, operating health, and founder-level escalations." />
   <meta name="theme-color" content="#160912" />
   <link rel="icon" href="/public/images/pageant-icon.png" />
   <link rel="stylesheet" href="/public/founder.css" />
   <link rel="stylesheet" href="/public/founder-auth.css" />
+  <link rel="stylesheet" href="/public/founder-autopilot.css?v=20260810" />
 </head>
 <body>
   <div class="founder-shell" id="founder-shell" hidden>
@@ -45,11 +46,21 @@
         </div>
       </header>
 
-      <section class="status-strip" id="overview" aria-label="System status">
+      <section class="status-strip" id="overview" aria-label="Private connection status">
         <article><span>GPT</span><strong id="metric-gpt">Checking…</strong><small id="metric-gpt-detail">Private assistant connection</small></article>
         <article><span>Email</span><strong id="metric-email">Checking…</strong><small id="metric-email-detail">Gmail read-only connection</small></article>
         <article><span>Opportunities</span><strong id="metric-opportunities">—</strong><small>Recent commercial or partnership intake</small></article>
         <article><span>Escalations</span><strong id="metric-reviews">—</strong><small>Only founder-level exceptions</small></article>
+      </section>
+
+      <section class="autopilot-strip" aria-label="Owner-light operating scorecard">
+        <article><span>Paying accounts</span><strong id="metric-active-accounts">—</strong><small>Active paying subscriptions</small></article>
+        <article><span>Revenue 30d</span><strong id="metric-revenue">—</strong><small>Confirmed platform revenue</small></article>
+        <article><span>Renewals at risk</span><strong id="metric-renewals">—</strong><small>Past due, grace, or due soon</small></article>
+        <article><span>Voting live</span><strong id="metric-voting">—</strong><small>Open voting events</small></article>
+        <article><span>Tabulation live</span><strong id="metric-tabulation">—</strong><small>Live scoring events</small></article>
+        <article><span>Support risk</span><strong id="metric-support-risk">—</strong><small>High or critical routine cases</small></article>
+        <article><span>System</span><strong id="metric-platform-health">Checking…</strong><small>Production application health</small></article>
       </section>
 
       <section class="founder-grid">
@@ -101,5 +112,6 @@
 
   <div class="toast" id="founder-toast" role="status" aria-live="polite"></div>
   <script src="/public/founder.js" defer></script>
+  <script src="/public/founder-autopilot.js?v=20260810" defer></script>
 </body>
 </html>

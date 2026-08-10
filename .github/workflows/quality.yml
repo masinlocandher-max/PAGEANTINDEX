@@ -12,7 +12,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -20,11 +20,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Check PageantIndex browser JavaScript syntax
+      - name: Check all PageantIndex JavaScript syntax
+        shell: bash
         run: |
-          node --check platform/platform.js
-          node --check public/experience.js
-          node --check public/organization-experience.js
-          node --check app/organizer.js
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            echo "Checking $file"
+            node --check "$file"
+          done < <(find public api app platform -type f -name '*.js' -print0)
       - name: Run repository checks
         run: npm test

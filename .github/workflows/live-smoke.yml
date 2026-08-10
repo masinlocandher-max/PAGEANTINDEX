@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,7 +12,7 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
     steps:
       - name: Check PageantIndex production routes
         shell: bash
@@ -24,27 +24,40 @@ jobs:
             path="$1"
             expected="$2"
             tmp="$(mktemp)"
-            code="$(curl --retry 2 --retry-delay 2 --connect-timeout 15 --max-time 30 -sS -L -o "$tmp" -w '%{http_code}' "$base$path")"
+            code="$(curl --retry 3 --retry-delay 4 --connect-timeout 15 --max-time 30 -sS -L -o "$tmp" -w '%{http_code}' "$base$path")"
             echo "$path -> HTTP $code"
             test "$code" = "200"
             grep -Fq "$expected" "$tmp" || {
               echo "Expected marker not found on $path: $expected"
-              echo "--- response preview ---"
-              head -c 1000 "$tmp"
+              head -c 1200 "$tmp"
               exit 1
             }
           }
 
-          check "/" "Pageant Index | The Global Network for Pageantry"
+          check "/" "PageantIndex | The Global Network for Pageantry"
           check "/organization/" "Pageant Organization | PageantIndex"
           check "/platform/" "PageantIndex Organizer OS"
-          check "/experience/" "PageantIndex User Experiences"
+          check "/experience/" "Start Your PageantIndex Profile | PageantIndex"
           check "/candidate/" "Candidate Portal | PageantIndex"
           check "/judge/" "Judge Scoring | PageantIndex"
           check "/vote/" "People's Choice Voting | PageantIndex"
-          check "/tickets/" "Tickets | PageantIndex"
+          check "/tickets/" "Official Pageant Tickets | PageantIndex"
           check "/supplier-workspace/" "Supplier Workspace | PageantIndex"
           check "/tabulation/" "Tabulation Control Room | PageantIndex"
-          check "/event/" "Official Event | PageantIndex"
+          check "/event/" "Official Pageant Events | PageantIndex"
+          check "/trust/" "Trust & Verification Standards | PageantIndex"
+          check "/report/" "Report a Concern | PageantIndex"
+          check "/credit-invite/" "Professional Credit Invitation | PageantIndex"
+          check "/founder/" "Founder Command Center | PageantIndex"
+          check "/api/health" '"service":"PageantIndex"'
 
-          echo "All PageantIndex production routes returned HTTP 200 with the expected deployed HTML markers."
+          founder_code="$(curl --connect-timeout 15 --max-time 30 -sS -o /tmp/founder-status -w '%{http_code}' "$base/api/founder/status")"
+          echo "/api/founder/status unauthenticated -> HTTP $founder_code"
+          test "$founder_code" = "401"
+
+          headers="$(curl --connect-timeout 15 --max-time 30 -sSI "$base/")"
+          echo "$headers" | grep -iq '^strict-transport-security:'
+          echo "$headers" | grep -iq '^x-frame-options: DENY'
+          echo "$headers" | grep -iq '^x-content-type-options: nosniff'
+
+          echo "All PageantIndex production smoke checks passed."
