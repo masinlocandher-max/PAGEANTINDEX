@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Report a Concern | PageantIndex</title>
+  <meta name="description" content="Report impersonation, copyright, harassment, fraud, privacy, or safety concerns to PageantIndex and receive an operational case reference." />
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://www.pageantindex.com/report/" />
+  <link rel="icon" href="/public/images/pageant-icon.png" />
+  <link rel="stylesheet" href="/public/pageantindex-trust.css?v=20260810" />
+</head>
+<body>
+<main class="pi-policy-shell">
+  <section class="pi-policy-hero"><div class="pi-policy-inner">
+    <a href="/" style="color:inherit;text-decoration:none;font-weight:800;letter-spacing:.08em">PAGEANTINDEX</a>
+    <p class="pi-policy-kicker" style="margin-top:48px">Trust desk</p>
+    <h1>Report a concern.</h1>
+    <p>Use this form for impersonation, copyright, harassment, fraud, privacy, safety, or other integrity concerns. Do not include passwords, government ID numbers, payment-card data, or unnecessary sensitive information.</p>
+  </div></section>
+  <section class="pi-policy-body"><div class="pi-policy-inner pi-policy-grid two">
+    <article class="pi-policy-card">
+      <h2>Submit a report</h2>
+      <form id="pi-trust-report" class="pi-report-form">
+        <label>Type of concern<select name="reportType" required><option value="">Choose one</option><option value="impersonation">Impersonation</option><option value="copyright">Copyright or content ownership</option><option value="harassment">Harassment</option><option value="fraud">Fraud or deceptive activity</option><option value="safety">Safety</option><option value="privacy">Privacy</option><option value="minor_safety">Minor safety</option><option value="other">Other integrity concern</option></select></label>
+        <label>What does this concern relate to?<input name="subjectType" maxlength="80" placeholder="Profile, organization, pageant, image, article, transaction…" /></label>
+        <label>Your email, if you want a follow-up<input name="contactEmail" type="email" maxlength="320" autocomplete="email" /></label>
+        <label>What happened?<textarea name="summary" minlength="10" maxlength="6000" required placeholder="Give enough factual detail for the review team to understand and investigate the concern."></textarea></label>
+        <label>Evidence links, up to 5<textarea name="evidenceUrls" maxlength="5000" placeholder="One HTTPS link per line. Do not upload private identity documents here."></textarea></label>
+        <label style="position:absolute;left:-9999px" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
+        <button type="submit">Submit report</button>
+      </form>
+      <div id="pi-report-status" class="pi-report-status" hidden role="status" aria-live="polite"></div>
+    </article>
+    <article class="pi-policy-card">
+      <h2>What happens next</h2>
+      <p>Accepted reports receive a PageantIndex case reference. The trust desk triages the report, may request additional evidence, and records the resolution internally.</p>
+      <h3>Urgent safety</h3><p>If someone is in immediate physical danger, contact the appropriate local emergency authority. This PageantIndex form is an operational reporting channel, not an emergency service.</p>
+      <h3>Copyright</h3><p>Identify the work, where it appears on PageantIndex, your relationship to the work, and a source that helps establish ownership or authorization.</p>
+      <h3>Impersonation</h3><p>Identify the profile or account, the person or organization being impersonated, and evidence that helps establish the authentic identity or authorized representative.</p>
+      <p><a href="/trust/">Read the PageantIndex trust and verification standards</a>.</p>
+    </article>
+  </div></section>
+</main>
+<script src="/public/pageantindex-report.js" defer></script>
+</body>
+</html>
