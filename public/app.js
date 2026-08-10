@@ -1634,7 +1634,7 @@ async function bootstrap() {
   if (["dashboard", "admin"].includes(page)) {
     await validateStoredSession();
   }
-  if (["home","directory","categories","locations","profile","admin"].includes(page)) {
+  if (["directory","categories","locations","profile","admin"].includes(page)) {
     await loadSuppliers(page === "admin");
   }
   if (page === "admin" && isAdminSession()) {
