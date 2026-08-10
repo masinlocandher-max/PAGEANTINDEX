@@ -2,6 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
+      "source": "/api/:route*",
+      "destination": "/api/router"
+    },
+    {
       "source": "/",
       "has": [{"type": "host", "value": "app.pageantindex.com"}],
       "destination": "/app/index.html"

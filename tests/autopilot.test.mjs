@@ -1,11 +1,24 @@
 import assert from "node:assert/strict";
-import {readFile} from "node:fs/promises";
+import {readdir, readFile} from "node:fs/promises";
 import {join, resolve, dirname} from "node:path";
 import {fileURLToPath} from "node:url";
 import test from "node:test";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (path) => readFile(join(root, path), "utf8");
+
+async function directApiFunctions(directory = join(root, "api"), relative = "") {
+  const entries = await readdir(directory, {withFileTypes: true});
+  const files = [];
+  for (const entry of entries) {
+    if (entry.name.startsWith("_") || entry.name.startsWith(".")) continue;
+    const nextRelative = relative ? `${relative}/${entry.name}` : entry.name;
+    const absolute = join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...await directApiFunctions(absolute, nextRelative));
+    else if (entry.name.endsWith(".js")) files.push(nextRelative);
+  }
+  return files;
+}
 
 test("autopilot migration covers revenue competition relationships and operations", async () => {
   const migration = await read("supabase/migrations/20260810154144_pageantindex_autopilot_core.sql");
@@ -33,11 +46,11 @@ test("transaction hardening keeps final results server generated", async () => {
 });
 
 test("server routes enforce authenticated or server boundaries", async () => {
-  const voting = await read("api/voting/cast.js");
-  const finalize = await read("api/tabulation/finalize.js");
-  const invite = await read("api/credits/invite.js");
-  const accept = await read("api/credits/accept.js");
-  const trust = await read("api/trust/report.js");
+  const voting = await read("api/voting/_cast.js");
+  const finalize = await read("api/tabulation/_finalize.js");
+  const invite = await read("api/credits/_invite.js");
+  const accept = await read("api/credits/_accept.js");
+  const trust = await read("api/trust/_report.js");
   assert.match(voting, /requestIdentityHash/);
   assert.match(voting, /confirmed payment does not match|Confirmed payment does not match/);
   assert.match(finalize, /scoring is incomplete/);
@@ -45,6 +58,20 @@ test("server routes enforce authenticated or server boundaries", async () => {
   assert.match(invite, /Only the organizer can invite professionals/);
   assert.match(accept, /professional profile before accepting this credit/i);
   assert.match(trust, /caseReference/);
+});
+
+test("Vercel API routing stays within Hobby direct-function limits", async () => {
+  const router = await read("api/router.js");
+  for (const route of [
+    "commerce/public","credits/accept","credits/inspect","credits/invite","events/public",
+    "judges/accept","judges/inspect","judges/invite","judges/score","judges/workspace",
+    "orders/read","orders/status","tabulation/configure","tabulation/finalize","tabulation/workspace",
+    "tickets/redeem","trust/report","voting/cast","voting/public",
+  ]) assert.match(router, new RegExp(`\\"${route.replaceAll("/", "\\/")}\\"`));
+  const config = JSON.parse(await read("vercel.json"));
+  assert.ok(config.rewrites.some((rewrite) => rewrite.source === "/api/:route*" && rewrite.destination === "/api/router"));
+  const functions = await directApiFunctions();
+  assert.ok(functions.length <= 12, `Expected at most 12 direct Vercel Functions, found ${functions.length}: ${functions.join(", ")}`);
 });
 
 test("public analytics excludes message and verification content", async () => {
