@@ -28,6 +28,18 @@ test("signup requires versioned privacy acknowledgement", async () => {
   assert.match(script, /type=\"checkbox\"[^>]*required/);
 });
 
+test("new and recovery passwords receive stronger client-side requirements", async () => {
+  const signup = await read("sign-up/index.html");
+  const signin = await read("sign-in/index.html");
+  const script = await read("public/auth-hardening.js");
+  assert.match(signup, /public\/auth-hardening\.js/);
+  assert.match(signin, /public\/auth-hardening\.js/);
+  assert.match(script, /MIN_LENGTH = 12/);
+  assert.match(script, /uppercase letter, lowercase letter, number, and symbol/i);
+  assert.match(script, /\/auth\/v1\/signup/);
+  assert.match(script, /\/auth\/v1\/user/);
+});
+
 test("trust desk accepts a dedicated privacy rights request", async () => {
   const html = await read("report/index.html");
   const api = await read("api/trust/_report.js");
